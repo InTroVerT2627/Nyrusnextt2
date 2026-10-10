@@ -186,8 +186,8 @@ export type LearnerReflection = {
  * Default formula: clamp(ceil(words / 3.8 * 0.6), 8, 90)
  */
 export function calculateMinSeconds(text: string, override?: number, relaxedMode = false): number {
-  if (override !== undefined && override > 0) {
-    return relaxedMode ? Math.max(4, Math.floor(override * 0.5)) : override;
+  if (override !== undefined && override >= 0) {
+    return relaxedMode ? Math.max(0, Math.floor(override * 0.5)) : override;
   }
   const words = text.trim().split(/\s+/).filter(Boolean).length;
   const raw = Math.ceil((words / 3.8) * 0.6);

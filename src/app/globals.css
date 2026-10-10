@@ -7716,3 +7716,271 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
     transition: none;
   }
 }
+
+/* =========================================================================
+   FOCUS ENGINE, HOW IT WORKS & INTERRUPTION STYLES
+   ========================================================================= */
+
+/* How It Works Modal */
+.how-it-works-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 45, 78, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 2500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.how-it-works-card {
+  width: 100%;
+  max-width: 580px;
+  background: var(--white);
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  box-shadow: 0 20px 50px rgba(20, 45, 78, 0.25);
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.hiw-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.hiw-icon-badge {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: var(--midnight);
+  color: var(--cyan);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.hiw-kicker {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.hiw-header h2 {
+  margin: 2px 0 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--midnight);
+}
+
+.hiw-intro {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text);
+}
+
+.hiw-rules-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 640px) {
+  .hiw-rules-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.hiw-rule-item {
+  padding: 12px;
+  background: var(--ice);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  display: flex;
+  gap: 10px;
+}
+
+.rule-icon-wrap {
+  color: var(--midnight);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.rule-copy strong {
+  display: block;
+  font-size: 12px;
+  color: var(--midnight);
+  margin-bottom: 2px;
+}
+
+.rule-copy p {
+  margin: 0;
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.relaxed-mode-panel {
+  padding: 12px 14px;
+  background: var(--white);
+  border: 1px solid rgba(6, 198, 230, 0.4);
+  border-radius: 10px;
+}
+
+.relaxed-mode-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.relaxed-mode-label input {
+  margin-top: 3px;
+  accent-color: var(--cyan);
+}
+
+.relaxed-label-text strong {
+  display: block;
+  font-size: 12px;
+  color: var(--midnight);
+}
+
+.relaxed-label-text span {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.hiw-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 6px;
+}
+
+.start-module-ack-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  font-size: 13px;
+  font-weight: 700;
+  background: var(--midnight);
+  color: var(--white);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* Interrupted Full-Screen Overlay */
+.interrupted-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--midnight);
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.interrupted-card {
+  width: 100%;
+  max-width: 520px;
+  background: var(--white);
+  border-radius: 16px;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+}
+
+.interrupted-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: rgba(217, 119, 6, 0.12);
+  border: 1px solid rgba(217, 119, 6, 0.35);
+  color: var(--warning);
+  font-size: 12px;
+  font-weight: 700;
+  margin: 0 auto;
+}
+
+.interrupted-card h2 {
+  margin: 0;
+  font-size: 22px;
+  color: var(--midnight);
+}
+
+.interrupted-card p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text);
+}
+
+.interrupted-note {
+  padding: 12px 16px;
+  background: var(--ice);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.interrupted-disclaimer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.interrupted-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  padding-top: 8px;
+}
+
+.exit-interrupted-btn {
+  padding: 10px 18px;
+  font-size: 12px;
+}
+
+.restart-interrupted-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 700;
+  background: var(--midnight);
+  color: var(--white);
+  border-radius: 8px;
+}
+
+/* Focus Warning Banner */
+.focus-warning-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: rgba(217, 119, 6, 0.1);
+  border: 1px solid rgba(217, 119, 6, 0.3);
+  border-radius: 8px;
+  color: var(--warning);
+  font-size: 12px;
+  font-weight: 600;
+}
