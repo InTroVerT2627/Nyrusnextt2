@@ -461,3 +461,168 @@ export async function resumeSession(
     return { resumed: true };
   }
 }
+
+export type StoredReflection = {
+  id: string;
+  userId: string;
+  pathSlug: string;
+  checkpointNumber: number;
+  modulesCovered: string[];
+  promptSynthesise: string;
+  responseSynthesise: string;
+  promptApply: string;
+  responseApply: string;
+  formativeFeedback: {
+    is_genuine_attempt: boolean;
+    depth_level: "Needs another look" | "Getting there" | "Solid";
+    strength: string;
+    growth_opportunity: string;
+    revisit_module_slug: string | null;
+  };
+  isGenuineAttempt: boolean;
+  wordCount: number;
+  submittedAt: string;
+  updatedAt: string;
+};
+
+const memoryReflections = new Map<string, StoredReflection>();
+
+export async function saveReflectionRecord(input: {
+  userId: string;
+  pathSlug: string;
+  checkpointNumber: number;
+  modulesCovered: string[];
+  promptSynthesise: string;
+  responseSynthesise: string;
+  promptApply: string;
+  responseApply: string;
+  feedback: {
+    is_genuine_attempt: boolean;
+    depth_level: "Needs another look" | "Getting there" | "Solid";
+    strength: string;
+    growth_opportunity: string;
+    revisit_module_slug: string | null;
+  };
+}): Promise<StoredReflection> {
+  const admin = createSupabaseAdminClient();
+  const id = crypto.randomUUID();
+  const now = new Date().toISOString();
+  const totalWords = (input.responseSynthesise + " " + input.responseApply)
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean).length;
+
+  const record: StoredReflection = {
+    id,
+    userId: input.userId,
+    pathSlug: input.pathSlug,
+    checkpointNumber: input.checkpointNumber,
+    modulesCovered: input.modulesCovered,
+    promptSynthesise: input.promptSynthesise,
+    responseSynthesise: input.responseSynthesise,
+    promptApply: input.promptApply,
+    responseApply: input.responseApply,
+    formativeFeedback: input.feedback,
+    isGenuineAttempt: input.feedback.is_genuine_attempt,
+    wordCount: totalWords,
+    submittedAt: now,
+    updatedAt: now,
+  };
+
+  if (admin) {
+    const { data, error } = await admin
+      .from("learning_reflections")
+      .upsert(
+        {
+          user_id: input.userId,
+          path_slug: input.pathSlug,
+          checkpoint_number: input.checkpointNumber,
+          modules_covered: input.modulesCovered,
+          prompt_synthesise: input.promptSynthesise,
+          response_synthesise: input.responseSynthesise,
+          prompt_apply: input.promptApply,
+          response_apply: input.responseApply,
+          formative_feedback: input.feedback,
+          is_genuine_attempt: input.feedback.is_genuine_attempt,
+          word_count: totalWords,
+          submitted_at: now,
+          updated_at: now,
+        },
+        { onConflict: "user_id, path_slug, checkpoint_number" }
+      )
+      .select()
+      .single();
+
+    if (!error && data) {
+      return {
+        id: data.id,
+        userId: data.user_id,
+        pathSlug: data.path_slug,
+        checkpointNumber: data.checkpoint_number,
+        modulesCovered: data.modules_covered,
+        promptSynthesise: data.prompt_synthesise,
+        responseSynthesise: data.response_synthesise,
+        promptApply: data.prompt_apply,
+        responseApply: data.response_apply,
+        formativeFeedback: data.formative_feedback,
+        isGenuineAttempt: data.is_genuine_attempt,
+        wordCount: data.word_count,
+        submittedAt: data.submitted_at,
+        updatedAt: data.updated_at,
+      };
+    }
+  }
+
+  // In-memory fallback
+  const key = `${input.userId}:${input.pathSlug}:${input.checkpointNumber}`;
+  memoryReflections.set(key, record);
+  return record;
+}
+
+export async function getReflectionRecords(
+  userId: string,
+  pathSlug?: string
+): Promise<StoredReflection[]> {
+  const admin = createSupabaseAdminClient();
+
+  if (admin) {
+    let query = admin
+      .from("learning_reflections")
+      .select("*")
+      .eq("user_id", userId)
+      .order("checkpoint_number", { ascending: true });
+
+    if (pathSlug) {
+      query = query.eq("path_slug", pathSlug);
+    }
+
+    const { data } = await query;
+    if (data && data.length > 0) {
+      return data.map((d) => ({
+        id: d.id,
+        userId: d.user_id,
+        pathSlug: d.path_slug,
+        checkpointNumber: d.checkpoint_number,
+        modulesCovered: d.modules_covered,
+        promptSynthesise: d.prompt_synthesise,
+        responseSynthesise: d.response_synthesise,
+        promptApply: d.prompt_apply,
+        responseApply: d.response_apply,
+        formativeFeedback: d.formative_feedback,
+        isGenuineAttempt: d.is_genuine_attempt,
+        wordCount: d.word_count,
+        submittedAt: d.submitted_at,
+        updatedAt: d.updated_at,
+      }));
+    }
+  }
+
+  const results: StoredReflection[] = [];
+  for (const [, val] of memoryReflections.entries()) {
+    if (val.userId === userId && (!pathSlug || val.pathSlug === pathSlug)) {
+      results.push(val);
+    }
+  }
+  return results.sort((a, b) => a.checkpointNumber - b.checkpointNumber);
+}
+

@@ -6,6 +6,8 @@ import SqlSandbox from "@/components/SqlSandbox";
 import SpreadsheetGrid from "@/components/SpreadsheetGrid";
 import CommunicationWorkbench from "@/components/CommunicationWorkbench";
 import ModuleExperienceContainer from "@/components/learning/ModuleExperienceContainer";
+import ReflectionCheckpointView from "@/components/learning/ReflectionCheckpointView";
+import MyReflectionsDrawer from "@/components/learning/MyReflectionsDrawer";
 import { getFullModule } from "@/lib/learning-seed-data";
 import { FullModule } from "@/lib/learning-experience-types";
 
@@ -62,8 +64,9 @@ export default function LearningPathsClient() {
   const [quizOpen, setQuizOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
   const [activeImmersiveModule, setActiveImmersiveModule] = useState<FullModule | null>(null);
+  const [activeCheckpoint, setActiveCheckpoint] = useState<(1 | 2 | 3 | 4) | null>(null);
+  const [showReflectionsDrawer, setShowReflectionsDrawer] = useState(false);
 
   useEffect(() => {
     let live = true;
@@ -187,8 +190,40 @@ export default function LearningPathsClient() {
     );
   }
 
+  if (activeCheckpoint && activePath) {
+    return (
+      <ReflectionCheckpointView
+        pathSlug={activePath.slug as any}
+        pathTitle={activePath.title}
+        checkpointNumber={activeCheckpoint}
+        onCompleted={() => setActiveCheckpoint(null)}
+        onExit={() => setActiveCheckpoint(null)}
+      />
+    );
+  }
+
   return <main className="learning-page">
-    <header className="learning-topbar"><Link className="brand" href="/"><span className="brand-mark">N</span><span>nextlearn</span></Link><div className="learning-top-actions"><span className="learning-progress-chip">Progress is earned through understanding</span><Link href="/" className="secondary">← Debugging workspace</Link></div></header>
+    <MyReflectionsDrawer
+      isOpen={showReflectionsDrawer}
+      onClose={() => setShowReflectionsDrawer(false)}
+      pathSlug={activePath?.slug}
+      pathTitle={activePath?.title}
+    />
+    <header className="learning-topbar">
+      <Link className="brand" href="/"><span className="brand-mark">N</span><span>nextlearn</span></Link>
+      <div className="learning-top-actions">
+        <button
+          type="button"
+          className="secondary"
+          onClick={() => setShowReflectionsDrawer(true)}
+          style={{ cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "6px" }}
+        >
+          <span>✦ My Reflections</span>
+        </button>
+        <span className="learning-progress-chip">Progress is earned through understanding</span>
+        <Link href="/" className="secondary">← Debugging workspace</Link>
+      </div>
+    </header>
     <div className="learning-content">
       <section className="learning-hero"><div><div className="eyebrow">LEARN · PRACTICE · SHOW UNDERSTANDING</div><h1>Choose your next path.</h1><p>Short lessons, practical scenarios, and knowledge checks. Pass a module to open the next one; take your time and retry whenever you need.</p></div><div className="learning-hero-mark" aria-hidden="true"><span>03</span><small>learning paths</small></div></section>
 
@@ -232,9 +267,46 @@ export default function LearningPathsClient() {
               const state = moduleState(index, activePath.modules, progress, activePath.slug);
               const moduleProgress = progress[progressKey(activePath.slug, module.slug)];
               const selected = activeView === "module" && activeModuleSlug === module.slug;
-              return <button key={module.slug} className={`learning-node ${state.toLowerCase()} ${selected ? "current" : ""}`} onClick={() => selectModule(module, index)} disabled={state === "Locked"} aria-current={selected ? "step" : undefined}>
-                <span className="learning-node-symbol" aria-hidden="true">{state === "Passed" ? "✓" : state === "Ready" ? String(index + 1).padStart(2, "0") : "·"}</span><span className="learning-node-copy"><strong>{module.title}</strong><small>{state}{moduleProgress?.attempts ? ` · ${moduleProgress.attempts} ${moduleProgress.attempts === 1 ? "attempt" : "attempts"}` : ""}</small></span><span className="learning-node-arrow" aria-hidden="true">{selected ? "●" : ""}</span>
-              </button>;
+
+              const isCheckpoint1 = index === 2;
+              const isCheckpoint2 = index === 5;
+              const isCheckpoint3 = index === 8;
+              const isCheckpoint4 = index === 9;
+
+              const checkpointNum = isCheckpoint1 ? 1 : isCheckpoint2 ? 2 : isCheckpoint3 ? 3 : isCheckpoint4 ? 4 : null;
+              const checkpointAvailable = state === "Passed";
+
+              return (
+                <div key={module.slug}>
+                  <button className={`learning-node ${state.toLowerCase()} ${selected ? "current" : ""}`} onClick={() => selectModule(module, index)} disabled={state === "Locked"} aria-current={selected ? "step" : undefined}>
+                    <span className="learning-node-symbol" aria-hidden="true">{state === "Passed" ? "✓" : state === "Ready" ? String(index + 1).padStart(2, "0") : "·"}</span><span className="learning-node-copy"><strong>{module.title}</strong><small>{state}{moduleProgress?.attempts ? ` · ${moduleProgress.attempts} ${moduleProgress.attempts === 1 ? "attempt" : "attempts"}` : ""}</small></span><span className="learning-node-arrow" aria-hidden="true">{selected ? "●" : ""}</span>
+                  </button>
+
+                  {checkpointNum && (
+                    <button
+                      type="button"
+                      className="learning-node"
+                      style={{
+                        margin: "4px 0 8px 12px",
+                        borderLeft: "2px solid #06C6E6",
+                        background: checkpointAvailable ? "rgba(6, 198, 230, 0.08)" : "transparent",
+                        opacity: checkpointAvailable ? 1 : 0.5,
+                        cursor: checkpointAvailable ? "pointer" : "not-allowed",
+                        textAlign: "left",
+                        width: "calc(100% - 12px)",
+                      }}
+                      disabled={!checkpointAvailable}
+                      onClick={() => setActiveCheckpoint(checkpointNum as 1 | 2 | 3 | 4)}
+                    >
+                      <span className="learning-node-symbol" style={{ color: "#06C6E6" }}>✦</span>
+                      <span className="learning-node-copy">
+                        <strong style={{ fontSize: "12px" }}>{checkpointNum === 4 ? "Capstone Reflection" : `Milestone Reflection ${checkpointNum}`}</strong>
+                        <small>{checkpointAvailable ? "Ready to reflect" : "Pass module first"}</small>
+                      </span>
+                    </button>
+                  )}
+                </div>
+              );
             })}
           </aside>
 
