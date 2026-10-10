@@ -27,6 +27,9 @@ import {
   LockIcon,
   RefreshIcon,
 } from "@/components/Icons";
+import CommandPalette from "@/components/CommandPalette";
+import { ToastProvider } from "@/components/ToastContext";
+import { Search } from "lucide-react";
 
 type Role = "learner" | "recruiter" | "reviewer";
 type Section =
@@ -507,75 +510,86 @@ export default function RemoteHome() {
   const activeRole: DemoRole = (profile?.user.role as DemoRole) || "learner";
 
   return (
-    <main className="shell">
-      {/* Sidebar Rail */}
-      <aside className="rail" aria-label="Main navigation">
-        <button
-          className="brand"
-          style={{ background: "transparent", border: 0, padding: "0 10px 24px", cursor: "pointer", width: "100%", textAlign: "left" }}
-          onClick={() => selectSection("Overview")}
-        >
-          <span className="brand-mark">N</span>
-          <span>ProofLoop</span>
-        </button>
-
-        <div className="rail-label">{profile?.user.role.toUpperCase()} PORTAL</div>
-
-        {profile?.user.role === "learner" && (
-          <Link className="nav-link" href="/learning">
-            <span className="nav-icon" aria-hidden="true"><MissionIcon size={16} /></span>
-            Learning paths
-          </Link>
-        )}
-
-        {nav.map((item) => (
+    <ToastProvider>
+      <CommandPalette onNavigate={(sec) => selectSection(sec as Section)} />
+      <main className="shell">
+        {/* Sidebar Rail */}
+        <aside className="rail" aria-label="Main navigation">
           <button
-            key={item}
-            className={`nav-link ${section === item ? "active" : ""}`}
-            onClick={() => selectSection(item)}
+            className="brand"
+            style={{ background: "transparent", border: 0, padding: "0 10px 24px", cursor: "pointer", width: "100%", textAlign: "left" }}
+            onClick={() => selectSection("Overview")}
           >
-            <span className="nav-icon" aria-hidden="true">{renderNavIcon(item)}</span>
-            {item}
+            <span className="brand-mark">N</span>
+            <span>ProofLoop</span>
           </button>
-        ))}
 
-        <div className="rail-bottom">
-          <div className="avatar">{profile?.user.displayName.slice(0, 1).toUpperCase()}</div>
-          <div>
-            <strong>{profile?.user.displayName}</strong>
-            <small>{profile?.user.syntheticCandidateId || profile?.user.role}</small>
-          </div>
-          <button className="more-button" onClick={signOut} aria-label="Sign out" title="Sign out">↪</button>
-        </div>
-      </aside>
+          <div className="rail-label">{profile?.user.role.toUpperCase()} PORTAL</div>
 
-      {/* Main Content Area */}
-      <section className="main-area" id="top">
-        <header className="topbar">
-          <div className="breadcrumb">
-            <span>Nextlearn</span> <span>/</span>{" "}
-            <strong>
-              {activeMission?.mission_json.title ??
-                (activeBoss && section === "Skill tree" ? "Boss round" : section)}
-            </strong>
-          </div>
+          {profile?.user.role === "learner" && (
+            <Link className="nav-link" href="/learning">
+              <span className="nav-icon" aria-hidden="true"><MissionIcon size={16} /></span>
+              Learning paths
+            </Link>
+          )}
 
-          <div className="top-actions">
-            <RoleSwitcher
-              currentRole={activeRole}
-              onRoleChange={async () => {
-                await refresh();
-              }}
-            />
-            <span className="sandbox-pill">
-              <i /> Judge0 CE + Gemini 3.8 Flash
-            </span>
-            <ThemeToggle />
-            <button className="icon-button" aria-label="Refresh workspace" onClick={() => void refresh()} title="Refresh data">
-              <RefreshIcon size={15} />
+          {nav.map((item) => (
+            <button
+              key={item}
+              className={`nav-link ${section === item ? "active" : ""}`}
+              onClick={() => selectSection(item)}
+            >
+              <span className="nav-icon" aria-hidden="true">{renderNavIcon(item)}</span>
+              {item}
             </button>
+          ))}
+
+          <div className="rail-bottom">
+            <div className="avatar">{profile?.user.displayName.slice(0, 1).toUpperCase()}</div>
+            <div>
+              <strong>{profile?.user.displayName}</strong>
+              <small>{profile?.user.syntheticCandidateId || profile?.user.role}</small>
+            </div>
+            <button className="more-button" onClick={signOut} aria-label="Sign out" title="Sign out">↪</button>
           </div>
-        </header>
+        </aside>
+
+        {/* Main Content Area */}
+        <section className="main-area" id="top">
+          <header className="topbar">
+            <div className="breadcrumb">
+              <span>Nextlearn</span> <span>/</span>{" "}
+              <strong>
+                {activeMission?.mission_json.title ??
+                  (activeBoss && section === "Skill tree" ? "Boss round" : section)}
+              </strong>
+            </div>
+
+            <div className="top-actions">
+              <button
+                className="cmd-quick-trigger"
+                onClick={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", ctrlKey: true }))}
+                aria-label="Open command palette (Ctrl+K)"
+              >
+                <Search size={14} />
+                <span>Quick jump...</span>
+                <kbd>Ctrl+K</kbd>
+              </button>
+              <RoleSwitcher
+                currentRole={activeRole}
+                onRoleChange={async () => {
+                  await refresh();
+                }}
+              />
+              <span className="sandbox-pill">
+                <i /> Judge0 CE + Gemini 3.8 Flash
+              </span>
+              <ThemeToggle />
+              <button className="icon-button" aria-label="Refresh workspace" onClick={() => void refresh()} title="Refresh data">
+                <RefreshIcon size={15} />
+              </button>
+            </div>
+          </header>
 
         {/* Mobile Navigation */}
         <nav className="remote-mobile-nav" aria-label="Mobile navigation">
@@ -692,7 +706,8 @@ export default function RemoteHome() {
           onAppeal={sendAppeal}
         />
       )}
-    </main>
+      </main>
+    </ToastProvider>
   );
 }
 
