@@ -27,7 +27,7 @@ for each row execute procedure public.create_profile_for_auth_user();
 create function public.prevent_profile_role_escalation()
 returns trigger language plpgsql set search_path = '' as $$
 begin
-  if new.role is distinct from old.role and coalesce(auth.role(), '') <> 'service_role' then
+  if new.role is distinct from old.role and coalesce(auth.role(), '') <> 'service_role' and current_user not in ('postgres', 'supabase_admin') then
     raise exception 'Only a trusted server administrator can change application roles';
   end if;
   return new;
@@ -301,7 +301,6 @@ language sql stable security definer set search_path = '' as $$
 $$;
 
 create policy "profile owner reads own" on public.profiles for select to authenticated using (id = (select auth.uid()));
-create policy "profile owner edits display name" on public.profiles for update to authenticated using (id = (select auth.uid())) with check (id = (select auth.uid()) and role = public.current_app_role());
 create policy "authenticated reads skill tree" on public.skill_nodes for select to authenticated using (true);
 create policy "authenticated reads active tasks" on public.tasks for select to authenticated using (active);
 create policy "authenticated reads task versions" on public.task_versions for select to authenticated using (exists (select 1 from public.tasks t where t.id = task_id and t.active));
@@ -309,18 +308,13 @@ create policy "authenticated reads rubrics" on public.rubrics for select to auth
 create policy "authenticated reads visible tests" on public.visible_test_cases for select to authenticated using (true);
 
 create policy "learner owns attempts" on public.attempts for select to authenticated using (user_id = (select auth.uid()));
-create policy "learner submits attempts" on public.attempts for insert to authenticated with check (user_id = (select auth.uid()));
 create policy "learner reads own followups" on public.followups for select to authenticated using (exists (select 1 from public.attempts a where a.id = attempt_id and a.user_id = (select auth.uid())));
 create policy "learner reads own boss submission" on public.boss_submissions for select to authenticated using (exists (select 1 from public.attempts a where a.id = attempt_id and a.user_id = (select auth.uid())));
 create policy "learner reads own scores" on public.criterion_scores for select to authenticated using (exists (select 1 from public.attempts a where a.id = attempt_id and a.user_id = (select auth.uid())));
 create policy "learner reads own evidence" on public.evidence for select to authenticated using (user_id = (select auth.uid()));
 create policy "consent owner reads own" on public.consents for select to authenticated using (user_id = (select auth.uid()));
-create policy "consent owner sets own" on public.consents for insert to authenticated with check (user_id = (select auth.uid()));
-create policy "consent owner updates own" on public.consents for update to authenticated using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
 create policy "learner reads own appeals" on public.appeals for select to authenticated using (user_id = (select auth.uid()));
-create policy "learner opens own appeals" on public.appeals for insert to authenticated with check (user_id = (select auth.uid()));
 create policy "reviewers read appeals" on public.appeals for select to authenticated using (public.current_app_role() = 'reviewer');
-create policy "reviewers resolve appeals" on public.appeals for update to authenticated using (public.current_app_role() = 'reviewer') with check (public.current_app_role() = 'reviewer' and reviewer_id = (select auth.uid()));
 create policy "authenticated reads active roles" on public.roles for select to authenticated using (active);
 create policy "owners and reviewers read audit" on public.audit_log for select to authenticated using (
   public.current_app_role() = 'reviewer' or exists (select 1 from public.attempts a where a.id = attempt_id and a.user_id = (select auth.uid()))
