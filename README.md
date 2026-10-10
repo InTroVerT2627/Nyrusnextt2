@@ -13,22 +13,32 @@ ProofLoop is an authentic skill-verification sandbox where learners prove compet
 
 ```mermaid
 flowchart TD
-  subgraph Client ["Client Layer (Next.js 16 App Router)"]
+  subgraph Client ["Client Layer (Next.js 16 App Router · Turbopack · React 19)"]
     LP["Landing Page & Nyeras LMS Simulation"]
     SW["Demo Role Switcher (Learner / Recruiter / Reviewer)"]
     ME["Monaco Code Editor & Incident Report Form"]
     SQL["WASM SQLite Sandbox (sql.js In-Browser)"]
     GRID["Spreadsheet Formula Grid (SaaS Unit Economics)"]
     COMM["Communication Workbench (Revise-After-Feedback Loop)"]
+    DEBUG_WB["Debugging Incident Workbench (Live Telemetry & Clues)"]
+    DSA_WB["DSA Production Scaling Workbench (Big-O & Scale Profiler)"]
+    SPLIT["7-Beat Immersive Split View (Midnight SVG Story + Lesson Panel)"]
+    TEST_UI["Capstone Final Test Shell & Hardware Check"]
+    REPLAY_UI["Assessment Replay (8-Step Audit & SHA-256 Verification)"]
+    MAP_UI["Role Readiness Map (Private Planning & Requirement Matcher)"]
+    FAIR_UI["Fairness Lab (Language & Phrasing Consistency Matrix)"]
   end
 
   subgraph Execution ["Isolated Sandboxes & Scoring Engines"]
     J0["Judge0 CE Sandbox Runner\n(CPU, RAM, Process & Network Limits)"]
-    GEMINI["Gemini 3.8 Flash Dual-Run Grader\n(2 Independent Runs, Schema Validation, Quote Grounding)"]
+    VM_RUNNER["Isolated Node.js VM & Scale Profiler\n(Deterministic Bug, Concurrency & Big-O Verification)"]
+    GEMINI["Gemini Dual-Run Grader\n(2 Independent Runs, Schema Validation, Quote Grounding)"]
     WASM_SRV["Node.js / WASM Deterministic Result Verifier"]
+    MATCHER["Shared Requirement Matcher Engine\n(Unified Recruiter & Readiness Evaluation)"]
+    SANITIZER["Replay Sanitiser & Leak Guard\n(N-Gram Redaction, Key Hiding, Recruiter Method Card)"]
   end
 
-  subgraph Database ["Supabase PostgreSQL (Row-Level Security)"]
+  subgraph Database ["Supabase PostgreSQL (Row-Level Security & In-Memory Fallback)"]
     AUTH["Supabase Auth (Profiles & Roles)"]
     TASKS["Versioned Tasks, Rubrics & Follow-up Bank"]
     HIDDEN["Hidden Test Suites & Flaw Keys (Server-Side Only)"]
@@ -36,19 +46,31 @@ flowchart TD
     EVID["Evidence Portfolio (Level, Confidence, Recency)"]
     CONSENT["Granular Per-Skill Consent (Off by Default)"]
     AUDIT["Immutable Audit Log (SHA-256 Input Hashes)"]
+    SESSIONS["Learning Sessions, Page Visits & Pacing Engine"]
+    TESTS_DB["Final Test Configurations, Question Pool & Secrets"]
+    GRADERS["grader_runs (Immutable Dual Model Traces)"]
+    TARGETS["learner_targets (Private Pinned Career Goals)"]
+    FAIR_DB["fairness_benchmarks & fairness_runs (Multilingual Matrix)"]
   end
 
   subgraph RecruiterReview ["NxtMove & Reviewer Surfaces"]
     REC["Recruiter Search & Evidence Viewer\n(Why Surfaced Rationale + Human Decision)"]
+    METHOD["Recruiter Method Card (Zero Candidate Code/Text Leaked)"]
     REV["Human Review Queue & Calibration Benchmarks\n(Anonymized Code Diff + Written Override)"]
     OUTBOX["NxtMove Profile Outbox (Consent-Gated Delivery)"]
   end
 
   Client -->|Execute Code| J0
+  Client -->|Verify Algorithm Scale & Debugging Patches| VM_RUNNER
   Client -->|Score Reasoning| GEMINI
   Client -->|Verify SQL & Formulas| WASM_SRV
   Execution -->|Persist Attempt & Criteria| Database
-  Database -->|Consented Evidence Query| REC
+  Database -->|Shared Matcher Evaluation| MATCHER
+  MATCHER -->|Readiness Analysis| MAP_UI
+  MATCHER -->|Candidate Search Results| REC
+  Database -->|Audit Replay Stream| SANITIZER
+  SANITIZER -->|Full 8-Step Replay| REPLAY_UI
+  SANITIZER -->|Method Card Projection| METHOD
   Database -->|Low-Confidence / Disagreement / Appeals| REV
   Database -->|Outbox Delivery| OUTBOX
 ```
@@ -77,7 +99,7 @@ This script is designed for hackathon judges to walk the entire end-to-end demo 
 | **1** | 0:00 – 1:00 | **Elevator Pitch & LMS Handoff**<br>`(Learner)` | 1. Start on `/` (Overview). Highlight the 10-second elevator pitch, calm "Mission Control" palette, and visible disclaimers.<br>2. Click **"Nyeras LMS"** in the sidebar. Show the simulated course module *"Distributed Systems Debugging"*. Click **"Prove Your Skill in Sandbox →"** to demonstrate seamless LMS handoff. |
 | **2** | 1:00 – 2:15 | **Debugging Mission & Monaco Editor**<br>`(Learner)` | 1. Open **"Missions"** → Incident 01 (*The wrong top seller*).<br>2. Toggle between **"Incident Story"** and **"Plain Task Specification"**.<br>3. Inspect visible acceptance tests and rubric.<br>4. Fix `for (let i = 0; i < values.length; i++)` in the **Monaco editor**.<br>5. Fill out the 4-part incident report headings.<br>6. Check *I used AI assistance*.<br>7. Click **"Submit incident report →"** to trigger live isolated tests in Judge0 and dual-run Gemini scoring. |
 | **3** | 2:15 – 3:30 | **Skill Tree & Boss Round**<br>`(Learner)` | 1. Navigate to **"Skill tree"**. Show node states conveyed with icons and text (*"Evidenced"*, *"Available"*, *"Locked"*), never color alone.<br>2. Show **Boss Round** (*Catch the AI’s mistake*): explain how learner assertions run against 3 code versions (flawed, reference, and alternate) so trivial tests like `assert false` are rejected. |
-| **4** | 3:30 – 4:45 | **New Paths & Authentic Work Samples**<br>`(Learner)` | 1. Click **"Learning paths"** in the sidebar.<br>2. Show all 3 paths (10 modules each with visible *"Draft curriculum content"* warnings).<br>3. Open **Data Analytics**: show the in-browser **WASM SQLite Sandbox** (`sql.js`). Click **"Run Query in WASM SQLite"** to execute against the live in-memory database and view the result table.<br>4. Open **Business Analytics**: demonstrate the interactive **Spreadsheet Formula Grid** (CAC, LTV, Payback period).<br>5. Open **Communication**: show the **Revise-After-Feedback Loop** on the P0 Incident memo. |
+| **4** | 3:30 – 4:45 | **5 Learning Paths & Authentic Workbenches**<br>`(Learner)` | 1. Click **"Learning paths"** in the sidebar.<br>2. Show all 5 learning paths: Data Analytics, Business Analytics, Workplace Communication, **Hands-on Incident Debugging** (*FinFlow War Room*), and **DSA in Production** (*Scaling EventPulse*).<br>3. Demonstrate authentic work samples & interactive workbenches:<br>   - **Data Analytics**: In-browser **WASM SQLite Sandbox** (`sql.js`). Click *"Run Query in WASM SQLite"* against the live in-memory database.<br>   - **Business Analytics**: Interactive **Spreadsheet Formula Grid** (CAC, LTV, Payback).<br>   - **Communication**: **Revise-After-Feedback Loop** on stakeholder memo.<br>   - **Incident Debugging Workbench**: Live telemetry alert, unfolding clues, interactive code editor, isolated Node.js VM tests, 4-part incident report, and adaptive follow-up defenses.<br>   - **DSA Workbench**: Big-O complexity profiling, scale verification ($15\text{k}$ items in $<80\text{ms}$), asymptotic trade-offs, and early-stopping rules. |
 | **5** | 4:45 – 5:45 | **Evidence Portfolio & Granular Consent**<br>`(Learner)` | 1. Return to **"My evidence"**.<br>2. Show the multi-skill evidence cards: proficiency level, confidence, and recency without opaque single aggregate scores or XP.<br>3. Demonstrate granular consent: toggle sharing ON/OFF for `debugging` vs `data-analytics`.<br>4. Toggle the two-tier switch (*"Also share source code and written answers"*). Show immediate revocability. |
 | **6** | 5:45 – 6:30 | **NxtMove Recruiter Search**<br>`(Recruiter)` | 1. Use the **Role Switcher** in the topbar to switch to **Priya Sharma (Recruiter)**.<br>2. Switch between **"Junior Java Developer"** and **"Junior Data Analyst"** roles.<br>3. Show surfaced candidates with explicit **"Why surfaced"** explanations.<br>4. Expand candidate evidence. Notice source code is visible only because the candidate opted into two-tier consent.<br>5. Enter a recruiter note and click **"Shortlist candidate"** to record an audited human hiring decision. |
 | **7** | 6:30 – 7:00 | **Reviewer Queue, Calibration & Failure Scenarios**<br>`(Reviewer)` | 1. Switch role to **Dr. Sarah Chen (Reviewer)**.<br>2. Show **Review queue**: anonymized peer similarity diff and mandatory 10-character written override reason.<br>3. Inspect the **Calibration Panel**: AI vs Human raters across 6 benchmark submissions with agreement rates.<br>4. Visit **"Failure scenarios"**: trigger the interactive simulations for Prompt Injection and Trivial Boss Test to show the defense gates in action.<br>5. End on the immutable **Audit Log** showing cryptographic input hashes for every turn. |
@@ -146,8 +168,8 @@ All quality gates pass in automated CI/CD and local environments:
 | Gate | Command / Test Suite | Result | Status |
 | :--- | :--- | :---: | :---: |
 | **Linter** | `npm run lint` | 0 errors | **PASS** |
-| **Type Check & Build** | `npm run build` | 39 routes compiled | **PASS** |
-| **Leak Protection** | `tests/leak-protection.test.ts` | 5 tests passed | **PASS** |
+| **Type Check & Build** | `npm run build` | 45 routes compiled | **PASS** |
+| **Leak Protection** | `tests/leak-protection.test.ts` | 9 tests passed | **PASS** |
 | **Two-User RLS** | `tests/two-user-rls.test.ts` | 3 tests passed | **PASS** |
 | **Consent & Profile** | `tests/consent-and-profile.test.ts` | 4 tests passed | **PASS** |
 | **Recruiter Workflow** | `tests/recruiter-search.test.ts` | 4 tests passed | **PASS** |
@@ -156,21 +178,34 @@ All quality gates pass in automated CI/CD and local environments:
 | **Follow-up Selector** | `tests/followup-selector.test.ts` | 4 tests passed | **PASS** |
 | **Reviewer & Audit** | `tests/reviewer-and-audit.test.ts` | 3 tests passed | **PASS** |
 | **Accessibility (WCAG AA)** | `tests/accessibility.test.ts` | 7 tests passed | **PASS** |
-| **Learning Session Engine** | `tests/learning-session-engine.test.ts` | 7 tests passed | **PASS** |
+| **Learning Session Engine** | `tests/learning-session-engine.test.ts` | 8 tests passed | **PASS** |
 | **Learning Reflections** | `tests/learning-reflection-and-unlock.test.ts` | 4 tests passed | **PASS** |
 | **Final Test Engine** | `tests/final-test-engine.test.ts` | 14 tests passed | **PASS** |
-| **Total Test Count** | `npm test` | **68 / 68 tests (12 suites)** | **100% PASS** |
+| **Integrity Verification** | `tests/integrity-verification.test.ts` | 3 tests passed | **PASS** |
+| **Readiness & Parity** | `tests/readiness-and-parity.test.ts` | 6 tests passed | **PASS** |
+| **Fairness & Multilingual** | `tests/fairness-and-multilingual.test.ts` | 7 tests passed | **PASS** |
+| **Debugging & DSA Paths** | `tests/debugging-and-dsa-paths.test.ts` | 16 tests passed | **PASS** |
+| **Total Test Count** | `npm test` | **105 / 105 tests (16 suites)** | **100% PASS** |
 
 ---
 
 ## Immersive Learning Paths & Focus Engine
 
-The three learning paths (**Data Analytics**, **Business Analytics**, and **Workplace Communication**; 10 modules each) feature a full-page, half-and-half software-like learning environment:
-- **7-Beat Pedagogical Flow**: (1) Teaser $\rightarrow$ (2) Story Scene with SVG character dialogue $\rightarrow$ (3) Core Concept with glossary tooltips $\rightarrow$ (4) Worked Practical Example $\rightarrow$ (5) Try-It Activity $\rightarrow$ (6) Server-Graded Knowledge Check (2/3 pass) $\rightarrow$ (7) Takeaway Card.
+The **five learning paths** feature a full-page, half-and-half software-like learning environment and interactive workbenches:
+1. **Data Analytics:** 10 modules on SQL querying, aggregation, schema design, and metrics (*Meera at Quickbite*).
+2. **Business Analytics:** 10 modules on unit economics, CAC/LTV, cohort analysis, and sensitivity modeling (*Rohan at ChaiCraft*).
+3. **Workplace Communication:** 10 modules on executive BLUF, de-escalation, briefs, and feedback loops (*Ananya at CloudScale*).
+4. **Hands-on Incident Debugging:** 4 modules on settlement off-by-one bugs, concurrency idempotency, optional payload crashes, and async event ordering (*Kavya Nair at FinFlow*).
+5. **Data Structures & Algorithms in Production:** 4 modules on event deduplication, VIP priority queues, sliding window rate limits, and indexed binary search (*Tariq Patel at EventPulse*).
+
+- **7-Beat Pedagogical Flow**: (1) Teaser $\rightarrow$ (2) Story Scene with SVG character dialogue $\rightarrow$ (3) Core Concept with glossary tooltips $\rightarrow$ (4) Worked Practical Example $\rightarrow$ (5) Try-It Activity with live symptoms and code inspection $\rightarrow$ (6) Server-Graded Knowledge Check (2/3 pass) $\rightarrow$ (7) Takeaway Card.
+- **Dedicated Interactive Workbenches**:
+  - `DebuggingWorkbench`: Production telemetry stream, unfolding investigation clues, live code editor with patch injection and resets, isolated Node.js VM tests, 4-part incident report, and adaptive follow-up defenses.
+  - `DsaWorkbench`: Algorithmic complexity profiler, real-time asymptotic constraints ($15\text{k}$ items in $<80\text{ms}$), deterministic scale verification, Big-O justifications, and adaptive follow-ups with early stopping.
+  - In-browser **WASM SQLite** (`sql.js`), **Spreadsheet Formula Grid**, and **Communication Workbench**.
 - **Server-Enforced Reading Pacing**: `clamp(ceil(words / 3.8 * 0.6), 8, 90)` seconds enforced strictly on the server with a calm, non-urgent SVG fill-up ring (`ReadingRing`).
 - **Focus Engine**: Tab visibility + window blur + `document.hasFocus()` tracking with 3s grace period for accidental tab switches, 5s heartbeat (30s timeout), single active session lock, and a Relaxed Focus Mode for accessibility.
 - **Formative Milestone Reflections**: Reflection checkpoints after Modules 3, 6, 9, and Capstone Module 10 reviewed formatively by Gemini Flash with structured feedback (genuine attempt check, understanding tier, strengths, and growth areas).
-- **Narrative Character Arcs**: Three ongoing story arcs—"The Missing Orders" (Meera), "The Tea Stall That Wanted to Grow" (Rohan), and "The Update Nobody Read" (Ananya).
 - **Flight Path Journey Map & Private Notebook**: Interactive 10-station timeline with milestone reflection stops, plus a private searchable notebook with Markdown (.md) export.
 - **Privacy & Override Guarantee**: All timing and focus data is private to the learner and used solely to gate instructional progression. It is never exposed to recruiters, factored into evidence cards, or used in hiring scores.
 
@@ -178,7 +213,7 @@ The three learning paths (**Data Analytics**, **Business Analytics**, and **Work
 
 ## Capstone Final Test & Proof-of-Skill Certification Engine
 
-Each of the three Learning Paths concludes with an authentic **Capstone Final Test** that unlocks strictly after completing all 10 modules and all 3 reflection checkpoints:
+Each of the foundational Learning Paths concludes with an authentic **Capstone Final Test** (Data Analytics, Business Analytics, Workplace Communication) that unlocks strictly after completing all 10 modules and all 3 reflection checkpoints, while the technical paths feature hands-on interactive workbenches and algorithmic challenges:
 - **Comprehensive Question Pools**: 72+ total questions ($\ge 24$ per path) spanning 6 authentic workplace archetypes:
   1. *Spot the AI's Mistake* (planted error identification + deterministic span check + AI rationale and fix grading)
   2. *Case Decision* (ambiguous operational triage + written justification)

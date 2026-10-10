@@ -60,6 +60,7 @@ flowchart TD
   end
 
   Client -->|Execute Code| J0
+  Client -->|Verify Algorithm Scale & Debugging Patches| VM_RUNNER
   Client -->|Score Reasoning| GEMINI
   Client -->|Verify SQL & Math| WASM_SRV
   Execution -->|Persist Attempt & Criteria| Database
@@ -78,7 +79,8 @@ flowchart TD
 - **Styling & Tokens:** Strict 10-token CSS variable design system (`--white`, `--midnight`, `--cyan`, `--ice`, `--text`, `--muted`, `--border`, `--success`, `--warning`, `--error` and defined opacity tints), Lucide icons, full WCAG 2.1 AA accessibility.
 - **Database & RLS:** Supabase PostgreSQL with Row-Level Security (RLS) policies, server-side admin client, and seamless in-memory fallback stores for test and offline environments.
 - **Execution Engines:**
-  - **Judge0 CE v1.14.0:** Isolated sandboxed code execution for Java & JavaScript.
+  - **Judge0 CE v1.14.0:** Isolated sandboxed code execution for Java & JavaScript with CPU, RAM, and process constraints.
+  - **Node.js Isolated VM & Scale Profiler:** Sub-millisecond deterministic execution sandbox with execution timeouts (<80ms benchmark constraints for $O(N)$ vs $O(N^2)$ checks), memory profiling, and server-side edge-case verification.
   - **sql.js (WASM SQLite):** In-browser query engine with deterministic row verification.
   - **Google Gemini Dual-Run Pipeline:** Structured dual-run JSON evaluation with Zod schema validation, quote citation grounding, and multilingual content-only scoring.
 
