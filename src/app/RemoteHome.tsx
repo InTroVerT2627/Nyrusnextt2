@@ -36,6 +36,7 @@ import EvidenceProfileView from "@/components/EvidenceProfileView";
 import RecruiterDashboardView from "@/components/RecruiterDashboardView";
 import ReviewerQueueView from "@/components/ReviewerQueueView";
 import AuditLogView from "@/components/AuditLogView";
+import AssessmentReplayView from "@/components/AssessmentReplayView";
 import { Search } from "lucide-react";
 
 type Role = "learner" | "recruiter" | "reviewer";
@@ -1552,6 +1553,7 @@ function AttemptDialog({
   const [criterion, setCriterion] = useState(attempt.attempt_type === "boss" ? "failing_test" : "root_cause");
   const [reason, setReason] = useState("");
   const [busy, setBusy] = useState(false);
+  const [showReplay, setShowReplay] = useState(false);
   const scores = profile.criterionScores.filter((item) => item.attempt_id === attempt.id);
   const followups = profile.followups.filter((item) => item.attempt_id === attempt.id);
   const appeals = profile.appeals.filter((item) => item.attempt_id === attempt.id);
@@ -1569,23 +1571,48 @@ function AttemptDialog({
 
   return (
     <div className="overlay" role="presentation" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <section className="dialog" role="dialog" aria-modal="true" aria-labelledby="attempt-title">
+      <section className="dialog" role="dialog" aria-modal="true" aria-labelledby="attempt-title" style={{ maxWidth: showReplay ? "900px" : "640px" }}>
         <button className="dialog-close" onClick={onClose} aria-label="Close">×</button>
         <div className="eyebrow">IMMUTABLE ATTEMPT · {attempt.id.slice(0, 8)}</div>
         <h2 id="attempt-title">{attempt.attempt_type === "boss" ? "Boss evidence" : "Assessment evidence"}</h2>
         <p>{new Date(attempt.submitted_at).toLocaleString()} · AI assistance disclosed: {attempt.ai_disclosure ? "Yes" : "No"}</p>
 
-        <div className="criterion-list">
-          {scores.map((item) => (
-            <div className="criterion-row" key={item.id} style={{ marginBottom: "12px" }}>
-              <span>
-                <strong>{criterionNames[item.criterion] ?? item.criterion}</strong>: {item.score} / {item.max_score}
-                <small style={{ display: "block", color: "var(--text-dim)" }}>{item.source} · {item.confidence} confidence</small>
-              </span>
-              <p style={{ margin: "4px 0", color: "var(--text-muted)", fontSize: "11px" }}>{item.feedback}</p>
-            </div>
-          ))}
+        <div style={{ display: "flex", gap: "8px", margin: "14px 0 18px", flexWrap: "wrap" }}>
+          <button
+            type="button"
+            className="primary"
+            onClick={() => setShowReplay(!showReplay)}
+            style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
+          >
+            <span>{showReplay ? "← Show standard summary" : "How this result was produced (Assessment Replay)"}</span>
+          </button>
+          <a
+            href={`/results/${attempt.id}/replay`}
+            target="_blank"
+            rel="noreferrer"
+            className="secondary"
+            style={{ display: "inline-flex", alignItems: "center", gap: "6px", textDecoration: "none", padding: "8px 12px", borderRadius: "6px" }}
+          >
+            <span>Open Replay in new tab</span>
+            <span>↗</span>
+          </a>
         </div>
+
+        {showReplay ? (
+          <AssessmentReplayView attemptId={attempt.id} onClose={() => setShowReplay(false)} />
+        ) : (
+          <>
+            <div className="criterion-list">
+              {scores.map((item) => (
+                <div className="criterion-row" key={item.id} style={{ marginBottom: "12px" }}>
+                  <span>
+                    <strong>{criterionNames[item.criterion] ?? item.criterion}</strong>: {item.score} / {item.max_score}
+                    <small style={{ display: "block", color: "var(--text-dim)" }}>{item.source} · {item.confidence} confidence</small>
+                  </span>
+                  <p style={{ margin: "4px 0", color: "var(--text-muted)", fontSize: "11px" }}>{item.feedback}</p>
+                </div>
+              ))}
+            </div>
 
         <details className="submission-detail">
           <summary>View submitted code and incident report</summary>
@@ -1646,6 +1673,8 @@ function AttemptDialog({
             {busy ? "Submitting appeal…" : "Open human review appeal"}
           </button>
         </div>
+        </>
+        )}
       </section>
     </div>
   );
