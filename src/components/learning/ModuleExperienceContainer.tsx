@@ -13,13 +13,23 @@ import TakeawayBeatView from "@/components/learning/beats/TakeawayBeatView";
 import HowItWorksModal from "@/components/learning/HowItWorksModal";
 import InterruptedOverlay from "@/components/learning/InterruptedOverlay";
 import { useFocusEngine } from "@/components/learning/useFocusEngine";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Bookmark, ChevronRight, RotateCcw } from "lucide-react";
 
 type ModuleExperienceContainerProps = {
   pathTitle: string;
   module: FullModule;
   onExit: () => void;
   onModuleCompleted: () => void;
+};
+
+const beatNames: Record<PageType, string> = {
+  teaser: "Curiosity Teaser",
+  scene: "Story Scene",
+  concept: "Core Concept",
+  example: "Worked Example",
+  tryit: "Try It First",
+  check: "Knowledge Check",
+  takeaway: "Key Takeaway",
 };
 
 export default function ModuleExperienceContainer({
@@ -33,6 +43,8 @@ export default function ModuleExperienceContainer({
   const [sessionToken, setSessionToken] = useState<string | null>(null);
   const [visitId, setVisitId] = useState<string | null>(null);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
+  const [savedBeatIndex, setSavedBeatIndex] = useState<number | null>(null);
+  const [showResumeModal, setShowResumeModal] = useState(false);
   const [minSeconds, setMinSeconds] = useState(10);
   const [isMinTimeSatisfied, setIsMinTimeSatisfied] = useState(false);
   const [isInteractionCompleted, setIsInteractionCompleted] = useState(false);
@@ -52,6 +64,20 @@ export default function ModuleExperienceContainer({
   const currentPage = module.pages[currentPageIndex];
   const currentPageType: PageType = currentPage.pageType;
 
+  // Detect previous progress for this module so learner can continue where they left off
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(`nextlearn.module_beat.${module.pathSlug}.${module.slug}`);
+      if (saved) {
+        const idx = parseInt(saved, 10);
+        if (!isNaN(idx) && idx > 0 && idx < module.pages.length) {
+          setSavedBeatIndex(idx);
+          setShowResumeModal(true);
+        }
+      }
+    } catch {}
+  }, [module.pathSlug, module.slug, module.pages.length]);
+
   const initSession = useCallback(async (useRelaxed = false) => {
     setSessionLoading(true);
     setRelaxedMode(useRelaxed);
@@ -69,20 +95,17 @@ export default function ModuleExperienceContainer({
         const data = await res.json();
         setSessionId(data.session.id);
         setSessionToken(data.token);
-        setCurrentPageIndex(0);
         setIsInterrupted(false);
       } else {
         const fallbackId = `local-sess-${Date.now()}`;
         setSessionId(fallbackId);
         setSessionToken(`local-tok-${Date.now()}`);
-        setCurrentPageIndex(0);
         setIsInterrupted(false);
       }
     } catch {
       const fallbackId = `local-sess-${Date.now()}`;
       setSessionId(fallbackId);
       setSessionToken(`local-tok-${Date.now()}`);
-      setCurrentPageIndex(0);
       setIsInterrupted(false);
     } finally {
       setSessionLoading(false);
@@ -170,12 +193,20 @@ export default function ModuleExperienceContainer({
   const handleAdvance = async () => {
     // Last page -> Complete module
     if (currentPageIndex === module.pages.length - 1) {
+      try {
+        localStorage.removeItem(`nextlearn.module_beat.${module.pathSlug}.${module.slug}`);
+      } catch {}
       onModuleCompleted();
       return;
     }
 
     const nextIdx = currentPageIndex + 1;
     const nextType = module.pages[nextIdx].pageType;
+
+    // Persist beat progression so learner can resume anytime
+    try {
+      localStorage.setItem(`nextlearn.module_beat.${module.pathSlug}.${module.slug}`, String(nextIdx));
+    } catch {}
 
     if (sessionId && visitId && !sessionId.startsWith("local-") && !visitId.startsWith("local-")) {
       try {
@@ -272,20 +303,20 @@ export default function ModuleExperienceContainer({
 
   // Interaction gating logic per beat type
   const isPacedPage = ["teaser", "scene", "concept", "example", "takeaway"].includes(currentPageType);
-  const canAdvance = (!isPacedPage || isMinTimeSatisfied) && isInteractionCompleted;
+  const requiresInteraction = ["teaser", "tryit", "check"].includes(currentPageType);
+  const canAdvance = (!isPacedPage || isMinTimeSatisfied) && (!requiresInteraction || isInteractionCompleted);
 
   let advanceReasonHint = "";
   if (isPacedPage && !isMinTimeSatisfied) {
     advanceReasonHint = "Complete the reading time ring to unlock";
-  } else if (!isInteractionCompleted) {
-    advanceReasonHint =
-      currentPageType === "teaser"
-        ? "Pick an option or reveal the topic to continue"
-        : currentPageType === "tryit"
-        ? "Attempt the practice activity to continue"
-        : currentPageType === "check"
-        ? "Pass at least 2 of 3 questions to unlock next module"
-        : "Complete required activity to continue";
+  } else if (requiresInteraction && !isInteractionCompleted) {
+    if (currentPageType === "teaser") {
+      advanceReasonHint = "Pick an option or click 'I'm not sure' to reveal the topic";
+    } else if (currentPageType === "tryit") {
+      advanceReasonHint = "Attempt the try-it exercise to continue";
+    } else if (currentPageType === "check") {
+      advanceReasonHint = "Pass at least 2 of 3 questions to unlock next beat";
+    }
   }
 
   // Find story scene for the left panel
@@ -347,6 +378,54 @@ export default function ModuleExperienceContainer({
           void initSession(relaxed);
         }}
       />
+
+      {/* Pick Up Where You Left Off Dialog */}
+      {showResumeModal && savedBeatIndex !== null && (
+        <div
+          className="resume-module-modal-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="resume-modal-title"
+        >
+          <div className="resume-module-card">
+            <div className="resume-card-kicker">
+              <Bookmark size={14} />
+              <span>IN-PROGRESS MODULE</span>
+            </div>
+            <h2 id="resume-modal-title">Continue where you left off?</h2>
+            <p>
+              You were previously on <strong>Step {savedBeatIndex + 1} of {module.pages.length}: {beatNames[module.pages[savedBeatIndex]?.pageType] || "Lesson Beat"}</strong>.
+            </p>
+            <div className="resume-card-actions">
+              <button
+                type="button"
+                className="resume-continue-btn"
+                onClick={() => {
+                  setCurrentPageIndex(savedBeatIndex);
+                  setShowResumeModal(false);
+                }}
+              >
+                <span>Continue from Step {savedBeatIndex + 1}</span>
+                <ChevronRight size={15} />
+              </button>
+              <button
+                type="button"
+                className="resume-restart-btn"
+                onClick={() => {
+                  setCurrentPageIndex(0);
+                  try {
+                    localStorage.removeItem(`nextlearn.module_beat.${module.pathSlug}.${module.slug}`);
+                  } catch {}
+                  setShowResumeModal(false);
+                }}
+              >
+                <RotateCcw size={13} />
+                <span>Start from the beginning (Step 1)</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Focus Interruption Screen */}
       <InterruptedOverlay
