@@ -113,6 +113,8 @@ export default function LearningTopBar({
         {/* Calm Reading Ring (Active on content pages) */}
         {isPacedPage ? (
           <ReadingRing
+            key={`reading-ring-${currentPageIndex}`}
+            pageIndex={currentPageIndex}
             minSeconds={minSeconds}
             onComplete={onMinTimeComplete}
             isPaused={isPaused}

@@ -124,6 +124,9 @@ export default function ModuleExperienceContainer({
           const data = await res.json();
           setMinSeconds(data.minSeconds);
           setVisitId(data.visitId);
+          if (data.minSeconds <= 0) {
+            setIsMinTimeSatisfied(true);
+          }
         } else {
           setMinSeconds(module.pages[pageIdx]?.minSecondsOverride || 8);
           setVisitId(`local-visit-${pageIdx}-${Date.now()}`);
@@ -137,9 +140,14 @@ export default function ModuleExperienceContainer({
     [sessionId, module.pages]
   );
 
+  const lastEnteredPageRef = useRef<number | null>(null);
+
   useEffect(() => {
     if (sessionId && !isInterrupted && !isPaused) {
-      void enterPage(currentPageIndex, currentPageType);
+      if (lastEnteredPageRef.current !== currentPageIndex) {
+        lastEnteredPageRef.current = currentPageIndex;
+        void enterPage(currentPageIndex, currentPageType);
+      }
     }
   }, [sessionId, currentPageIndex, currentPageType, isInterrupted, isPaused, enterPage]);
 
@@ -196,6 +204,7 @@ export default function ModuleExperienceContainer({
       }
     }
 
+    setIsMinTimeSatisfied(false);
     setCurrentPageIndex(nextIdx);
   };
 

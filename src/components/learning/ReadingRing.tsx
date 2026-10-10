@@ -9,6 +9,7 @@ type ReadingRingProps = {
   isPaused?: boolean;
   active?: boolean;
   className?: string;
+  pageIndex?: number;
 };
 
 export default function ReadingRing({
@@ -17,6 +18,7 @@ export default function ReadingRing({
   isPaused = false,
   active = true,
   className = "",
+  pageIndex,
 }: ReadingRingProps) {
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [isCompleted, setIsCompleted] = useState(false);
@@ -29,13 +31,13 @@ export default function ReadingRing({
     onCompleteRef.current = onComplete;
   }, [onComplete]);
 
-  // Reset when minSeconds or active changes
+  // Reset when pageIndex, minSeconds or active changes
   useEffect(() => {
     setElapsedSeconds(0);
     setIsCompleted(false);
     setScreenReaderAnnouncement("");
     completedRef.current = false;
-  }, [minSeconds, active]);
+  }, [pageIndex, minSeconds, active]);
 
   // Handle immediate completion if minSeconds <= 0
   useEffect(() => {
