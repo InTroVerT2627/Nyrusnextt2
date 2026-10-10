@@ -103,7 +103,7 @@ export default function ModuleExperienceContainer({
   const enterPage = useCallback(
     async (pageIdx: number, pType: PageType) => {
       setIsMinTimeSatisfied(false);
-      setIsInteractionCompleted(["scene", "concept", "takeaway"].includes(pType));
+      setIsInteractionCompleted(["scene", "concept", "example", "takeaway"].includes(pType));
       setAdvanceError("");
 
       const currentSessId = sessionId || `local-sess-${Date.now()}`;

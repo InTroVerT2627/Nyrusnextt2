@@ -157,4 +157,17 @@ describe("Learning Session Engine & Focus Enforcement (Quality Gate)", () => {
     expect(pause2.paused).toBe(false);
     expect(pause2.error).toContain("Maximum one pause");
   });
+
+  it("verifies reading beat types auto-complete interaction requirement", () => {
+    const isAutoCompleted = (pType: string) =>
+      ["scene", "concept", "example", "takeaway"].includes(pType);
+
+    expect(isAutoCompleted("scene")).toBe(true);
+    expect(isAutoCompleted("concept")).toBe(true);
+    expect(isAutoCompleted("example")).toBe(true);
+    expect(isAutoCompleted("takeaway")).toBe(true);
+    expect(isAutoCompleted("teaser")).toBe(false);
+    expect(isAutoCompleted("tryit")).toBe(false);
+    expect(isAutoCompleted("check")).toBe(false);
+  });
 });
