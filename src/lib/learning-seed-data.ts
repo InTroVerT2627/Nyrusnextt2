@@ -1,10 +1,94 @@
-import { FullModule } from "@/lib/learning-experience-types";
-import { learningPaths } from "@/lib/learning-paths";
+import { FullModule, PublicLearningQuestion } from "@/lib/learning-experience-types";
 
-// Extract original knowledge check questions from learningPaths
-const daModule1Questions = learningPaths.find((p) => p.slug === "data-analytics")!.modules[0].questions;
-const baModule1Questions = learningPaths.find((p) => p.slug === "business-analytics")!.modules[0].questions;
-const commModule1Questions = learningPaths.find((p) => p.slug === "communication")!.modules[0].questions;
+const daModule1Questions: PublicLearningQuestion[] = [
+  {
+    id: "da1q1",
+    prompt: "Which question is most ready for analysis?",
+    choices: [
+      "Did we do a good job?",
+      "For new learners in September, did 7-day lesson completion change after the new flow?",
+      "Can you make a chart about onboarding?",
+    ],
+  },
+  {
+    id: "da1q2",
+    prompt: "Why define the unit of analysis?",
+    choices: [
+      "So each row represents a known kind of observation",
+      "So the dataset has more rows",
+      "So missing values disappear",
+    ],
+  },
+  {
+    id: "da1q3",
+    prompt: "What should you clarify before comparing completion rates?",
+    choices: [
+      "Which chart color is preferred",
+      "Whether completion means the same thing in both groups",
+      "Whether the table has the newest file name",
+    ],
+  },
+];
+
+const baModule1Questions: PublicLearningQuestion[] = [
+  {
+    id: "ba1q1",
+    prompt: "What should you clarify before calculating margin?",
+    choices: [
+      "Who is asking and what choice they need to make",
+      "Which font the slide deck uses",
+      "Whether the chart can be 3D",
+    ],
+  },
+  {
+    id: "ba1q2",
+    prompt: "Why state what would change a decision?",
+    choices: [
+      "To avoid endless re-analysis after the result arrives",
+      "To make the calculation take longer",
+      "To hide negative results",
+    ],
+  },
+  {
+    id: "ba1q3",
+    prompt: "Which problem statement is ready for work?",
+    choices: [
+      "The team feels busy",
+      "In Q3, delivery cost per order rose 18%; should we renegotiate route fees or adjust minimums?",
+      "We should look into operations",
+    ],
+  },
+];
+
+const commModule1Questions: PublicLearningQuestion[] = [
+  {
+    id: "comm1q1",
+    prompt: "What should you determine first when drafting an update?",
+    choices: [
+      "Who the audience is and what they need to decide",
+      "Which font looks most modern",
+      "How many acronyms you can include",
+    ],
+  },
+  {
+    id: "comm1q2",
+    prompt: "An executive asks for a launch status. Which opening is strongest?",
+    choices: [
+      "The launch succeeded on Friday with 99.8% uptime; two minor bugs are in triage.",
+      "First we configured the DNS, then we ran into cache invalidation, then we re-deployed.",
+      "Everyone worked very hard this weekend.",
+    ],
+  },
+  {
+    id: "comm1q3",
+    prompt: "Why avoid unshared acronyms?",
+    choices: [
+      "They force readers to stop and guess instead of understanding the point",
+      "They make documents look shorter",
+      "They are forbidden by style guides",
+    ],
+  },
+];
 
 export const dataAnalyticsModule1: FullModule = {
   slug: "frame-the-question",
@@ -599,3 +683,182 @@ export const seededModulesMap: Record<string, FullModule> = {
   "business-analytics/frame-the-business-problem": businessAnalyticsModule1,
   "communication/know-your-audience": communicationModule1,
 };
+
+export type PublicModuleInput = {
+  slug: string;
+  title: string;
+  summary: string;
+  objectives: string[];
+  lesson: { heading: string; body: string }[];
+  scenario: string;
+  questions: PublicLearningQuestion[];
+};
+
+export function getFullModule(
+  pathSlug: "data-analytics" | "business-analytics" | "communication" | string,
+  pathTitle: string,
+  module: PublicModuleInput,
+  index: number
+): FullModule {
+  const key = `${pathSlug}/${module.slug}`;
+  if (seededModulesMap[key]) {
+    return seededModulesMap[key];
+  }
+
+  // Synthesize a structured 7-beat module for paths/modules pending bespoke arcs
+  const character = pathSlug === "data-analytics" ? "Meera" : pathSlug === "business-analytics" ? "Rohan" : "Ananya";
+  const characterRole = pathSlug === "data-analytics" ? "Junior Data Analyst" : pathSlug === "business-analytics" ? "Business Strategist" : "Engineering Lead";
+  const storyArcTitle = pathSlug === "data-analytics" ? "The Missing Orders" : pathSlug === "business-analytics" ? "The Tea Stall That Wanted to Grow" : "The Update Nobody Read";
+
+  return {
+    slug: module.slug,
+    title: module.title,
+    pathSlug: (pathSlug === "data-analytics" || pathSlug === "business-analytics" || pathSlug === "communication") ? pathSlug : "data-analytics",
+    order: index + 1,
+    storyArcId: storyArcTitle.toLowerCase().replace(/\s+/g, "-"),
+    storyArcTitle,
+    estimatedMinutes: 8,
+    status: "draft_needs_review",
+    pages: [
+      {
+        id: `${module.slug}-p1-teaser`,
+        pageType: "teaser",
+        order: 1,
+        minSecondsOverride: 10,
+        content: {
+          prompt: `What is the central focus of '${module.title}'?`,
+          format: "choice",
+          options: [
+            "Superficial guesswork without methodology",
+            module.summary,
+            "Relying on assumptions without validation",
+          ],
+          revealReaction: `Understanding begins with clear framing. In this module, we focus on: ${module.summary}`,
+          realTopic: module.title,
+        },
+      },
+      {
+        id: `${module.slug}-p2-scene`,
+        pageType: "scene",
+        order: 2,
+        minSecondsOverride: 15,
+        content: {
+          sceneNumber: index + 1,
+          character,
+          characterRole,
+          setting: "Operations Hub · Case Briefing",
+          visualMood: "focused",
+          sceneObjects: ["laptop", "dashboard_monitor", "sticky_notes"],
+          narrative: module.scenario || `The team gathers to resolve an operational challenge around ${module.title}. Every stakeholder is waiting for a concrete, defensible direction.`,
+          dialogue: [
+            { speaker: "Stakeholder", text: `We need clear answers regarding ${module.title}. What should we focus on?` },
+            { speaker: character, text: module.objectives[0] || "We must examine the evidence step by step." },
+          ],
+          decisionBranch: {
+            prompt: `How should ${character} proceed?`,
+            choices: [
+              {
+                id: "c1",
+                label: "Jump immediately to conclusions without verifying assumptions.",
+                consequence: "You miss key context and risk presenting invalid findings.",
+              },
+              {
+                id: "c2",
+                label: `Focus on fundamentals: ${module.objectives[0] || module.title}.`,
+                consequence: "Clear direction established. The team avoids wasted effort and focuses on defensible facts.",
+              },
+            ],
+          },
+        },
+      },
+      {
+        id: `${module.slug}-p3-concept`,
+        pageType: "concept",
+        order: 3,
+        minSecondsOverride: 15,
+        content: {
+          title: module.lesson[0]?.heading || "Core Principle",
+          chunks: [
+            module.lesson[0]?.body || module.summary,
+            module.lesson[1]?.body || "Apply this systematic approach to ensure defensible, evidence-grounded outcomes.",
+          ],
+          glossaryTooltips: [
+            { term: module.title.split(" ")[0], definition: `Key concept in ${pathTitle}` },
+          ],
+        },
+      },
+      {
+        id: `${module.slug}-p4-example`,
+        pageType: "example",
+        order: 4,
+        minSecondsOverride: 15,
+        content: {
+          title: "Realistic Practical Application",
+          problem: module.scenario || `Addressing ${module.title} in real-world scenarios.`,
+          context: `Demonstrated in ${pathTitle}`,
+          steps: [
+            {
+              stepNumber: 1,
+              title: module.objectives[0] || "Foundational Step",
+              explanation: module.lesson[0]?.body?.slice(0, 180) || "Analyze the problem systematically.",
+            },
+            {
+              stepNumber: 2,
+              title: module.objectives[1] || "Execution & Verification",
+              explanation: module.lesson[1]?.body?.slice(0, 180) || "Verify outcomes against clear standards.",
+            },
+          ],
+        },
+      },
+      {
+        id: `${module.slug}-p5-tryit`,
+        pageType: "tryit",
+        order: 5,
+        content: {
+          taskType: "choose_justify",
+          prompt: `Based on what you learned in '${module.title}', evaluate the following scenario:`,
+          starterContext: module.scenario,
+          choices: [
+            {
+              id: "opt-1",
+              label: module.objectives[0] || "Apply systematic verification.",
+              isCorrect: true,
+              feedback: "Correct. This follows the disciplined principle required for reliable outcomes.",
+            },
+            {
+              id: "opt-2",
+              label: "Rely on intuition without checking data.",
+              isCorrect: false,
+              feedback: "This bypasses the analytical foundation required for proof of skill.",
+            },
+          ],
+          expectedGuidance: "Prioritize disciplined methodology over hasty assumptions.",
+          reasoningExplanation: "Defensible evidence requires adherence to rigorous, repeatable processes.",
+          explainItBackPrompt: `In your own words: why is ${module.title} critical for reliable decision-making?`,
+        },
+      },
+      {
+        id: `${module.slug}-p6-check`,
+        pageType: "check",
+        order: 6,
+        content: {
+          questions: module.questions,
+        },
+      },
+      {
+        id: `${module.slug}-p7-takeaway`,
+        pageType: "takeaway",
+        order: 7,
+        minSecondsOverride: 10,
+        content: {
+          summaryLines: [
+            module.summary,
+            ...(module.objectives.length > 0 ? module.objectives : ["Focus on evidence over intuition."]),
+          ],
+          reflectionPrompt: `How would you explain the core lesson of ${module.title} to a colleague?`,
+        },
+      },
+    ],
+  };
+}
+

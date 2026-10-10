@@ -5,6 +5,9 @@ import Link from "next/link";
 import SqlSandbox from "@/components/SqlSandbox";
 import SpreadsheetGrid from "@/components/SpreadsheetGrid";
 import CommunicationWorkbench from "@/components/CommunicationWorkbench";
+import ModuleExperienceContainer from "@/components/learning/ModuleExperienceContainer";
+import { getFullModule } from "@/lib/learning-seed-data";
+import { FullModule } from "@/lib/learning-experience-types";
 
 type PublicQuestion = { id: string; prompt: string; choices: string[] };
 type PublicModule = {
@@ -60,6 +63,7 @@ export default function LearningPathsClient() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [activeImmersiveModule, setActiveImmersiveModule] = useState<FullModule | null>(null);
 
   useEffect(() => {
     let live = true;
@@ -158,6 +162,31 @@ export default function LearningPathsClient() {
   if (loading) return <main className="learning-loading"><span className="brand-mark">N</span><p>Opening your learning paths…</p></main>;
   if (error && paths.length === 0) return <main className="learning-loading"><span className="brand-mark">N</span><h1>Learning paths need a connection</h1><p>{error}</p>{remote && <Link className="primary" href="/login">Sign in to continue <span>→</span></Link>}<Link className="secondary" href="/">Return to Nextlearn</Link></main>;
 
+  if (activeImmersiveModule && activePath) {
+    return (
+      <ModuleExperienceContainer
+        pathTitle={activePath.title}
+        module={activeImmersiveModule}
+        onExit={() => setActiveImmersiveModule(null)}
+        onModuleCompleted={() => {
+          const key = progressKey(activePath.slug, activeImmersiveModule.slug);
+          const previous = progress[key];
+          const updatedProgress = {
+            passed: true,
+            attempts: (previous?.attempts ?? 0) + 1,
+            bestScore: 3,
+            lastScore: 3,
+            lastAttemptAt: new Date().toISOString(),
+          };
+          const updated = { ...progress, [key]: updatedProgress };
+          setProgress(updated);
+          if (!remote) localStorage.setItem(localProgressKey, JSON.stringify(updated));
+          setActiveImmersiveModule(null);
+        }}
+      />
+    );
+  }
+
   return <main className="learning-page">
     <header className="learning-topbar"><Link className="brand" href="/"><span className="brand-mark">N</span><span>nextlearn</span></Link><div className="learning-top-actions"><span className="learning-progress-chip">Progress is earned through understanding</span><Link href="/" className="secondary">← Debugging workspace</Link></div></header>
     <div className="learning-content">
@@ -223,6 +252,58 @@ export default function LearningPathsClient() {
                 <p style={{ margin: 0, fontSize: "13px" }}>
                   <strong>Draft curriculum content — for demonstration purposes; requires human curriculum review.</strong> Do not invent statistics. Real skills are proven in the Authentic Work-Sample Sandbox.
                 </p>
+              </div>
+
+              <div
+                style={{
+                  background: "linear-gradient(135deg, rgba(20, 45, 78, 0.04) 0%, rgba(6, 198, 230, 0.08) 100%)",
+                  border: "1px solid var(--border-color)",
+                  borderRadius: "8px",
+                  padding: "16px 20px",
+                  marginBottom: "20px",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                  gap: "14px",
+                }}
+              >
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+                    <span style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "0.06em", color: "#142D4E", textTransform: "uppercase" }}>
+                      IMMERSIVE STORY EXPERIENCE
+                    </span>
+                    <span style={{ fontSize: "11px", padding: "2px 6px", borderRadius: "4px", background: "#EAF6FC", color: "#142D4E", fontWeight: "600" }}>
+                      7 Beats · Focus Engine
+                    </span>
+                  </div>
+                  <p style={{ margin: 0, fontSize: "13px", color: "var(--color-muted, #64748B)" }}>
+                    Half-and-half layout with narrative scene, SVG character dialogue, calm pacing ring, try-it, and knowledge check.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="primary"
+                  style={{
+                    background: "#142D4E",
+                    color: "#FFFFFF",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    padding: "10px 18px",
+                    borderRadius: "6px",
+                    fontWeight: "600",
+                    border: "none",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => {
+                    const fullMod = getFullModule(activePath.slug, activePath.title, activeModule, activeModuleIndex);
+                    setActiveImmersiveModule(fullMod);
+                  }}
+                >
+                  <span>Launch Immersive Module</span>
+                  <span aria-hidden="true">→</span>
+                </button>
               </div>
 
               <div className="learning-module-kicker"><span>MODULE {String(activeModuleIndex + 1).padStart(2, "0")}</span><span>{activePath.shortTitle.toUpperCase()} PATH</span></div>

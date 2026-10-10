@@ -1,4 +1,8 @@
-import { LearningQuestion } from "@/lib/learning-paths";
+export type PublicLearningQuestion = {
+  id: string;
+  prompt: string;
+  choices: string[];
+};
 
 export type PageType =
   | "teaser"
@@ -92,7 +96,7 @@ export type TryItContent = {
 };
 
 export type KnowledgeCheckContent = {
-  questions: LearningQuestion[];
+  questions: PublicLearningQuestion[];
 };
 
 export type TakeawayContent = {
