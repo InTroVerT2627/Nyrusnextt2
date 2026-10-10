@@ -53,10 +53,10 @@ async function readJson<T>(response: Response): Promise<T> {
 
 function progressKey(path: string, module: string) { return `${path}/${module}`; }
 
-function moduleState(index: number, modules: PublicModule[], progress: Record<string, ModuleProgress>, pathSlug: string) {
-  if (progress[progressKey(pathSlug, modules[index].slug)]?.passed) return "Passed" as const;
+function moduleState(index: number, modules: PublicModule[], progress: Record<string, ModuleProgress>, pathSlug: string): "Passed" | "Ready" | "Locked" {
+  if (progress[progressKey(pathSlug, modules[index].slug)]?.passed) return "Passed";
   // All modules are unlocked and ready for hackathon demonstration
-  return "Ready" as const;
+  return "Ready";
 }
 
 export default function LearningPathsClient() {
