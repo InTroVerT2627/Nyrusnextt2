@@ -19,6 +19,8 @@ flowchart TD
     WASM["WASM SQLite Sandbox (sql.js In-Browser)"]
     GRID["Spreadsheet Formula Grid (SaaS Unit Economics)"]
     COMM["Communication Workbench (Revise-After-Feedback Loop)"]
+    DEBUG_WB["Debugging Incident Workbench (Live Telemetry & Clues)"]
+    DSA_WB["DSA Production Scaling Workbench (Big-O & Scale Profiler)"]
     SPLIT["7-Beat Immersive Split View (Midnight SVG Story + Lesson Panel)"]
     TEST_UI["Capstone Final Test Shell & Hardware Check"]
     REPLAY_UI["Assessment Replay (8-Step Audit & SHA-256 Verification)"]
@@ -28,6 +30,7 @@ flowchart TD
 
   subgraph Execution ["Isolated Sandboxes & Reasoning Evaluators"]
     J0["Judge0 CE Isolated Runner\n(CPU, RAM, Process & Network Limits)"]
+    VM_RUNNER["Isolated Node.js VM & Scale Profiler\n(Deterministic Bug, Concurrency & Big-O Verification)"]
     GEMINI["Gemini Dual-Run Grader\n(2 Independent Runs, Schema Validation, Quote Grounding)"]
     WASM_SRV["Node.js / WASM Deterministic Result Verifier"]
     MATCHER["Shared Requirement Matcher Engine\n(Unified Recruiter & Readiness Evaluation)"]
@@ -113,22 +116,29 @@ flowchart TD
 
 ---
 
-### Pillar 2: Immersive Learning Paths & Focus Engine
-- **3 Practice Paths:** Data Analytics, Business Analytics, Workplace Communication (10 modules each = 30 modules total).
+### Pillar 2: Immersive Learning Paths, Workbenches & Focus Engine
+- **5 Comprehensive Practice Paths:**
+  1. **Data Analytics:** 10 modules on SQL queries, schema design, metric calculations, and business dashboards.
+  2. **Business Analytics:** 10 modules on unit economics, CAC/LTV, Cohort retention, and sensitivity models.
+  3. **Workplace Communication:** 10 modules on executive BLUF, de-escalation, cross-functional briefs, and active feedback loops.
+  4. **Hands-on Incident Debugging (The FinFlow War Room):** 4 story modules tackling production payment, concurrency, payload crash, and event ordering incidents.
+  5. **Data Structures & Algorithms in Production (Scaling EventPulse):** 4 practical modules on high-throughput deduplication, priority queues, sliding window rate limits, and binary search log indexing.
 - **Split-Screen Immersive View:**
-  - **Left (Midnight `#142D4E`):** Original SVG illustrations and ongoing narrative arcs (*Meera at Quickbite*, *Rohan at ChaiCraft*, *Ananya at CloudScale*) featuring interactive decision branches that immediately register learner commitment.
+  - **Left (Midnight `#142D4E`):** Original SVG illustrations and ongoing narrative arcs (*Meera at Quickbite*, *Rohan at ChaiCraft*, *Ananya at CloudScale*, *Kavya Nair at FinFlow*, *Tariq Patel at EventPulse*) featuring interactive decision branches that immediately register learner commitment.
   - **Right (Clean White Canvas):** 7-beat pedagogical lesson progression:
     1. *Curiosity Teaser* (predict before seeing the lesson)
-    2. *Story Scene* (contextual narrative)
+    2. *Story Scene* (contextual workplace narrative with recurring engineering characters)
     3. *Core Concept* (bite-sized principles with interactive glossary popovers)
     4. *Worked Example* (production scenario walkthrough)
-    5. *Try-It First* (low-stakes interactive trial)
+    5. *Try-It First* (low-stakes interactive trial with live incident symptoms and code inspection)
     6. *Knowledge Check* (server-graded formative check, pass 2 of 3 to advance)
     7. *Key Takeaway* (summary card)
-- **Authentic Interactive Work Samples:**
+- **Authentic Interactive Work Samples & Workbenches:**
   - **WASM SQLite (`sql.js`):** In-browser SQL execution on live eCommerce order tables.
   - **Spreadsheet Formula Grid:** Interactive formula evaluation for SaaS metrics (CAC, LTV, Payback).
   - **Communication Workbench:** Revise-after-feedback loop on critical stakeholder memos.
+  - **Debugging Incident Workbench (`DebuggingWorkbench`):** Live incident telemetry, unfolding clues, interactive code editor with reset and patch injection, isolated Node.js VM deterministic test runner, 4-part incident report documentation, and adaptive follow-up defenses probing reasoning.
+  - **DSA Production Scaling Workbench (`DsaWorkbench`):** Algorithmic complexity profiler, scaling stakes ($10\text{k} \rightarrow 1\text{M}$ events/sec), code editor with asymptotic benchmarking (<80ms execution constraints), deterministic unit & scale verification, and adaptive Big-O follow-up questions with early-stopping rules.
 - **Calm Reading Pacing Ring (`ReadingRing`):** Server-enforced reading pacing (`clamp(ceil(words / 3.8 * 0.6), 8, 90)`) with per-beat key remounting and zero render-loop side effects.
 - **Focus Session Engine:** Heartbeat monitoring (30s timeout), single active session lock, 3-second grace period for accidental tab switches, pause/resume controls, and an accessible Relaxed Focus Mode.
 - **Pick Up Where You Left Off:** Resumption modal that detects in-progress module beats from `localStorage` and lets learners resume immediately.
@@ -251,12 +261,12 @@ The entire application uses a **"Mission Control for Skills"** visual identity:
 
 ## 5. Verification & Test Suite Matrix
 
-The codebase is rigorously validated by **15 automated Vitest test suites** comprising **89 total tests** (100% passing) and compiles with zero Turbopack build errors:
+The codebase is rigorously validated by **16 automated Vitest test suites** comprising **105 total tests** (100% passing) and compiles with zero Turbopack build errors:
 
 | Quality Gate / Test Suite | Scope & Verification | Result |
 | :--- | :--- | :---: |
 | **Linter & Type Check** | `npm run lint` & Turbopack TypeScript check | **PASS (0 errors)** |
-| **Next.js Production Build** | Compiles all 44 static, dynamic, and API routes | **PASS (44 / 44 routes)** |
+| **Next.js Production Build** | Compiles all 45 static, dynamic, and API routes | **PASS (45 / 45 routes)** |
 | `tests/accessibility.test.ts` | Contrast tokens, focus rings, reduced motion, ARIA progressbars | **PASS (7/7)** |
 | `tests/leak-protection.test.ts` | Hidden tests, flaw keys, answer keys, allowlist projection, N-gram guard | **PASS (9/9)** |
 | `tests/two-user-rls.test.ts` | Validates Supabase RLS isolation between candidate accounts | **PASS (3/3)** |
@@ -272,7 +282,8 @@ The codebase is rigorously validated by **15 automated Vitest test suites** comp
 | `tests/integrity-verification.test.ts` | SHA-256 recomputation, tamper detection, hidden check sanitisation | **PASS (3/3)** |
 | `tests/readiness-and-parity.test.ts` | Requirement matcher parity between recruiter and readiness views | **PASS (6/6)** |
 | `tests/fairness-and-multilingual.test.ts` | 12-benchmark consistency, scoring spy, Unicode scripts, batch caps, Markdown export | **PASS (7/7)** |
-| **Total Automated Tests** | `npm test` | **89 / 89 PASS (100%)** |
+| `tests/debugging-and-dsa-paths.test.ts` | Path curricula, deterministic VM test verification, scale benchmarks (<80ms), priority queues, binary search, adaptive follow-up defenses & leak protection | **PASS (16/16)** |
+| **Total Automated Tests** | `npm test` | **105 / 105 PASS (100%)** |
 
 ---
 

@@ -5,6 +5,8 @@ import Link from "next/link";
 import SqlSandbox from "@/components/SqlSandbox";
 import SpreadsheetGrid from "@/components/SpreadsheetGrid";
 import CommunicationWorkbench from "@/components/CommunicationWorkbench";
+import DebuggingWorkbench from "@/components/DebuggingWorkbench";
+import DsaWorkbench from "@/components/DsaWorkbench";
 import ModuleExperienceContainer from "@/components/learning/ModuleExperienceContainer";
 import ReflectionCheckpointView from "@/components/learning/ReflectionCheckpointView";
 import MyReflectionsDrawer from "@/components/learning/MyReflectionsDrawer";
@@ -320,7 +322,7 @@ export default function LearningPathsClient() {
       </div>
     </header>
     <div className="learning-content">
-      <section className="learning-hero"><div><div className="eyebrow">LEARN · PRACTICE · SHOW UNDERSTANDING</div><h1>Choose your next path.</h1><p>Short lessons, practical scenarios, and knowledge checks. Pass a module to open the next one; take your time and retry whenever you need.</p></div><div className="learning-hero-mark" aria-hidden="true"><span>03</span><small>learning paths</small></div></section>
+      <section className="learning-hero"><div><div className="eyebrow">LEARN · PRACTICE · SHOW UNDERSTANDING</div><h1>Choose your next path.</h1><p>Short lessons, practical scenarios, and knowledge checks. Pass a module to open the next one; take your time and retry whenever you need.</p></div><div className="learning-hero-mark" aria-hidden="true"><span>{String(paths.length || 5).padStart(2, "0")}</span><small>learning paths</small></div></section>
 
       {error && <div className="notice error" role="status">{error}</div>}
 
@@ -379,7 +381,7 @@ export default function LearningPathsClient() {
                 <span className="learning-node-copy">
                   <strong>Work-Sample Task</strong>
                   <small>
-                    {activePath.slug === "data-analytics" ? "WASM SQLite Sandbox" : activePath.slug === "business-analytics" ? "Spreadsheet Formula Model" : "P0 Escalation Workbench"}
+                    {activePath.slug === "data-analytics" ? "WASM SQLite Sandbox" : activePath.slug === "business-analytics" ? "Spreadsheet Formula Model" : activePath.slug === "debugging" ? "Incident Debugging Sandbox" : activePath.slug === "dsa" ? "Complexity & Scale Sandbox" : "P0 Escalation Workbench"}
                   </small>
                 </span>
               </button>
@@ -492,6 +494,8 @@ export default function LearningPathsClient() {
               {activePath.slug === "data-analytics" && <SqlSandbox />}
               {activePath.slug === "business-analytics" && <SpreadsheetGrid />}
               {activePath.slug === "communication" && <CommunicationWorkbench />}
+              {activePath.slug === "debugging" && <DebuggingWorkbench />}
+              {activePath.slug === "dsa" && <DsaWorkbench />}
             </section>
           ) : activeModule && (
             <section className="learning-module">

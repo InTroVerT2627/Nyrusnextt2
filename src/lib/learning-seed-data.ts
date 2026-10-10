@@ -678,12 +678,381 @@ export const communicationModule1: FullModule = {
   ],
 };
 
+const dbgModule1Questions: PublicLearningQuestion[] = [
+  {
+    id: "dbg1q1",
+    prompt: "Why do slice-based sliding windows frequently omit the final transaction?",
+    choices: [
+      "slice(start, end) excludes the element at the end index",
+      "JavaScript arrays cannot store timestamps",
+      "Floating point math always rounds down to zero",
+    ],
+  },
+  {
+    id: "dbg1q2",
+    prompt: "What is the most effective deterministic test for off-by-one window bugs?",
+    choices: [
+      "A test with a transaction timestamp exactly equal to the upper window boundary",
+      "A test with a billion random transactions",
+      "Checking whether the variable names are camelCase",
+    ],
+  },
+  {
+    id: "dbg1q3",
+    prompt: "How do adaptive follow-up questions impact your debugging assessment score?",
+    choices: [
+      "They calibrate understanding and confidence; they never decrease base score",
+      "Each follow-up question subtracts 10% from the score",
+      "Follow-ups are only given when an attempt fails completely",
+    ],
+  },
+];
+
+const dsaModule1Questions: PublicLearningQuestion[] = [
+  {
+    id: "dsa1q1",
+    prompt: "What is the time complexity of checking duplicates using array.indexOf() inside a loop of N items?",
+    choices: [
+      "O(N²) quadratic time",
+      "O(N) linear time",
+      "O(log N) logarithmic time",
+    ],
+  },
+  {
+    id: "dsa1q2",
+    prompt: "What is the primary benefit of using a Set for duplicate detection?",
+    choices: [
+      "O(1) average lookup and insertion time",
+      "It uses zero memory on the heap",
+      "It guarantees sorted order of all elements",
+    ],
+  },
+  {
+    id: "dsa1q3",
+    prompt: "When using a hash set for unbounded real-time event streams, what memory risk arises?",
+    choices: [
+      "Unbounded memory growth unless items outside the dedup window are purged",
+      "Hash collisions cause silent data corruption",
+      "JavaScript sets can only hold 256 items",
+    ],
+  },
+];
+
+export const debuggingModule1: FullModule = {
+  slug: "off-by-one-settlement",
+  title: "The Missing Settlement Slice",
+  pathSlug: "debugging",
+  order: 1,
+  storyArcId: "the-late-night-deploy-at-finflow",
+  storyArcTitle: "The Late-Night Deploy at FinFlow",
+  estimatedMinutes: 8,
+  status: "draft_needs_review",
+  pages: [
+    {
+      id: "dbg-m1-p1-teaser",
+      pageType: "teaser",
+      order: 1,
+      minSecondsOverride: 10,
+      content: {
+        format: "choice",
+        prompt: "What causes the vast majority of silent reconciliation deficits in sliding time-window pipelines?",
+        options: [
+          "Hardware clock drift in data center cooling units",
+          "Off-by-one boundary index exclusion (confusing inclusive vs half-open intervals)",
+          "Network cables routing packets in alphabetical order",
+        ],
+        revealReaction:
+          "Exactly right. Boundary index off-by-one defects are the leading cause of silent item drops in financial batching systems.",
+        realTopic:
+          "Interval Invariants: Proving and verifying half-open [start, end) boundary conditions in critical settlement systems.",
+      },
+    },
+    {
+      id: "dbg-m1-p2-scene",
+      pageType: "scene",
+      order: 2,
+      minSecondsOverride: 18,
+      content: {
+        sceneNumber: 1,
+        character: "Kavya",
+        characterRole: "SRE & Backend Engineer",
+        setting: "FinFlow Incident Command War Room · 11:42 PM",
+        visualMood: "urgent",
+        sceneObjects: ["laptop", "telemetry_graphs", "red_phone"],
+        narrative:
+          "Kavya monitors the midnight settlement batch when Sentry flashes an S3 deficit alert. Vikram, Incident Commander, strides in holding an urgent printout: 'Merchant payouts are short by $4,200! Exactly one transaction from the 23:00 hour was omitted. The finance team is holding the batch. Did the batch drop an order?'",
+        dialogue: [
+          { speaker: "Vikram (Incident Commander)", text: "The settlement batch total is short. Did the worker drop a transaction at 23:59:59?" },
+          { speaker: "Kavya", text: "Let me inspect the window slice bounds. Array slicing might be dropping the boundary index." },
+        ],
+        decisionBranch: {
+          prompt: "How should Kavya investigate the missing transaction?",
+          choices: [
+            {
+              id: "dbg-choice-manual-edit",
+              label: "Manually insert a $4,200 database balance adjustment to unblock the payout quickly.",
+              consequence: "Bypasses the audit log, masks the underlying code defect, and corrupts ledger history.",
+            },
+            {
+              id: "dbg-choice-inspect-slice",
+              label: "Isolate the slicing function and verify boundary index tests against edge timestamps.",
+              consequence: "Uncovers that `slice(start, end - 1)` was truncating the final element. Fix can be verified deterministically.",
+            },
+          ],
+        },
+      },
+    },
+    {
+      id: "dbg-m1-p3-concept",
+      pageType: "concept",
+      order: 3,
+      minSecondsOverride: 20,
+      content: {
+        title: "Interval Semantics & Boundary Invariants",
+        chunks: [
+          "In financial batch processing, time ranges are almost universally defined as half-open intervals: [startTime, endTime). This means startTime is inclusive while endTime is exclusive. Array methods such as Array.prototype.slice(start, end) already model this half-open interval. If developer code applies an extra `- 1` adjustment like `slice(start, end - 1)`, the final transaction occurring right before endTime is silently dropped.",
+          "Defensive boundary engineering requires three verification checks: (1) An empty batch must safely return an empty slice, (2) A single-element batch must be fully captured, and (3) The upper boundary element at index `length - 1` must be included. When testing financial pipelines, property tests must test timestamp equality on the boundary.",
+        ],
+        glossaryTooltips: [
+          { term: "Half-Open Interval", definition: "A mathematical range [a, b) where lower bound a is inclusive and upper bound b is exclusive." },
+          { term: "Sliding Window", definition: "A sub-array or sub-sequence determined by moving boundary indices over time." },
+          { term: "Off-by-One", definition: "A logic error where an iteration or slice runs one time too many or one time too few." },
+        ],
+      },
+    },
+    {
+      id: "dbg-m1-p4-example",
+      pageType: "example",
+      order: 4,
+      minSecondsOverride: 20,
+      content: {
+        title: "Tracing Slice Boundary Exclusion",
+        problem: "The hourly batch has 10 transactions. Why did `transactions.slice(0, 9)` return only 9 items?",
+        context: "The developer intended to fetch all 10 items but applied `endIdx - 1` because array length is 10.",
+        steps: [
+          { stepNumber: 1, title: "Trace slice parameters", explanation: "slice(0, 9) extracts elements from index 0 through index 8." },
+          { stepNumber: 2, title: "Identify omitted element", explanation: "Index 9 (the 10th item) is excluded by slice, omitting the $4,200 payout." },
+          { stepNumber: 3, title: "Apply correct invariant", explanation: "Use `transactions.slice(startIdx, endIdx)` directly. The slice method already treats endIdx as exclusive." },
+        ],
+      },
+    },
+    {
+      id: "dbg-m1-p5-tryit",
+      pageType: "tryit",
+      order: 5,
+      content: {
+        taskType: "fix_error",
+        prompt: "Inspect the buggy sliding window calculation and identify why the final transaction is omitted:",
+        starterContext: "FinFlow settlement window function: getSettlementSlice(transactions, startIdx, endIdx) received start=0, end=10, but returned only 9 transactions.",
+        codeSnippet: "function getSettlementSlice(transactions, startIdx, endIdx) {\n  // Bug: endIdx - 1 excludes the requested end element\n  return transactions.slice(startIdx, endIdx - 1);\n}",
+        clues: [
+          "Hourly batch covers timestamps 23:00:00 through 23:59:59",
+          "End index passed to slice is array.length",
+          "slice(start, end) already treats the second argument as an exclusive upper bound",
+        ],
+        symptom: "S3 Deficit: 1 missing transaction in the 23:00 hourly batch",
+        choices: [
+          {
+            id: "dbg-opt-1",
+            label: "Change slice(startIdx, endIdx - 1) to slice(startIdx, endIdx) because slice's second parameter is already exclusive.",
+            isCorrect: true,
+            feedback: "Correct! Array.prototype.slice already excludes the upper bound. Subtracting 1 drops the last valid element.",
+          },
+          {
+            id: "dbg-opt-2",
+            label: "Add a while loop that appends null to transactions before slicing.",
+            isCorrect: false,
+            feedback: "Appending null introduces corrupt data into the settlement ledger.",
+          },
+        ],
+        expectedGuidance: "Preserve the invariant that slice(start, end) captures all elements from start up to end - 1.",
+        reasoningExplanation: "Subtracting 1 from endIdx artificially truncates the window, omitting the final record.",
+        explainItBackPrompt: "In one sentence: Why does subtracting 1 from the slice end argument drop the boundary transaction?",
+      },
+    },
+    {
+      id: "dbg-m1-p6-check",
+      pageType: "check",
+      order: 6,
+      content: {
+        questions: dbgModule1Questions,
+      },
+    },
+    {
+      id: "dbg-m1-p7-takeaway",
+      pageType: "takeaway",
+      order: 7,
+      minSecondsOverride: 12,
+      content: {
+        summaryLines: [
+          "Off-by-one errors in sliding windows are preventable through consistent half-open interval conventions [start, end).",
+          "Always test boundary edge cases: empty batches, single-item slices, and transactions landing exactly on the timestamp limit.",
+          "Adaptive follow-up defenses calibrate understanding and confidence without lowering your base score.",
+        ],
+        reflectionPrompt: "How will you verify boundary conditions the next time you write or review a slicing loop?",
+      },
+    },
+  ],
+};
+
+export const dsaModule1: FullModule = {
+  slug: "fast-record-dedup",
+  title: "Finding Duplicate Audit Events in Real-Time",
+  pathSlug: "dsa",
+  order: 1,
+  storyArcId: "scaling-eventpulse",
+  storyArcTitle: "Scaling EventPulse",
+  estimatedMinutes: 8,
+  status: "draft_needs_review",
+  pages: [
+    {
+      id: "dsa-m1-p1-teaser",
+      pageType: "teaser",
+      order: 1,
+      minSecondsOverride: 10,
+      content: {
+        format: "choice",
+        prompt: "Why do real-time event streaming pipelines degrade catastrophically under quadratic O(N²) deduplication?",
+        options: [
+          "Because doubling traffic quadruples processing time, quickly causing queue backpressure and memory exhaustion.",
+          "Because quadratic equations require GPUs that servers don't have.",
+          "Because browsers cannot render more than 100 HTML elements.",
+        ],
+        revealReaction:
+          "Spot on. When an ingestion stream scales from 1,000 to 50,000 events/sec, O(N²) comparisons jump from 1 million to 2.5 billion operations, crashing worker nodes.",
+        realTopic:
+          "Algorithmic Complexity & Scaling: Transforming quadratic bottlenecks into linear O(N) operations using hash indexing.",
+      },
+    },
+    {
+      id: "dsa-m1-p2-scene",
+      pageType: "scene",
+      order: 2,
+      minSecondsOverride: 18,
+      content: {
+        sceneNumber: 1,
+        character: "Tariq",
+        characterRole: "Systems & Infrastructure Engineer",
+        setting: "EventPulse Pipeline Profiler Desk · 09:15 AM",
+        visualMood: "urgent",
+        sceneObjects: ["cpu_flamegraph", "laptop", "event_stream"],
+        narrative:
+          "Tariq opens the CPU profiler to find worker pod CPU pegged at 100%. Lead Architect Maya pulls up the flame graph: 'The deduplication filter is blocking the entire message bus. We are processing 40,000 audit events per second, and each event scans the entire historical array with array.includes(). What data structure will eliminate this bottleneck?'",
+        dialogue: [
+          { speaker: "Maya (Lead Architect)", text: "Our ingestion pods are dying under quadratic array scans. How do we fix this before the 10 AM traffic surge?" },
+          { speaker: "Tariq", text: "We need to replace the linear array lookup with a hash set. That drops each lookup from O(N) to O(1) amortized." },
+        ],
+        decisionBranch: {
+          prompt: "How should Tariq optimize the deduplication pipeline?",
+          choices: [
+            {
+              id: "dsa-choice-cluster",
+              label: "Scale the Kubernetes cluster from 10 to 100 pods without changing the code.",
+              consequence: "Multiplies cloud infrastructure costs by 10x without fixing the O(N²) quadratic scaling limit.",
+            },
+            {
+              id: "dsa-choice-hash-set",
+              label: "Refactor the dedup buffer to use a Set with O(1) lookups and prune keys outside the time window.",
+              consequence: "CPU drops from 100% to 4%. Ingestion throughput increases by 45x while memory remains strictly bounded.",
+            },
+          ],
+        },
+      },
+    },
+    {
+      id: "dsa-m1-p3-concept",
+      pageType: "concept",
+      order: 3,
+      minSecondsOverride: 20,
+      content: {
+        title: "Hash Sets vs Array Scans in Event Ingestion",
+        chunks: [
+          "Repeatedly scanning an array using `array.includes()` or `array.indexOf()` inside a loop of N incoming items results in $O(N^2)$ time complexity. For 50,000 items, this requires up to 2.5 billion comparison operations, easily exhausting CPU time slices and stalling worker threads.",
+          "A hash table (JavaScript `Set` or `Map`) computes a hash of the key to index directly into a bucket, providing $O(1)$ amortized lookup and insertion time. The overall algorithm drops to $O(N)$ linear time. The trade-off is $O(N)$ memory overhead for hash table nodes. In production streams, memory must be capped by pruning entries older than the deduplication time window.",
+        ],
+        glossaryTooltips: [
+          { term: "Amortized O(1)", definition: "Constant time on average over a sequence of operations, accounting for occasional hash table resizing." },
+          { term: "Quadratic O(N²)", definition: "An algorithm whose execution time scales with the square of the input size." },
+          { term: "Hash Collision", definition: "When two distinct keys produce the same bucket index; resolved via chaining or open addressing." },
+        ],
+      },
+    },
+    {
+      id: "dsa-m1-p4-example",
+      pageType: "example",
+      order: 4,
+      minSecondsOverride: 20,
+      content: {
+        title: "Comparing Execution Steps",
+        problem: "De-duplicate 10,000 transaction events while preserving first-seen order.",
+        context: "EventPulse needs sub-50ms latency per batch of 10,000 events.",
+        steps: [
+          { stepNumber: 1, title: "Naive Array Scan", explanation: "For each item, scan the result array. Total comparisons: 10,000 * 5,000 = 50,000,000 operations (~450ms)." },
+          { stepNumber: 2, title: "Hash Set Accumulator", explanation: "Maintain a `seen = new Set()`. Check `seen.has(id)` in O(1). If not seen, add to Set and result list. Total operations: 10,000 (~1.2ms)." },
+          { stepNumber: 3, title: "Bounded Memory Pruning", explanation: "Evict keys older than 5 minutes to prevent heap memory exhaustion over 24 hours." },
+        ],
+      },
+    },
+    {
+      id: "dsa-m1-p5-tryit",
+      pageType: "tryit",
+      order: 5,
+      content: {
+        taskType: "choose_justify",
+        prompt: "Evaluate the optimal deduplication strategy for high-throughput event processing:",
+        starterContext: "EventPulse receives 20,000 audit records per batch. An engineer proposes sorting the array first (O(N log N)), then removing adjacent duplicates.",
+        choices: [
+          {
+            id: "dsa-opt-1",
+            label: "Use a Set for O(N) time and first-seen order preservation; sorting changes the original order and takes O(N log N).",
+            isCorrect: true,
+            feedback: "Correct! Set gives true linear O(N) performance and automatically preserves original audit event chronology.",
+          },
+          {
+            id: "dsa-opt-2",
+            label: "Keep the O(N²) array.includes() approach and add setTimeout(0) between every loop iteration.",
+            isCorrect: false,
+            feedback: "Adding setTimeout yields the thread but does not reduce the 200 million operations needed, drastically increasing latency.",
+          },
+        ],
+        expectedGuidance: "Prioritize O(N) linear hash sets over O(N²) nested scans or unnecessary O(N log N) sorting.",
+        reasoningExplanation: "Hash sets provide constant-time average lookups while preserving arrival order.",
+        explainItBackPrompt: "In one sentence: Why does a Set maintain first-seen event order better than sorting the input array?",
+      },
+    },
+    {
+      id: "dsa-m1-p6-check",
+      pageType: "check",
+      order: 6,
+      content: {
+        questions: dsaModule1Questions,
+      },
+    },
+    {
+      id: "dsa-m1-p7-takeaway",
+      pageType: "takeaway",
+      order: 7,
+      minSecondsOverride: 12,
+      content: {
+        summaryLines: [
+          "Eliminate quadratic O(N²) loops by replacing linear searches with O(1) hash sets.",
+          "Balance time and space complexity: O(N) runtime requires O(N) memory, which must be bounded in streaming pipelines.",
+          "Adaptive follow-up defenses calibrate understanding and confidence without lowering your base score.",
+        ],
+        reflectionPrompt: "Where in your current codebase might an inner array scan be creating a hidden quadratic bottleneck?",
+      },
+    },
+  ],
+};
+
 export const seededModulesMap: Record<string, FullModule> = {
   "data-analytics/frame-the-question": dataAnalyticsModule1,
   "business-analytics/frame-a-decision": businessAnalyticsModule1,
   "business-analytics/frame-the-business-problem": businessAnalyticsModule1,
   "communication/read-the-room": communicationModule1,
   "communication/know-your-audience": communicationModule1,
+  "debugging/off-by-one-settlement": debuggingModule1,
+  "dsa/fast-record-dedup": dsaModule1,
 };
 
 const DATA_ARC_SCENES = [
@@ -725,6 +1094,20 @@ const COMM_ARC_SCENES = [
   { setting: "Leadership Alignment Summit · 07:00 PM", mood: "triumphant" as const, objects: ["signed_roadmap", "conference_table", "laptop"] },
 ];
 
+const DEBUGGING_ARC_SCENES = [
+  { setting: "FinFlow Incident Command War Room · 11:42 PM", mood: "urgent" as const, objects: ["laptop", "telemetry_graphs", "red_phone"] },
+  { setting: "Payment Ledger Database Console · 01:15 AM", mood: "focused" as const, objects: ["sql_terminal", "laptop", "coffee_mug"] },
+  { setting: "Webhook Ingestion Gateway · 02:30 AM", mood: "pensive" as const, objects: ["payload_inspector", "error_log", "sticky_notes"] },
+  { setting: "Message Broker & Read Replica Cluster · 04:00 AM", mood: "triumphant" as const, objects: ["cluster_metrics", "postmortem_draft", "laptop"] },
+];
+
+const DSA_ARC_SCENES = [
+  { setting: "EventPulse Pipeline Profiler Desk · 09:15 AM", mood: "urgent" as const, objects: ["cpu_flamegraph", "laptop", "event_stream"] },
+  { setting: "Triage Dispatch Engine Whiteboard · 11:30 AM", mood: "focused" as const, objects: ["priority_queue_diagram", "markers", "laptop"] },
+  { setting: "API Gateway Rate Limiter Console · 02:45 PM", mood: "focused" as const, objects: ["sliding_window_chart", "memory_usage", "coffee_mug"] },
+  { setting: "Distributed Telemetry Search Terminal · 04:30 PM", mood: "triumphant" as const, objects: ["latency_distribution", "search_tree", "laptop"] },
+];
+
 export type PublicModuleInput = {
   slug: string;
   title: string;
@@ -736,7 +1119,7 @@ export type PublicModuleInput = {
 };
 
 export function getFullModule(
-  pathSlug: "data-analytics" | "business-analytics" | "communication" | string,
+  pathSlug: "data-analytics" | "business-analytics" | "communication" | "debugging" | "dsa" | string,
   pathTitle: string,
   module: PublicModuleInput,
   index: number
@@ -747,17 +1130,53 @@ export function getFullModule(
   }
 
   // Synthesize a structured 7-beat module for paths/modules pending bespoke arcs
-  const character = pathSlug === "data-analytics" ? "Meera" : pathSlug === "business-analytics" ? "Rohan" : "Ananya";
-  const characterRole = pathSlug === "data-analytics" ? "Junior Data Analyst" : pathSlug === "business-analytics" ? "Business Strategist" : "Engineering Lead";
-  const storyArcTitle = pathSlug === "data-analytics" ? "The Missing Orders" : pathSlug === "business-analytics" ? "The Tea Stall That Wanted to Grow" : "The Update Nobody Read";
+  const character =
+    pathSlug === "data-analytics"
+      ? "Meera"
+      : pathSlug === "business-analytics"
+      ? "Rohan"
+      : pathSlug === "debugging"
+      ? "Kavya"
+      : pathSlug === "dsa"
+      ? "Tariq"
+      : "Ananya";
+  const characterRole =
+    pathSlug === "data-analytics"
+      ? "Junior Data Analyst"
+      : pathSlug === "business-analytics"
+      ? "Business Strategist"
+      : pathSlug === "debugging"
+      ? "SRE & Backend Engineer"
+      : pathSlug === "dsa"
+      ? "Systems & Infrastructure Engineer"
+      : "Engineering Lead";
+  const storyArcTitle =
+    pathSlug === "data-analytics"
+      ? "The Missing Orders"
+      : pathSlug === "business-analytics"
+      ? "The Tea Stall That Wanted to Grow"
+      : pathSlug === "debugging"
+      ? "The Late-Night Deploy at FinFlow"
+      : pathSlug === "dsa"
+      ? "Scaling EventPulse"
+      : "The Update Nobody Read";
 
-  const sceneMetaList = pathSlug === "data-analytics" ? DATA_ARC_SCENES : pathSlug === "business-analytics" ? BUSINESS_ARC_SCENES : COMM_ARC_SCENES;
+  const sceneMetaList =
+    pathSlug === "data-analytics"
+      ? DATA_ARC_SCENES
+      : pathSlug === "business-analytics"
+      ? BUSINESS_ARC_SCENES
+      : pathSlug === "debugging"
+      ? DEBUGGING_ARC_SCENES
+      : pathSlug === "dsa"
+      ? DSA_ARC_SCENES
+      : COMM_ARC_SCENES;
   const currentSceneMeta = sceneMetaList[Math.min(index, sceneMetaList.length - 1)];
 
   return {
     slug: module.slug,
     title: module.title,
-    pathSlug: (pathSlug === "data-analytics" || pathSlug === "business-analytics" || pathSlug === "communication") ? pathSlug : "data-analytics",
+    pathSlug: pathSlug as any,
     order: index + 1,
     storyArcId: storyArcTitle.toLowerCase().replace(/\s+/g, "-"),
     storyArcTitle,

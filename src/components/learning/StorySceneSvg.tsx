@@ -115,7 +115,11 @@ export default function StorySceneSvg({
         {/* Character Hair: Distinct styling */}
         {character === "Meera" ? (
           <path d="M362 245 C360 215, 420 215, 418 245 C418 260, 410 265, 415 280 C400 282, 385 275, 380 270 Z" fill="#2d1b0d" />
-        ) : character === "Ravi" ? (
+        ) : character === "Kavya" ? (
+          <path d="M362 240 C358 210, 422 210, 418 240 C420 255, 424 270, 432 285 C416 278, 384 278, 362 240 Z" fill="#1b1c24" />
+        ) : character === "Tariq" ? (
+          <path d="M362 238 C364 212, 416 212, 418 238 C418 228, 410 218, 390 218 C370 218, 362 228, 362 238 Z" fill="#1e293b" />
+        ) : character === "Ravi" || character === "Rohan" ? (
           <path d="M362 240 C362 215, 418 215, 418 240 C418 230, 410 220, 390 220 C370 220, 362 230, 362 240 Z" fill="#1c2536" />
         ) : (
           <path d="M362 242 C362 218, 418 218, 418 242 C415 225, 365 225, 362 242 Z" fill="#3b2716" />

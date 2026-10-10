@@ -93,6 +93,10 @@ export type TryItContent = {
   expectedGuidance: string;
   reasoningExplanation: string;
   explainItBackPrompt: string;
+  codeSnippet?: string;
+  clues?: string[];
+  symptom?: string;
+  verificationChecks?: { label: string; passed: boolean }[];
 };
 
 export type KnowledgeCheckContent = {
@@ -125,7 +129,7 @@ export type ModulePage<T extends PageType = PageType> = {
 export type FullModule = {
   slug: string;
   title: string;
-  pathSlug: "data-analytics" | "business-analytics" | "communication";
+  pathSlug: "data-analytics" | "business-analytics" | "communication" | "debugging" | "dsa" | string;
   order: number;
   storyArcId: string;
   storyArcTitle: string;

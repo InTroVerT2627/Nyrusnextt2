@@ -323,6 +323,156 @@ export const learningPaths: LearningPath[] = [
       ]),
     ],
   },
+  {
+    slug: "debugging",
+    title: "Hands-on Incident Debugging",
+    shortTitle: "Debugging",
+    subtitle: "The FinFlow Incident War Room",
+    description: "Investigate real-world production incidents with telemetry, clues, code inspection, and deterministic verification. Stabilize systems and communicate root causes under pressure.",
+    icon: "⚡",
+    accent: "midnight",
+    modules: [
+      m(
+        "off-by-one-settlement",
+        "The Missing Settlement Slice",
+        "Diagnose sliding time-window slice errors where the final transaction in a batch is silently dropped.",
+        ["Identify boundary index exclusion in sliding windows", "Verify time-window invariants with deterministic tests"],
+        [
+          "Sliding time-windows and array slice methods often drop edge elements when inclusive vs exclusive boundary conditions are confused. In financial settlements, a window defined as [startTime, endTime) that incorrectly excludes endTime or truncates array bounds causes reconciliations to silently omit the final transaction.",
+          "When inspecting windowing code, isolate the loop terminating condition (< vs <=) and array slicing parameters. Verify that single-item batches, empty windows, and timestamps occurring exactly at window limits are correctly captured by unit test assertions.",
+        ],
+        "FinFlow's hourly merchant payout reconciliation shows a $4,200 deficit: the final transaction recorded at 23:59:59 is omitted from the settlement batch.",
+        [
+          q("dbg1q1", "Why do slice-based sliding windows frequently omit the final transaction?", ["slice(start, end) excludes the element at the end index", "JavaScript arrays cannot store timestamps", "Floating point math always rounds down to zero"], 0, "Array.prototype.slice(start, end) extracts up to but not including the end index."),
+          q("dbg1q2", "What is the most effective deterministic test for off-by-one window bugs?", ["A test with a transaction timestamp exactly equal to the upper window boundary", "A test with a billion random transactions", "Checking whether the variable names are camelCase"], 0, "Boundary-value tests verify that transactions occurring exactly on the limit are included."),
+          q("dbg1q3", "How do adaptive follow-up questions impact your debugging assessment score?", ["They calibrate understanding and confidence; they never decrease base score", "Each follow-up question subtracts 10% from the score", "Follow-ups are only given when an attempt fails completely"], 0, "Under NextLearn principles, follow-up defenses calibrate confidence without point deduction."),
+        ]
+      ),
+      m(
+        "concurrent-state-race",
+        "The Phantom Reversal",
+        "Fix concurrent mutation bugs where simultaneous webhook retries produce duplicate ledger debits.",
+        ["Enforce idempotency keys before state transition", "Prevent concurrent race conditions with atomic verification"],
+        [
+          "Distributed payment systems experience network timeouts that trigger automatic merchant retries. If the backend processes concurrent retries without atomic idempotency locking, duplicate ledger deductions occur before the first transaction finishes persisting.",
+          "Resolve race conditions by checking and acquiring an idempotency lock before state mutations. If a lock or committed record exists, return the cached result instead of executing a second deduction. Always verify concurrent thread execution with deterministic stress tests.",
+        ],
+        "A merchant reported double deduction on order #9421 after network latency caused their payment client to fire two requests 12ms apart.",
+        [
+          q("dbg2q1", "What mechanism prevents duplicate ledger deductions during concurrent retries?", ["Idempotency keys with atomic state verification", "Increasing database connection pool timeout to 10 minutes", "Deleting failed webhook payloads automatically"], 0, "Idempotency keys guarantee that identical requests executed multiple times yield the same result once."),
+          q("dbg2q2", "When two concurrent requests arrive with the same idempotency key, what should the second request do?", ["Await or return the existing execution result without mutating state again", "Immediately throw an unhandled 500 server error", "Execute a third reversal transaction"], 0, "The second concurrent request should respect the in-flight lock or return the recorded outcome."),
+          q("dbg2q3", "Why is testing concurrency with single-threaded sequential calls insufficient?", ["Race conditions only manifest when executions interleave simultaneously", "Sequential calls run faster than concurrent calls", "Single-threaded calls cannot use JSON"], 0, "Interleaved execution is required to expose un-synchronized shared state access."),
+        ]
+      ),
+      m(
+        "unhandled-null-payload",
+        "The Webhook Ingestion Crash",
+        "Defend ingestion endpoints against cascading unhandled null exceptions from third-party webhook payloads.",
+        ["Identify unsafe property access on optional nested objects", "Implement schema validation and safe fallback defaults"],
+        [
+          "External API payloads change over time. When partner services send unexpected null or omitted nested properties, naive deep property accesses like payload.customer.billing.address.zip trigger TypeError: Cannot read properties of undefined and crash the ingestion worker.",
+          "Use optional chaining (?.), nullish coalescing (??), and strict runtime schema validation (like Zod) to guard ingestion boundaries. Ensure unparseable payloads are dead-lettered rather than repeatedly crashing the worker queue.",
+        ],
+        "A partner payment provider deployed an update omitting billing_address for digital goods, crashing FinFlow's ingestion queue for 40 minutes.",
+        [
+          q("dbg3q1", "What error occurs when accessing payload.customer.address.zip if customer is undefined?", ["TypeError: Cannot read properties of undefined", "ReferenceError: zip is not defined", "SyntaxError: Unexpected token dot"], 0, "Accessing properties on an undefined reference throws a runtime TypeError in JavaScript."),
+          q("dbg3q2", "What is the safest way to extract optional nested properties in modern JavaScript?", ["Optional chaining (payload?.customer?.address?.zip ?? 'DEFAULT')", "A 5-level nested if-else chain checking typeof", "Wrapping the entire service in an empty catch block"], 0, "Optional chaining with nullish coalescing safely traverses optional properties with clear fallbacks."),
+          q("dbg3q3", "When a webhook payload fails schema validation, what should the ingestion worker do?", ["Dead-letter the payload with logged validation errors and acknowledge receipt to prevent queue poison", "Crash the node process immediately so it restarts", "Silently discard the payload with zero audit log entry"], 0, "Dead-letter queues isolate malformed payloads while allowing healthy queue traffic to proceed."),
+        ]
+      ),
+      m(
+        "async-event-ordering",
+        "The Out-of-Order Webhook Delivery",
+        "Fix asynchronous execution bugs where events fire out of sequence due to unawaited promise loops.",
+        ["Recognize promise race hazards in array iterations (forEach vs map/for-of)", "Ensure strict event sequencing with Promise.all and serial queues"],
+        [
+          "Using async/await inside Array.prototype.forEach does not cause the caller to await the asynchronous iterations. The enclosing function returns immediately, causing downstream tasks to run before upstream database commits finish.",
+          "When operations must run sequentially, use a standard for...of loop with await. When tasks can run concurrently but must all complete before proceeding, use Promise.all(items.map(async ...)) or Promise.allSettled. This guarantees deterministic execution order.",
+        ],
+        "Customer receipt webhooks were sent showing 'Status: Pending' because the email dispatcher ran before the settlement database write finished.",
+        [
+          q("dbg4q1", "Why does `items.forEach(async (item) => await process(item))` fail to wait?", ["forEach does not await or return the promises created by its callback", "forEach only works with synchronous integers", "JavaScript prohibits async functions inside loops"], 0, "forEach discards the promises returned by its callback; the caller does not wait for them."),
+          q("dbg4q2", "How do you guarantee that a list of asynchronous operations completes in strict sequence?", ["Use a for...of loop with await on each iteration", "Use forEach with a setTimeout of 100ms", "Run them in parallel with Promise.race"], 0, "A for...of loop pauses execution at each await statement, ensuring sequential completion."),
+          q("dbg4q3", "If an async database write is followed by an email notification, what must happen first?", ["The database write promise must resolve successfully before triggering the email", "The email should be sent first to reduce customer latency", "Both should run unawaited as background daemon tasks"], 0, "The state change must commit before notifying external parties to prevent false status delivery."),
+        ]
+      ),
+    ],
+  },
+  {
+    slug: "dsa",
+    title: "Data Structures & Algorithms in Production",
+    shortTitle: "Algorithms",
+    subtitle: "Scaling EventPulse",
+    description: "Turn algorithmic theory into production efficiency. Master hash indexing, priority dispatch, sliding window limits, and binary telemetry search to eliminate quadratic bottlenecks.",
+    icon: "⌘",
+    accent: "cyan",
+    modules: [
+      m(
+        "fast-record-dedup",
+        "Finding Duplicate Audit Events in Real-Time",
+        "Replace quadratic O(N²) array lookups with linear O(N) hash set indexing during high-throughput event ingestion.",
+        ["Analyze time and space complexity trade-offs between array scanning and hash sets", "Implement linear-time deduplication with bounded memory footprint"],
+        [
+          "Checking for duplicates by repeatedly scanning an array with array.includes() or indexOf() inside a loop produces O(N²) quadratic time complexity. When EventPulse processes 50,000 events per second, quadratic loops cause CPU spikes and event queue backpressure.",
+          "Using a Set or Map leverages O(1) average-time hash lookups, reducing total runtime to O(N) linear time. The trade-off is O(N) space overhead for the hash table. In production, cap memory by retaining keys only within the deduplication time window.",
+        ],
+        "EventPulse's ingestion worker spikes to 100% CPU when processing batch audit logs because an inner loop checks duplicate transaction IDs across 20,000 records.",
+        [
+          q("dsa1q1", "What is the time complexity of checking duplicates using array.indexOf() inside a loop of N items?", ["O(N²) quadratic time", "O(N) linear time", "O(log N) logarithmic time"], 0, "Calling an O(N) lookup inside an O(N) loop yields O(N²) total time."),
+          q("dsa1q2", "What is the primary benefit of using a Set for duplicate detection?", ["O(1) average lookup and insertion time", "It uses zero memory on the heap", "It guarantees sorted order of all elements"], 0, "Hash-based sets provide constant-time average lookups, transforming the algorithm to linear time."),
+          q("dsa1q3", "When using a hash set for unbounded real-time event streams, what memory risk arises?", ["Unbounded memory growth unless items outside the dedup window are purged", "Hash collisions cause silent data corruption", "JavaScript sets can only hold 256 items"], 0, "Real-time streams require a sliding time window or TTL to prevent memory exhaustion."),
+        ]
+      ),
+      m(
+        "priority-task-dispatch",
+        "Triage Under Pressure: Incident Priority Queue",
+        "Implement priority dispatching using binary heaps to eliminate O(N) sorting bottlenecks during Sev-1 outages.",
+        ["Compare binary heap priority queues O(log N) with linear array searches O(N)", "Implement tie-breaking logic based on priority levels and timestamps"],
+        [
+          "When incident alerts flood the system, finding the highest-priority task by scanning an unsorted list takes O(N) time per dispatch, and re-sorting an array takes O(N log N).",
+          "A Binary Heap (Priority Queue) maintains the heap-order property, allowing insertion in O(log N) time and retrieval of the highest-priority item in O(1) inspection and O(log N) extraction. For alerts with identical severity, tie-break using arrival timestamp (FIFO).",
+        ],
+        "During a major cloud provider disruption, EventPulse received 8,000 alert signals in 30 seconds; the dispatcher stalled because it repeatedly re-sorted an in-memory array.",
+        [
+          q("dsa2q1", "What is the time complexity to insert an element into a binary heap of size N?", ["O(log N) logarithmic time", "O(1) constant time", "O(N) linear time"], 0, "Inserting an element bubbles up through the tree height, taking O(log N) time."),
+          q("dsa2q2", "Why is a binary heap superior to re-sorting an array after every incoming alert?", ["Heap insert is O(log N) while full array re-sort is O(N log N)", "Heaps do not use any memory", "Arrays cannot store numbers"], 0, "Incremental heap adjustment takes O(log N) instead of re-sorting the entire collection."),
+          q("dsa2q3", "How should a priority queue handle two alerts with identical severity levels?", ["Tie-break using the earliest arrival timestamp (FIFO)", "Drop the second alert as duplicate", "Pick randomly between the two"], 0, "Earliest arrival tie-breaking preserves fairness and predictable processing order."),
+        ]
+      ),
+      m(
+        "sliding-rate-limiter",
+        "Taming the Spike: Sliding Window Rate Limiting",
+        "Design a sliding window rate limiter with double-ended queues to enforce API quotas with bounded memory.",
+        ["Differentiate between fixed window counters and sliding window log algorithms", "Optimize memory and time using double-ended timestamp queues (Deque)"],
+        [
+          "Fixed-window rate limiters reset counters at rigid boundary intervals (e.g., top of the minute). A client can send 100% of their limit at 00:59 and another 100% at 01:01, doubling their allowed rate across the boundary.",
+          "A sliding window rate limiter tracks timestamps in a double-ended queue. When a new request arrives at time t, prune all timestamps older than t - window. If the remaining count is below limit, record t and allow the request. Memory is bounded to the maximum allowed burst K.",
+        ],
+        "A webhook partner bypassed rate limits by firing 200 requests across a 5-second boundary transition, overwhelming EventPulse's downstream worker pool.",
+        [
+          q("dsa3q1", "What flaw exists in a fixed-window rate limiter counter?", ["Burst traffic across window boundaries can exceed the intended rate by up to 2x", "It requires 10GB of RAM per user", "It cannot run on Linux servers"], 0, "Fixed windows allow bursts at the end of window 1 and start of window 2 to double the allowed rate."),
+          q("dsa3q2", "In a sliding window log, how are expired requests removed from the queue?", ["Prune timestamps from the head of the queue where timestamp < (now - window)", "Delete all elements whenever the minute changes", "Filter the entire database table on every request"], 0, "Old timestamps older than the sliding threshold are popped from the front of the queue."),
+          q("dsa3q3", "What is the maximum space complexity for a sliding window storing at most K requests per user?", ["O(K) proportional to the rate limit threshold", "O(N²) proportional to total lifetime users", "O(1) independent of request volume"], 0, "The queue size never exceeds K timestamps because excess requests are rejected."),
+        ]
+      ),
+      m(
+        "indexed-log-search",
+        "Sub-Millisecond Telemetry Lookup: Binary Search & Intervals",
+        "Search sorted telemetry timestamps in sub-millisecond O(log N) time using binary search range boundaries.",
+        ["Implement binary search for first and last occurrences of timestamp boundaries", "Maintain strict loop invariants to avoid off-by-one infinite loops"],
+        [
+          "Telemetry log archives contain millions of records sorted chronologically. Linear scanning to locate an incident timeframe of 10 minutes takes seconds. Because the logs are sorted, Binary Search locates time bounds in O(log N) comparisons.",
+          "To query a time range [T_start, T_end], use binary search to locate the lower bound (first record with timestamp >= T_start) and the upper bound (first record with timestamp > T_end). Calculate mid = low + Math.floor((high - low) / 2) to prevent arithmetic overflow.",
+        ],
+        "Customer support engineers waited 12 seconds per query when filtering incident logs because the query engine executed full sequential scans over 500,000 records.",
+        [
+          q("dsa4q1", "How many comparisons does Binary Search require to search 1,000,000 sorted records in the worst case?", ["Approximately 20 comparisons (log₂ 1,000,000 ≈ 20)", "1,000,000 comparisons", "500,000 comparisons"], 0, "log₂(1,000,000) is approximately 19.93, requiring at most 20 comparisons."),
+          q("dsa4q2", "Why calculate midpoint as `low + Math.floor((high - low) / 2)` rather than `Math.floor((low + high) / 2)`?", ["It prevents integer arithmetic overflow on very large index values", "It runs 10x faster in V8", "It rounds to the nearest prime number"], 0, "Subtracting low from high avoids summing two large integers that might exceed integer limits."),
+          q("dsa4q3", "To extract an interval [T_start, T_end] from sorted logs, what two binary searches are performed?", ["Find the first index where timestamp >= T_start, and the first index where timestamp > T_end", "Search from index 0 and index length-1 sequentially", "Search for the median timestamp twice"], 0, "Lower bound and upper bound binary searches identify the exact start and end slice indices in O(log N) time."),
+        ]
+      ),
+    ],
+  },
 ];
 
 export const learningPassMark = 2;

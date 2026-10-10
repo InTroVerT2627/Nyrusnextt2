@@ -49,3 +49,51 @@ export type CommunicationPackage = {
   executiveBriefing: string;
   customerAdvisory: string;
 };
+
+export type VerificationCheck = {
+  title: string;
+  passed: boolean;
+  message?: string;
+  details?: string;
+};
+
+export type DebuggingEvaluationResult = {
+  passed: boolean;
+  checks: VerificationCheck[];
+  totalChecks: number;
+  passedChecks: number;
+  executionTimeMs: number;
+  syntaxValid: boolean;
+  suggestedFollowup?: AdaptiveFollowupQuestion;
+};
+
+export type DsaEvaluationResult = {
+  passed: boolean;
+  checks: VerificationCheck[];
+  totalChecks: number;
+  passedChecks: number;
+  complexityVerified: boolean;
+  operationsCount?: number;
+  timeComplexityObserved: string;
+  spaceComplexityObserved: string;
+  executionTimeMs: number;
+  suggestedFollowup?: AdaptiveFollowupQuestion;
+};
+
+export type AdaptiveFollowupQuestion = {
+  id: string;
+  prompt: string;
+  concept: string;
+  expectedKeyTerms: string[];
+  level: "foundation" | "complexity" | "edge_case" | "tradeoff";
+};
+
+export type FollowupEvaluationResult = {
+  score: number; // 0, 1, or 2 (never reduces base score)
+  confidence: "High" | "Medium" | "Low";
+  evidenceQuote: string;
+  reason: string;
+  stopQuestioning: boolean;
+  demonstratedConcepts: string[];
+};
+

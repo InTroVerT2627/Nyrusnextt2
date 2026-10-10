@@ -170,3 +170,11 @@ export function evaluateCommunicationStructure(pkg: CommunicationPackage) {
   const passed = checks.every((c) => c.passed);
   return { passed, checks };
 }
+
+export {
+  evaluateDebuggingFix,
+  evaluateDsaChallenge,
+  evaluateFollowupDefense,
+  getFollowupQuestion,
+} from "./code-challenge-evaluator";
+
