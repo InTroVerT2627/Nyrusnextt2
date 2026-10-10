@@ -29,6 +29,9 @@ import {
 } from "@/components/Icons";
 import CommandPalette from "@/components/CommandPalette";
 import { ToastProvider } from "@/components/ToastContext";
+import SkillTreeSvg from "@/components/SkillTreeSvg";
+import CodingWorkspace from "@/components/CodingWorkspace";
+import BossRoundWorkbench from "@/components/BossRoundWorkbench";
 import { Search } from "lucide-react";
 
 type Role = "learner" | "recruiter" | "reviewer";
@@ -615,7 +618,7 @@ export default function RemoteHome() {
           )}
 
           {activeMission ? (
-            <MissionEditor
+            <CodingWorkspace
               mission={activeMission}
               busy={answerBusy}
               attempt={attempt}
@@ -630,7 +633,7 @@ export default function RemoteHome() {
               }}
             />
           ) : activeBoss && section === "Skill tree" ? (
-            <BossEditor
+            <BossRoundWorkbench
               boss={activeBoss}
               onBack={() => {
                 setActiveBoss(null);
@@ -662,7 +665,7 @@ export default function RemoteHome() {
               onTree={() => selectSection("Skill tree")}
             />
           ) : section === "Skill tree" ? (
-            <TreeView
+            <SkillTreeSvg
               missions={missions}
               evidence={evidenced}
               attempts={profile?.attempts ?? []}
