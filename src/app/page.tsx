@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { getEvidenceState, missions, scoreFollowUp, selectQuestions, type Mission } from "@/lib/nextlearn";
+import RemoteHome from "@/app/RemoteHome";
 
 type Section = "Missions" | "Skill tree" | "My evidence" | "Recruiter preview" | "Review queue" | "Audit log";
 type Attempt = { id: string; missionId: string; date: string; codePassed: boolean; followUpScore: number; confidence: string; report: string; code: string; answers: string[]; aiUsed: boolean; flagged: boolean; questionIds: string[]; challenge?: string };
@@ -13,6 +14,11 @@ const rubric = [["Fix correctness", "35%", "Visible tests"], ["Edge-case handlin
 function Icon({ children }: { children: React.ReactNode }) { return <span className="nav-icon" aria-hidden="true">{children}</span>; }
 
 export default function Home() {
+  if (process.env.NEXT_PUBLIC_BACKEND_MODE === "supabase") return <RemoteHome />;
+  return <LocalHome />;
+}
+
+function LocalHome() {
   const [section, setSection] = useState<Section>("Missions");
   const [saved, setSaved] = useState<Saved>(blank);
   const [ready, setReady] = useState(false);
@@ -29,7 +35,12 @@ export default function Home() {
   const [bossOpen, setBossOpen] = useState(false);
 
   useEffect(() => {
-    try { const raw = localStorage.getItem(storageKey); if (raw) setSaved({ ...blank, ...JSON.parse(raw) }); }
+    try {
+      const raw = localStorage.getItem(storageKey);
+      // This is a one-time browser storage hydration after server rendering.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      if (raw) setSaved({ ...blank, ...JSON.parse(raw) });
+    }
     catch { setNotice("Saved demo data could not be read; a fresh workspace is ready."); }
     setReady(true);
   }, []);
