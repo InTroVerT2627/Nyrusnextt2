@@ -54,4 +54,37 @@ describe("Accessibility & WCAG AA Compliance (Quality Gate: Accessibility Check)
     expect(source).toContain('state === "Locked" ? <LockIcon');
     expect(source).toContain('<span className="state-label">');
   });
+
+  it("verifies the exact 10 colour tokens are declared in globals.css", () => {
+    const cssPath = path.resolve(process.cwd(), "src/app/globals.css");
+    const css = fs.readFileSync(cssPath, "utf8");
+
+    const tokens = [
+      "--white",
+      "--midnight",
+      "--cyan",
+      "--ice",
+      "--text",
+      "--muted",
+      "--border",
+      "--success",
+      "--warning",
+      "--error",
+    ];
+
+    for (const token of tokens) {
+      expect(css).toContain(token);
+    }
+  });
+
+  it("verifies absence of gamification pressure patterns (XP, streaks, countdown timers)", () => {
+    const sourcePath = path.resolve(process.cwd(), "src/app/RemoteHome.tsx");
+    const source = fs.readFileSync(sourcePath, "utf8");
+
+    // Must not have XP, streaks, or leaderboards
+    expect(source.toLowerCase()).not.toContain("leaderboard");
+    expect(source.toLowerCase()).not.toContain("streak count");
+    expect(source.toLowerCase()).not.toContain("+100 xp");
+    expect(source.toLowerCase()).not.toContain("countdown timer");
+  });
 });

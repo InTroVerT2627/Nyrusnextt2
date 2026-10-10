@@ -161,11 +161,15 @@ Strict adherence to the 10 defined tokens. Zero external hues, zero purple gradi
 ---
 
 ## 5. Verification Checklist
-- [ ] Exact 10 colour tokens defined in `:root` and used consistently.
-- [ ] No emoji icons anywhere; Lucide icons used exclusively.
-- [ ] No gamification mechanisms present.
-- [ ] Command palette (`Ctrl+K`) and Help sheet (`?`) functional.
-- [ ] 3-pane coding workspace resizable and layout persisted.
-- [ ] Skill tree SVG graph supports pan, zoom, and keyboard navigation with icon+text states.
-- [ ] Tests and AI feedback visually distinguished.
-- [ ] 39 unit/integration tests continue to pass.
+- [x] Exact 10 colour tokens defined in `:root` and used consistently.
+- [x] No emoji icons anywhere; Lucide icons used exclusively.
+- [x] No gamification mechanisms present (no XP, points, streaks, timers, or leaderboards).
+- [x] Command palette (`Ctrl+K`) and Help sheet (`?`) functional.
+- [x] 3-pane coding workspace resizable and layout persisted in localStorage.
+- [x] Skill tree SVG graph supports pan, zoom, and keyboard navigation with icon+text states.
+- [x] Tests and AI feedback visually distinguished.
+- [x] Recruiter dashboard with explicit role requirements filter chips and "Why surfaced" explainability.
+- [x] Reviewer queue with split diff comparison and mandatory written justifications.
+- [x] Append-only audit log with search, filters, and cryptographic payload inspector.
+- [x] 41 unit/integration tests passing across 9 test suites (`npm test`).
+- [x] Next.js Turbopack production build compiles with 0 errors (`npm run build`).
