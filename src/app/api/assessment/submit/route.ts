@@ -172,6 +172,31 @@ export async function POST(request: NextRequest) {
   const { error: scoresError } = await admin.from("criterion_scores").insert(criteria.map((item) => ({ ...item, attempt_id: attempt.id })));
   if (scoresError) return apiError("The assessment was saved but its criterion record could not be completed. It is in the review queue.", 503);
 
+  if (explanationRuns && explanationRuns.length === 2) {
+    try {
+      await admin.from("grader_runs").insert([
+        {
+          attempt_id: attempt.id,
+          run_no: 1,
+          run_type: "explanation",
+          model_name: MODEL_NAME,
+          prompt_version: PROMPT_VERSION,
+          rubric_version: rubric.version,
+          output_json: explanationRuns[0],
+        },
+        {
+          attempt_id: attempt.id,
+          run_no: 2,
+          run_type: "explanation",
+          model_name: MODEL_NAME,
+          prompt_version: PROMPT_VERSION,
+          rubric_version: rubric.version,
+          output_json: explanationRuns[1],
+        },
+      ]);
+    } catch {}
+  }
+
   const inputHash = createHash("sha256").update(`${body.code}\n${learnerText}`).digest("hex");
   const flags = [flagged ? "injection_precheck" : "", similarityFlag ? "near_identical_submission" : "", modelError ? "reasoning_provider_unavailable" : "", baseConfidence === "low" ? "low_confidence" : ""].filter(Boolean);
   await appendAudit({

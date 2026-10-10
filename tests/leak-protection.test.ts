@@ -61,4 +61,131 @@ describe("Security & Privacy: Zero Answer-Key & Hidden Test Leakage", () => {
     expect(clientSource).not.toContain("referenceImplementation");
     expect(clientSource).not.toContain("flawLineNumbers");
   });
+
+  it("proves Replay Sanitiser projects ONLY allowlisted fields and strips secrets", async () => {
+    const { projectReplayPayload } = await import("@/lib/server/replay-sanitiser");
+
+    const rawPayload = {
+      attemptId: "att-123",
+      submittedAt: "2026-10-10T12:00:00Z",
+      taskTitle: "Find Max Boundary",
+      taskVersion: 1,
+      rubricVersion: 1,
+      inputHash: "sha256-abc",
+      visibleTests: [{ title: "Positive array", passed: true }],
+      hiddenTotal: 4,
+      hiddenPassed: 3,
+      optimalityTier: "Tier 1: Linear Time",
+      aiCriteria: [
+        {
+          criterion: "root_cause",
+          criterionTitle: "Root-cause identification",
+          run1Score: 3,
+          run2Score: 3,
+          evidenceQuote: "loop skips last element",
+          rawReason: "Identified boundary condition correctly.",
+          injectionFlag: false,
+          ambiguousFlag: false,
+        },
+      ],
+      followups: [
+        {
+          position: 1,
+          gapTags: ["boundary"],
+          questionText: "What breaks when max is last?",
+          learnerAnswer: "It returns previous max because of i < len - 1",
+          score: 2,
+          stopRuleOutcome: "Stopped after 1 question because answers were consistent and strong",
+        },
+      ],
+      confidence: {
+        level: "high" as const,
+        conditionsApplied: ["Dual runs agreed", "Tests passed"],
+      },
+      finalScores: { root_cause: { score: 3, maxScore: 3 } },
+      auditAction: "assessment_submitted",
+      auditRecordedAt: "2026-10-10T12:00:01Z",
+      secretCorpus: ["the secret key is that values[i] > best fails at end"],
+    };
+
+    const projected = projectReplayPayload(rawPayload as any);
+
+    // Verify allowlisted properties exist
+    expect(projected).toHaveProperty("attemptId", "att-123");
+    expect(projected).toHaveProperty("hiddenSummary");
+    expect(projected.hiddenSummary.category).toBe("3 of 4 hidden edge-case checks passed");
+
+    // Verify secret fields NEVER exist in the projected object
+    expect(projected).not.toHaveProperty("hiddenCases");
+    expect(projected).not.toHaveProperty("testSpec");
+    expect(projected).not.toHaveProperty("referenceCode");
+    expect(projected).not.toHaveProperty("expectedKeyPoints");
+    expect(projected).not.toHaveProperty("secretCorpus");
+
+    // Hidden checks must only have counts and category
+    expect(projected.hiddenSummary).toEqual({
+      passed: false,
+      count: 4,
+      category: "3 of 4 hidden edge-case checks passed",
+    });
+  });
+
+  it("proves Replay Sanitiser redacts reasons that overlap with answer keys or reference solutions", async () => {
+    const { sanitizeReasonText, calculateNgramOverlap } = await import("@/lib/server/replay-sanitiser");
+
+    const secretKey = "the exact bug is off by one at values.length minus one which skips final element";
+    const leakyReason = "The candidate explained that the exact bug is off by one at values.length minus one which skips final element completely.";
+
+    const overlap = calculateNgramOverlap(leakyReason, secretKey, 3);
+    expect(overlap).toBeGreaterThan(0.4);
+
+    const sanitized = sanitizeReasonText(leakyReason, [secretKey], 0.25);
+    expect(sanitized).toBe("Reasoning evaluated against rubric descriptors. Technical details summarized for security.");
+    expect(sanitized).not.toContain("off by one");
+  });
+
+  it("proves Replay Sanitiser truncates reasons to maximum safe character length", async () => {
+    const { sanitizeReasonText } = await import("@/lib/server/replay-sanitiser");
+
+    const longReason = "a".repeat(400);
+    const sanitized = sanitizeReasonText(longReason, [], 0.25, 250);
+    expect(sanitized.length).toBeLessThanOrEqual(250);
+  });
+
+  it("proves Recruiter Method Card redacts raw model output and learner text unless submission consent granted", async () => {
+    const { buildRecruiterMethodCard } = await import("@/lib/server/replay-sanitiser");
+
+    // Without submission consent
+    const cardWithoutConsent = buildRecruiterMethodCard({
+      assessmentName: "Find Max",
+      taskVersion: 1,
+      rubricVersion: 1,
+      confidenceLevel: "high",
+      aiDisclosure: true,
+      flagsRaised: [],
+      submissionConsented: false,
+      submissionCode: "function findMax() { ... }",
+      report: { what_broke: "Loop bound" },
+    });
+
+    expect(cardWithoutConsent).not.toHaveProperty("consentedSubmissionText");
+    expect(cardWithoutConsent).not.toHaveProperty("consentedReport");
+    expect(cardWithoutConsent).toHaveProperty("confidenceDerivation");
+
+    // With explicit submission consent
+    const cardWithConsent = buildRecruiterMethodCard({
+      assessmentName: "Find Max",
+      taskVersion: 1,
+      rubricVersion: 1,
+      confidenceLevel: "high",
+      aiDisclosure: true,
+      flagsRaised: [],
+      submissionConsented: true,
+      submissionCode: "function findMax() { ... }",
+      report: { what_broke: "Loop bound" },
+    });
+
+    expect(cardWithConsent.consentedSubmissionText).toBe("function findMax() { ... }");
+    expect(cardWithConsent.consentedReport?.what_broke).toBe("Loop bound");
+  });
 });

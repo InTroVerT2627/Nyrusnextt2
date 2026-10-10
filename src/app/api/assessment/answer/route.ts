@@ -80,6 +80,31 @@ export async function POST(request: NextRequest) {
   });
   if (saveAnswerError) return apiError("The answer could not be saved.", 503);
 
+  if (runs && runs.length === 2) {
+    try {
+      await admin.from("grader_runs").insert([
+        {
+          attempt_id: attempt.id,
+          run_no: 1,
+          run_type: "followup",
+          model_name: MODEL_NAME,
+          prompt_version: PROMPT_VERSION,
+          rubric_version: bankVersion,
+          output_json: runs[0],
+        },
+        {
+          attempt_id: attempt.id,
+          run_no: 2,
+          run_type: "followup",
+          model_name: MODEL_NAME,
+          prompt_version: PROMPT_VERSION,
+          rubric_version: bankVersion,
+          output_json: runs[1],
+        },
+      ]);
+    } catch {}
+  }
+
   const questionRun = { runs: scores.length === 2 ? scores : [0, 0], flags: answerFlags || modelError, ambiguous };
   const previousResult = await admin.from("followups").select("score, run_scores, ai_reason, gap_tags").eq("attempt_id", attempt.id).lt("position", body.position).order("position");
   const previousRuns = (previousResult.data ?? []).map((row) => {
