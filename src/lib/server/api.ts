@@ -13,7 +13,8 @@ export function apiError(message: string, status = 400) {
 export async function requireActor(request: NextRequest, roles: string[] = ["learner"]) {
   const origin = request.headers.get("origin");
   if (origin && origin !== new URL(request.url).origin) return { response: apiError("Cross-origin request rejected.", 403), actor: null };
-  const session = await getAuthenticatedUser();
+  const requestedRole = request.headers.get("x-demo-role");
+  const session = await getAuthenticatedUser(requestedRole);
   if (!session.client) return { response: apiError("Supabase is not configured. This route requires the remote backend.", 503), actor: null };
   if (!session.user || !session.profile) return { response: apiError("Sign in to continue.", 401), actor: null };
   if (!roles.includes(session.profile.role)) return { response: apiError("Your account cannot perform this action.", 403), actor: null };
