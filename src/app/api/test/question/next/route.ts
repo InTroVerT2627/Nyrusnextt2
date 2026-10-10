@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { apiError } from "@/lib/server/api";
 import { getAttemptSummary } from "@/lib/server/final-test-engine";
-import { getQuestionsForPath, sanitizeQuestionForClient } from "@/lib/server/final-test-pool";
+import { getAllQuestionsForPath, sanitizeQuestionForClient } from "@/lib/server/final-test-pool";
 
 export const runtime = "nodejs";
 
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
 
     attempt.currentQuestionIndex = nextIndex;
     const nextQId = attempt.questionIds[nextIndex];
-    const questions = getQuestionsForPath(attempt.pathSlug);
+    const questions = getAllQuestionsForPath(attempt.pathSlug);
     const qServer = questions.find((q) => q.client.id === nextQId);
     if (!qServer) return apiError("Question not found.", 404);
 

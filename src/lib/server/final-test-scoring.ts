@@ -4,7 +4,7 @@ import {
   LearnerQuestionSubmission,
   QuestionScoreResult,
 } from "@/lib/final-test-types";
-import { getQuestionsForPath } from "@/lib/server/final-test-pool";
+import { getAllQuestionsForPath } from "@/lib/server/final-test-pool";
 import { getAttemptSummary, StoredTestAttempt } from "@/lib/server/final-test-engine";
 import { scoreFollowup, hasManipulationFlag } from "@/lib/server/gemini";
 import { appendAudit } from "@/lib/server/assessment";
@@ -52,7 +52,7 @@ export async function useHint(
     throw new Error("Cannot use hints on an inactive test.");
   }
 
-  const questions = getQuestionsForPath(attempt.pathSlug);
+  const questions = getAllQuestionsForPath(attempt.pathSlug);
   const qServer = questions.find((q) => q.client.id === questionId);
   if (!qServer) throw new Error("Question not found.");
 
@@ -91,7 +91,7 @@ export async function evaluateQuestionSubmission(
     throw new Error("Invalid test attempt session token.");
   }
 
-  const questions = getQuestionsForPath(attempt.pathSlug);
+  const questions = getAllQuestionsForPath(attempt.pathSlug);
   const qServer = questions.find((q) => q.client.id === submission.questionId);
   if (!qServer) throw new Error("Question not found in path pool.");
 
@@ -265,7 +265,7 @@ export async function evaluateFollowupDefense(
     throw new Error("Invalid test attempt session token.");
   }
 
-  const questions = getQuestionsForPath(attempt.pathSlug);
+  const questions = getAllQuestionsForPath(attempt.pathSlug);
   const qServer = questions.find((q) => q.client.id === questionId);
   if (!qServer) throw new Error("Question not found.");
 
