@@ -1652,24 +1652,30 @@ function RecruiterView() {
     }[];
   } | null>(null);
 
+  const [selectedRole, setSelectedRole] = useState("junior-java-developer");
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState("");
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (role = selectedRole) => {
     try {
       setError("");
-      setData(await api("/api/recruiter/candidates?role=junior-java-developer"));
+      setData(await api(`/api/recruiter/candidates?role=${encodeURIComponent(role)}`));
     } catch (problem) {
       setError(problem instanceof Error ? problem.message : "Recruiter search failed.");
     }
-  }, []);
+  }, [selectedRole]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void load();
   }, [load]);
+
+  const handleRoleChange = async (newRole: string) => {
+    setSelectedRole(newRole);
+    await load(newRole);
+  };
 
   const choose = async (candidateId: string, decision: "reviewed" | "shortlisted") => {
     setBusy(candidateId);
@@ -1704,11 +1710,33 @@ function RecruiterView() {
         </p>
       </div>
 
-      <section className="role-card">
+      <section className="role-card" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "16px" }}>
         <div>
           <div className="panel-kicker">ACTIVE HIRING REQUIREMENT</div>
-          <h2>{data?.role.title ?? "Junior Java Developer"}</h2>
-          <p>Debugging · Java · Developing or above · Evidence within 90 days · Minimum 2 Java tasks</p>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", marginTop: "4px" }}>
+            <h2 style={{ margin: 0 }}>{data?.role.title ?? "Junior Java Developer"}</h2>
+            <select
+              value={selectedRole}
+              onChange={(e) => void handleRoleChange(e.target.value)}
+              style={{
+                padding: "6px 12px",
+                borderRadius: "6px",
+                background: "var(--bg-input, #0d1117)",
+                color: "var(--text-main, #c9d1d9)",
+                border: "1px solid var(--border-color)",
+                fontSize: "13px",
+              }}
+            >
+              <option value="junior-java-developer">Junior Java Developer</option>
+              <option value="junior-data-analyst">Junior Data Analyst</option>
+              <option value="associate-product-analyst">Associate Product Analyst</option>
+            </select>
+          </div>
+          <p style={{ marginTop: "6px" }}>
+            {selectedRole === "junior-java-developer" && "Debugging · Java · Developing or above · Evidence within 90 days · Minimum 2 Java tasks"}
+            {selectedRole === "junior-data-analyst" && "Data Analytics · JavaScript · Developing or above · Evidence within 90 days · Minimum 1 task"}
+            {selectedRole === "associate-product-analyst" && "Business Analytics · JavaScript · Developing or above · Evidence within 90 days · Minimum 1 task"}
+          </p>
         </div>
         <button className="secondary" onClick={() => void load()}>
           Refresh candidate search
