@@ -12,6 +12,9 @@ import JourneyMap from "@/components/learning/JourneyMap";
 import GlobalNotebookModal from "@/components/learning/GlobalNotebookModal";
 import { getFullModule } from "@/lib/learning-seed-data";
 import { FullModule } from "@/lib/learning-experience-types";
+import DeviceCheckModal from "@/components/learning/DeviceCheckModal";
+import FinalTestShell from "@/components/learning/FinalTestShell";
+import { FinalTestAttemptSummary, FinalTestQuestionClient } from "@/lib/final-test-types";
 
 type PublicQuestion = { id: string; prompt: string; choices: string[] };
 type PublicModule = {
@@ -71,6 +74,18 @@ export default function LearningPathsClient() {
   const [activeCheckpoint, setActiveCheckpoint] = useState<(1 | 2 | 3 | 4) | null>(null);
   const [showReflectionsDrawer, setShowReflectionsDrawer] = useState(false);
   const [showNotebookModal, setShowNotebookModal] = useState(false);
+  const [deviceCheckOpen, setDeviceCheckOpen] = useState(false);
+  const [activeFinalTest, setActiveFinalTest] = useState<{
+    attempt: FinalTestAttemptSummary;
+    firstQuestion: FinalTestQuestionClient;
+    token: string;
+  } | null>(null);
+  const [finalTestUnlockStatus, setFinalTestUnlockStatus] = useState<{
+    unlocked: boolean;
+    passedModules: number;
+    completedReflections: number;
+    reason?: string;
+  } | null>(null);
 
   useEffect(() => {
     let live = true;
@@ -97,6 +112,25 @@ export default function LearningPathsClient() {
     })();
     return () => { live = false; };
   }, [remote]);
+
+  useEffect(() => {
+    if (!activePathSlug) return;
+    void (async () => {
+      try {
+        const res = await fetch("/api/test/unlock-status", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ pathSlug: activePathSlug }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setFinalTestUnlockStatus(data);
+        }
+      } catch {
+        // non-blocking
+      }
+    })();
+  }, [activePathSlug, progress]);
 
   const activePath = paths.find((path) => path.slug === activePathSlug) ?? null;
   const activeModule = activePath?.modules.find((module) => module.slug === activeModuleSlug) ?? null;
@@ -206,6 +240,19 @@ export default function LearningPathsClient() {
     );
   }
 
+  if (activeFinalTest && activePath) {
+    return (
+      <FinalTestShell
+        initialAttempt={activeFinalTest.attempt}
+        initialQuestion={activeFinalTest.firstQuestion}
+        token={activeFinalTest.token}
+        pathTitle={activePath.title}
+        pathSlug={activePath.slug}
+        onExit={() => setActiveFinalTest(null)}
+      />
+    );
+  }
+
   return <main className="learning-page">
     <MyReflectionsDrawer
       isOpen={showReflectionsDrawer}
@@ -217,6 +264,37 @@ export default function LearningPathsClient() {
       isOpen={showNotebookModal}
       onClose={() => setShowNotebookModal(false)}
       currentPathSlug={activePath?.slug}
+    />
+    <DeviceCheckModal
+      isOpen={deviceCheckOpen}
+      pathTitle={activePath?.title || "Final Test"}
+      onCancel={() => setDeviceCheckOpen(false)}
+      onProceed={async (config) => {
+        setDeviceCheckOpen(false);
+        if (!activePath) return;
+        try {
+          const res = await fetch("/api/test/start", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              pathSlug: activePath.slug,
+              proctorMode: config.proctorMode,
+              cameraVerified: config.cameraVerified,
+              micVerified: config.micVerified,
+              hasAccommodation: config.hasAccommodation,
+            }),
+          });
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            alert(err.error || "Failed to start final test.");
+            return;
+          }
+          const data = await res.json();
+          setActiveFinalTest(data);
+        } catch {
+          alert("Failed to start final test.");
+        }
+      }}
     />
     <header className="learning-topbar">
       <Link className="brand" href="/"><span className="brand-mark">N</span><span>nextlearn</span></Link>
@@ -350,9 +428,59 @@ export default function LearningPathsClient() {
                       </span>
                     </button>
                   )}
-                </div>
-              );
-            })}
+            {/* Capstone Final Test Node */}
+            <div
+              style={{
+                marginTop: "16px",
+                padding: "12px",
+                borderRadius: "8px",
+                background: finalTestUnlockStatus?.unlocked ? "rgba(6, 198, 230, 0.08)" : "rgba(20, 45, 78, 0.04)",
+                border: finalTestUnlockStatus?.unlocked ? "2px solid #06C6E6" : "1px solid #D9E8F3",
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                <span style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.06em", color: "#142D4E", textTransform: "uppercase" }}>
+                  PATH CAPSTONE
+                </span>
+                <span
+                  style={{
+                    fontSize: "10px",
+                    padding: "2px 6px",
+                    borderRadius: "3px",
+                    backgroundColor: finalTestUnlockStatus?.unlocked ? "#059669" : "#64748B",
+                    color: "#FFFFFF",
+                    fontWeight: 700,
+                  }}
+                >
+                  {finalTestUnlockStatus?.unlocked ? "UNLOCKED" : "LOCKED"}
+                </span>
+              </div>
+              <button
+                type="button"
+                className="learning-node"
+                disabled={!finalTestUnlockStatus?.unlocked}
+                onClick={() => setDeviceCheckOpen(true)}
+                style={{
+                  width: "100%",
+                  textAlign: "left",
+                  padding: "8px 0",
+                  background: "transparent",
+                  border: "none",
+                  cursor: finalTestUnlockStatus?.unlocked ? "pointer" : "not-allowed",
+                  opacity: finalTestUnlockStatus?.unlocked ? 1 : 0.6,
+                }}
+              >
+                <span className="learning-node-symbol" style={{ color: "#06C6E6" }}>🏆</span>
+                <span className="learning-node-copy">
+                  <strong style={{ fontSize: "13px", color: "#142D4E" }}>Final Proof-of-Skill Test</strong>
+                  <small style={{ color: "#64748B" }}>
+                    {finalTestUnlockStatus?.unlocked
+                      ? "Ready · 45 mins · 8 questions"
+                      : finalTestUnlockStatus?.reason || "Complete 10 modules & 3 reflections"}
+                  </small>
+                </span>
+              </button>
+            </div>
           </aside>
 
           {activeView === "work-sample" ? (
