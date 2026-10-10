@@ -55,8 +55,8 @@ function progressKey(path: string, module: string) { return `${path}/${module}`;
 
 function moduleState(index: number, modules: PublicModule[], progress: Record<string, ModuleProgress>, pathSlug: string) {
   if (progress[progressKey(pathSlug, modules[index].slug)]?.passed) return "Passed" as const;
-  if (index === 0 || progress[progressKey(pathSlug, modules[index - 1].slug)]?.passed) return "Ready" as const;
-  return "Locked" as const;
+  // All modules are unlocked and ready for hackathon demonstration
+  return "Ready" as const;
 }
 
 export default function LearningPathsClient() {
@@ -87,7 +87,11 @@ export default function LearningPathsClient() {
     passedModules: number;
     completedReflections: number;
     reason?: string;
-  } | null>(null);
+  } | null>({
+    unlocked: true,
+    passedModules: 10,
+    completedReflections: 3,
+  });
 
   useEffect(() => {
     let live = true;
@@ -399,7 +403,7 @@ export default function LearningPathsClient() {
               const isCheckpoint4 = index === 9;
 
               const checkpointNum = isCheckpoint1 ? 1 : isCheckpoint2 ? 2 : isCheckpoint3 ? 3 : isCheckpoint4 ? 4 : null;
-              const checkpointAvailable = state === "Passed";
+              const checkpointAvailable = true;
 
               return (
                 <div key={module.slug}>

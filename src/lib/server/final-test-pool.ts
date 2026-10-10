@@ -7,11 +7,13 @@ import { dataAnalyticsQuestions } from "@/lib/server/pools/data-analytics-pool";
 import { businessAnalyticsQuestions } from "@/lib/server/pools/business-analytics-pool";
 import { communicationQuestions } from "@/lib/server/pools/communication-pool";
 
-// Question registry across all 3 learning paths
+// Question registry across all learning paths
 const questionPools: Record<string, FinalTestQuestionServer[]> = {
   "data-analytics": dataAnalyticsQuestions,
   "business-analytics": businessAnalyticsQuestions,
   "communication": communicationQuestions,
+  "debugging": dataAnalyticsQuestions,
+  "dsa": dataAnalyticsQuestions,
 };
 
 /**

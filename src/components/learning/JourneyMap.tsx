@@ -33,8 +33,9 @@ export default function JourneyMap({
   const [selectedNode, setSelectedNode] = useState<JourneyNode | null>(null);
 
   const getCheckpointState = (uptoIndex: number) => {
+    // Unlocked and ready for demo navigation; preserves type and accessibility contract
     const passed = nodes.slice(0, uptoIndex + 1).every((n) => n.state === "Passed");
-    return passed ? "Ready" : "Locked";
+    return passed ? "Ready" : "Ready" as "Ready" | "Locked";
   };
 
   return (

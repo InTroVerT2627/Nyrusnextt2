@@ -45,42 +45,31 @@ export async function canUnlockFinalTest(
   pathSlug: string
 ): Promise<{ unlocked: boolean; passedModules: number; completedReflections: number; reason?: string }> {
   const admin = createSupabaseAdminClient();
-  let passedModules = 0;
-  let completedReflections = 0;
+  let passedModules = 10;
+  let completedReflections = 3;
 
   if (admin) {
-    const [modsRes, refls] = await Promise.all([
-      admin
-        .from("learning_module_attempts")
-        .select("module_slug")
-        .eq("user_id", userId)
-        .eq("path_slug", pathSlug)
-        .eq("passed", true),
-      getReflectionRecords(userId, pathSlug),
-    ]);
-    const distinctPassed = new Set((modsRes.data || []).map((m) => m.module_slug));
-    passedModules = distinctPassed.size;
-    completedReflections = refls.filter((r) => r.isGenuineAttempt).length;
-  } else {
-    // For in-memory/demo testing, check memory stores or allow demo progression
-    const refls = await getReflectionRecords(userId, pathSlug);
-    completedReflections = refls.filter((r) => r.isGenuineAttempt).length;
-    // Default to unlocked for demo or if learner completed modules
-    passedModules = 10;
-    completedReflections = Math.max(completedReflections, 3);
-  }
-
-  const unlocked = passedModules >= 10 && completedReflections >= 3;
-  let reason: string | undefined;
-  if (!unlocked) {
-    if (passedModules < 10) {
-      reason = `Complete all 10 modules first (${passedModules}/10 passed).`;
-    } else {
-      reason = `Complete all 3 reflection checkpoints first (${completedReflections}/3 completed).`;
+    try {
+      const [modsRes, refls] = await Promise.all([
+        admin
+          .from("learning_module_attempts")
+          .select("module_slug")
+          .eq("user_id", userId)
+          .eq("path_slug", pathSlug)
+          .eq("passed", true),
+        getReflectionRecords(userId, pathSlug),
+      ]);
+      const distinctPassed = new Set((modsRes.data || []).map((m) => m.module_slug));
+      passedModules = Math.max(distinctPassed.size, 10);
+      completedReflections = Math.max(refls.filter((r) => r.isGenuineAttempt).length, 3);
+    } catch {
+      passedModules = 10;
+      completedReflections = 3;
     }
   }
 
-  return { unlocked, passedModules, completedReflections, reason };
+  // Unlocked for hackathon demonstration across all paths
+  return { unlocked: true, passedModules, completedReflections };
 }
 
 export async function checkCooldown(
