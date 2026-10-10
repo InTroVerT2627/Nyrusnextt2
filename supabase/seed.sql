@@ -33,7 +33,7 @@ insert into public.task_versions(id, task_id, version, prompt, starter_code, exp
 on conflict (task_id, version) do nothing;
 
 insert into public.rubrics(task_id, version, criteria_json)
-select t.id, 1, '{"criteria":[{"id":"fix_correctness","title":"Fix correctness","weight":35,"max":100,"source":"tests"},{"id":"edge_cases","title":"Edge-case handling","weight":15,"max":100,"source":"tests"},{"id":"root_cause","title":"Root-cause identification","weight":20,"max":3,"source":"ai"},{"id":"explanation","title":"Explanation clarity","weight":10,"max":2,"source":"ai"},{"id":"followup_reasoning","title":"Follow-up reasoning","weight":20,"max":2,"source":"followups"}]'
+select t.id, 1, '{"criteria":[{"id":"fix_correctness","title":"Fix correctness","weight":35,"max":100,"source":"tests"},{"id":"edge_cases","title":"Edge-case handling","weight":15,"max":100,"source":"tests"},{"id":"root_cause","title":"Root-cause identification","weight":20,"max":3,"source":"ai"},{"id":"explanation","title":"Explanation clarity","weight":10,"max":2,"source":"ai"},{"id":"followup_reasoning","title":"Follow-up reasoning","weight":20,"max":2,"source":"followups"}]}'
 from public.tasks t
 on conflict (task_id, version) do nothing;
 
