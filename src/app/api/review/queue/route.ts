@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { apiError, consumeRateLimit, requireActor } from "@/lib/server/api";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
+import { findNearIdenticalSubmission } from "@/lib/server/submission-similarity";
 
 export async function GET(request: NextRequest) {
   const { response, actor } = await requireActor(request, ["reviewer"]);
@@ -38,22 +39,27 @@ export async function GET(request: NextRequest) {
     admin.from("appeals").select("id, attempt_id, user_id, criterion, reason, status, created_at").in("attempt_id", allIds),
   ]);
   if (attempts.error || scores.error || followups.error || profiles.error || appealsByAttempt.error) return apiError("Could not load review material.", 503);
-  const { data: versions } = await admin.from("task_versions").select("id, task_id, version, prompt").in("id", (attempts.data ?? []).map((item) => item.task_version_id).filter(Boolean));
+  const { data: versions } = await admin.from("task_versions").select("id, task_id, version, prompt, starter_code").in("id", (attempts.data ?? []).map((item) => item.task_version_id).filter(Boolean));
   const { data: tasks } = await admin.from("tasks").select("id, slug, language, mission_json").in("id", (versions ?? []).map((item) => item.task_id));
-  const items = (attempts.data ?? []).map((attempt) => {
+  const items = await Promise.all((attempts.data ?? []).map(async (attempt) => {
     const version = versions?.find((item) => item.id === attempt.task_version_id);
     const task = tasks?.find((item) => item.id === version?.task_id);
     const appeal = appealsByAttempt.data?.find((item) => item.attempt_id === attempt.id);
     const profile = profiles.data?.find((item) => item.id === attempt.user_id);
+    const similarityFlag = (attempt.explanation_json as { similarity_review?: boolean }).similarity_review === true;
+    const similarityComparison = similarityFlag && version?.starter_code
+      ? await findNearIdenticalSubmission(admin, version.id, attempt.user_id, attempt.code, version.starter_code)
+      : null;
     return {
       attemptId: attempt.id, attemptType: attempt.attempt_type, submittedAt: attempt.submitted_at,
       code: attempt.code, report: (attempt.explanation_json as { report?: unknown }).report,
+      similarityFlag, similarityComparison,
       aiDisclosure: attempt.ai_disclosure, task: task ? { slug: task.slug, language: task.language, mission: task.mission_json, prompt: version?.prompt } : null,
       candidate: { id: profile?.synthetic_candidate_id, displayName: profile?.display_name },
       criteria: scores.data?.filter((row) => row.attempt_id === attempt.id) ?? [],
       followups: followups.data?.filter((row) => row.attempt_id === attempt.id) ?? [],
       appeal: appeal ?? null,
     };
-  });
+  }));
   return NextResponse.json({ items }, { headers: { "cache-control": "private, no-store" } });
 }

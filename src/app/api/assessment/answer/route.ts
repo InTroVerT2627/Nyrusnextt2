@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
 
   const { data: attempt } = await admin.from("attempts").select("id, user_id, attempt_type, task_version_id, rubric_id, boss_round_id, explanation_json").eq("id", body.attemptId).maybeSingle();
   if (!attempt || attempt.user_id !== actor.id) return apiError("Assessment attempt was not found.", 404);
-  const explanation = attempt.explanation_json as { selected_question_ids?: string[]; gap_tags?: string[]; test_summary?: { visible_total?: number; visible_passed?: number; hidden_total?: number; hidden_passed?: number; valid?: boolean }; model_runs?: { root_cause: number; explanation: number; injection_suspected: boolean; ambiguous: boolean }[] };
+  const explanation = attempt.explanation_json as { selected_question_ids?: string[]; gap_tags?: string[]; similarity_review?: boolean; test_summary?: { visible_total?: number; visible_passed?: number; hidden_total?: number; hidden_passed?: number; valid?: boolean }; model_runs?: { root_cause: number; explanation: number; injection_suspected: boolean; ambiguous: boolean }[] };
   const selectedIds = explanation.selected_question_ids ?? [];
   if (body.position > selectedIds.length || body.position !== (await admin.from("followups").select("id", { count: "exact", head: true }).eq("attempt_id", attempt.id)).count! + 1) return apiError("Follow-up questions must be answered in order.", 409);
   const expectedId = selectedIds[body.position - 1];
@@ -126,7 +126,8 @@ export async function POST(request: NextRequest) {
   });
   if (finalScoreError) return apiError("Answers were saved but the final score record could not be completed.", 503);
 
-  const effectiveConfidence = answerFlags || flagged || modelError ? "low" : finalConfidence;
+  const similarityReview = explanation.similarity_review === true;
+  const effectiveConfidence = answerFlags || flagged || modelError || similarityReview ? "low" : finalConfidence;
   const isBoss = attempt.attempt_type === "boss";
   const skill = isBoss ? "reviewing-ai-written-code" : "debugging";
   const language = isBoss ? bossRow?.language ?? "JavaScript"
@@ -173,8 +174,8 @@ export async function POST(request: NextRequest) {
   await appendAudit({
     actor: actor.id, action: "followup_answered", attemptId: attempt.id,
     taskVersion: taskBank.data?.version ?? null, bankVersion, modelName: runs.length ? MODEL_NAME : null,
-    promptVersion: PROMPT_VERSION, flags: [answerFlags ? "injection_precheck" : "", modelError ? "grading_provider_unavailable" : "", effectiveConfidence === "low" ? "low_confidence" : ""].filter(Boolean),
-    output: { followup_scores: scores, final_score: finalScore, followup_mean: followupMean, confidence: effectiveConfidence, question_count: answerRows.length, early_stop: stopEarly },
+    promptVersion: PROMPT_VERSION, flags: [answerFlags ? "injection_precheck" : "", similarityReview ? "near_identical_submission" : "", modelError ? "grading_provider_unavailable" : "", effectiveConfidence === "low" ? "low_confidence" : ""].filter(Boolean),
+    output: { followup_scores: scores, final_score: finalScore, followup_mean: followupMean, confidence: effectiveConfidence, question_count: answerRows.length, early_stop: stopEarly, similarity_review: similarityReview },
   });
   return NextResponse.json({ complete: true, earlyStop: stopEarly, evidence, confidence: effectiveConfidence, followupScore, score: finalScore, taskId });
 }

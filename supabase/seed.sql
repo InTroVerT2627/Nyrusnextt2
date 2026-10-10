@@ -7,10 +7,10 @@ insert into public.skill_nodes (id, slug, title, requires) values
 on conflict (id) do update set slug=excluded.slug, title=excluded.title, requires=excluded.requires;
 
 insert into public.tasks(id, slug, competency, language, difficulty, skill_node_id, mission_json) values
-  ('10000000-0000-4000-8000-000000000001', 'find-max', 'debugging', 'JavaScript', 'Easy', 1, '{"title":"Dashboard shows the wrong top seller","short_title":"The wrong top seller","severity":"S3 · Low","description":"A weekly sales report leaves out the product that should be leading.","symptom":"The final item in the weekly sales data is never considered.","plain_task":"Fix findMax so it considers every value and has defined empty-input behavior."}'),
-  ('10000000-0000-4000-8000-000000000002', 'remove-duplicates', 'debugging', 'Java', 'Medium', 2, '{"title":"Mailing list skips some customers","short_title":"Customers go missing","severity":"S3 · Low","description":"Duplicate cleanup silently drops valid customer records.","symptom":"Removing from the list shifts elements while the index advances.","plain_task":"Remove duplicates while preserving the first-seen order."}'),
-  ('10000000-0000-4000-8000-000000000003', 'async-results', 'debugging', 'JavaScript', 'Medium', 3, '{"title":"Order summary renders before data arrives","short_title":"The early report","severity":"S2 · Medium","description":"An order summary renders before all of its data has finished loading.","symptom":"The outer function returns before the asynchronous callbacks finish.","plain_task":"Wait for all requests and preserve input order."}'),
-  ('10000000-0000-4000-8000-000000000004', 'customer-key', 'debugging', 'Java', 'Hard', 4, '{"title":"Customer cache never gets a hit","short_title":"The cache miss","severity":"S1 · High","description":"A customer lookup misses even when the requested key looks familiar.","symptom":"The key compares equal but hashes to the wrong bucket.","plain_task":"Make equal customer keys obey the hash-code contract."}')
+  ('10000000-0000-4000-8000-000000000001', 'find-max', 'debugging', 'JavaScript', 'Easy', 1, '{"title":"Dashboard shows the wrong top seller","short_title":"The wrong top seller","severity":"S3 · Low","description":"A weekly sales report sometimes disagrees with the source totals.","symptom":"The reported leader differs from the source report for some input lists.","plain_task":"Given a list of weekly product values, return the largest value and define how an empty list is handled."}'),
+  ('10000000-0000-4000-8000-000000000002', 'remove-duplicates', 'debugging', 'Java', 'Medium', 2, '{"title":"Mailing list skips some customers","short_title":"Customers go missing","severity":"S3 · Low","description":"Some customer records are missing after a mailing-list cleanup.","symptom":"The saved roster does not match the expected customer records.","plain_task":"Remove duplicate customer names from a Java list while preserving the first-seen order."}'),
+  ('10000000-0000-4000-8000-000000000003', 'async-results', 'debugging', 'JavaScript', 'Medium', 3, '{"title":"Order summary renders before data arrives","short_title":"The early report","severity":"S2 · Medium","description":"Some order summaries appear incomplete after a successful refresh.","symptom":"The displayed order list can differ from the expected results.","plain_task":"Given order IDs and an asynchronous fetch function, return every order in input order after handling all requests."}'),
+  ('10000000-0000-4000-8000-000000000004', 'customer-key', 'debugging', 'Java', 'Hard', 4, '{"title":"Customer cache never gets a hit","short_title":"The cache miss","severity":"S1 · High","description":"A cache lookup sometimes misses a customer key that should represent the same identity.","symptom":"A familiar customer lookup does not return the saved record.","plain_task":"Implement a Java customer key for HashMap so equal customer identities retrieve the same value and key fields remain stable."}')
 on conflict (slug) do update set mission_json=excluded.mission_json;
 
 insert into public.task_versions(id, task_id, version, prompt, starter_code, explanation_prompt) values
@@ -32,9 +32,33 @@ insert into public.task_versions(id, task_id, version, prompt, starter_code, exp
    '{"headings":["What broke","Why it broke","The fix","How to prevent it"]}')
 on conflict (task_id, version) do nothing;
 
+insert into public.task_versions(id, task_id, version, prompt, starter_code, explanation_prompt) values
+  ('21000000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000001', 2,
+   'The weekly sales dashboard shows a top seller that sometimes disagrees with the source report. Review the supplied calculation against the acceptance checks and document your findings.',
+   E'function findMax(values) {\n  let best = values[0];\n  for (let i = 0; i < values.length - 1; i++) {\n    if (values[i] > best) best = values[i];\n  }\n  return best;\n}',
+   '{"headings":["What broke","Why it broke","The fix","How to prevent it"]}'),
+  ('21000000-0000-4000-8000-000000000002', '10000000-0000-4000-8000-000000000002', 2,
+   'An operations team reports that the saved mailing list does not match the expected roster. Review the supplied behavior, use the acceptance checks, and document a safe correction.',
+   E'class Solution {\n  static List<String> removeDuplicates(List<String> customers) {\n    for (int i = 0; i < customers.size(); i++) {\n      if (customers.indexOf(customers.get(i)) < i) customers.remove(i);\n    }\n    return customers;\n  }\n}',
+   '{"headings":["What broke","Why it broke","The fix","How to prevent it"]}'),
+  ('21000000-0000-4000-8000-000000000003', '10000000-0000-4000-8000-000000000003', 2,
+   'Some order summaries appear incomplete after a successful refresh. Review the supplied implementation against the acceptance checks and document a reliable correction.',
+   E'async function loadOrders(ids, fetchOrder) {\n  const orders = [];\n  ids.forEach(async (id) => { orders.push(await fetchOrder(id)); });\n  return orders;\n}',
+   '{"headings":["What broke","Why it broke","The fix","How to prevent it"]}'),
+  ('21000000-0000-4000-8000-000000000004', '10000000-0000-4000-8000-000000000004', 2,
+   'A cache lookup misses a customer key expected to represent the same identity as a saved key. Review the supplied implementation against the acceptance checks and explain a stable correction.',
+   E'class CustomerKey {\n  private final String email;\n  CustomerKey(String email) { this.email = email; }\n  @Override public boolean equals(Object other) {\n    return other instanceof CustomerKey && email.equals(((CustomerKey) other).email);\n  }\n}',
+   '{"headings":["What broke","Why it broke","The fix","How to prevent it"]}')
+on conflict (task_id, version) do nothing;
+
 insert into public.rubrics(task_id, version, criteria_json)
 select t.id, 1, '{"criteria":[{"id":"fix_correctness","title":"Fix correctness","weight":35,"max":100,"source":"tests"},{"id":"edge_cases","title":"Edge-case handling","weight":15,"max":100,"source":"tests"},{"id":"root_cause","title":"Root-cause identification","weight":20,"max":3,"source":"ai"},{"id":"explanation","title":"Explanation clarity","weight":10,"max":2,"source":"ai"},{"id":"followup_reasoning","title":"Follow-up reasoning","weight":20,"max":2,"source":"followups"}]}'
 from public.tasks t
+on conflict (task_id, version) do nothing;
+
+insert into public.rubrics(task_id, version, criteria_json)
+select task_id, 2, criteria_json
+from public.rubrics where version = 1
 on conflict (task_id, version) do nothing;
 
 insert into public.visible_test_cases(task_version_id, ordinal, title, input_json, expected_json) values
@@ -45,11 +69,27 @@ insert into public.visible_test_cases(task_version_id, ordinal, title, input_jso
   ('20000000-0000-4000-8000-000000000004', 1, 'Equal keys retrieve the value', '{"email_a":"a@example.test","email_b":"a@example.test"}', '{"equals":true,"same_hash":true,"retrieves":true}')
 on conflict (task_version_id, ordinal) do nothing;
 
+insert into public.visible_test_cases(task_version_id, ordinal, title, input_json, expected_json)
+select v2.id, cases.ordinal, cases.title, cases.input_json, cases.expected_json
+from public.task_versions v2
+join public.task_versions v1 on v1.task_id = v2.task_id and v1.version = 1
+join public.visible_test_cases cases on cases.task_version_id = v1.id
+where v2.version = 2
+on conflict (task_version_id, ordinal) do nothing;
+
 insert into public.hidden_test_suites(task_version_id, test_spec) values
   ('20000000-0000-4000-8000-000000000001', '{"cases":[{"title":"Empty input","input":[],"expected":null},{"title":"All negative values","input":[-9,-3,-15],"expected":-3},{"title":"One item","input":[2],"expected":2},{"title":"Negative maximum at end","input":[-100,-1,-50],"expected":-1}]}'),
   ('20000000-0000-4000-8000-000000000002', '{"cases":[{"title":"Repeated duplicates","input":["A","B","B","C","A"],"expected":["A","B","C"]},{"title":"Empty input","input":[],"expected":[]},{"title":"Single item","input":["only"],"expected":["only"]},{"title":"All equal","input":["X","X","X"],"expected":["X"]}]}'),
   ('20000000-0000-4000-8000-000000000003', '{"cases":[{"title":"Three async results","input":["x","y","z"],"expected":["X","Y","Z"]},{"title":"Empty request list","input":[],"expected":[]},{"title":"Different completion order","input":["slow","fast"],"expected":["SLOW","FAST"]},{"title":"Request failure propagates","input":["fail"],"expect_rejection":true}]}'),
   ('20000000-0000-4000-8000-000000000004', '{"cases":[{"title":"Equal key lookup","input":{"email_a":"a@example.test","email_b":"a@example.test"},"expected":{"equals":true,"same_hash":true,"retrieves":true}},{"title":"Case-distinct keys","input":{"email_a":"User@example.test","email_b":"user@example.test"},"expected":{"equals":false,"same_hash":true,"retrieves":false}}]}')
+on conflict (task_version_id) do nothing;
+
+insert into public.hidden_test_suites(task_version_id, test_spec)
+select v2.id, hidden.test_spec
+from public.task_versions v2
+join public.task_versions v1 on v1.task_id = v2.task_id and v1.version = 1
+join public.hidden_test_suites hidden on hidden.task_version_id = v1.id
+where v2.version = 2
 on conflict (task_version_id) do nothing;
 
 insert into public.followup_bank(task_id, version, trigger_json, question_template, expected_key_points, ordinal) values

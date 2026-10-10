@@ -7,6 +7,7 @@ const schema = z.object({
   attemptId: z.string().uuid(), appealId: z.string().uuid().optional(),
   criterion: z.enum(["fix_correctness", "edge_cases", "root_cause", "explanation", "followup_reasoning", "failing_test", "flaw_located", "flaw_explanation"]),
   decision: z.enum(["confirmed", "overturned"]), score: z.number().min(0).max(100).optional(),
+  similarityCleared: z.boolean().default(false),
   reason: z.string().trim().min(10).max(2000),
 });
 
@@ -22,6 +23,13 @@ export async function POST(request: NextRequest) {
   catch { return apiError("Provide an attempt, criterion, decision, and written review reason."); }
   const { data: attempt } = await admin.from("attempts").select("id, user_id, task_version_id, rubric_id, boss_round_id, attempt_type, explanation_json").eq("id", body.attemptId).maybeSingle();
   if (!attempt) return apiError("Attempt was not found.", 404);
+  const similarityFlag = (attempt.explanation_json as { similarity_review?: boolean }).similarity_review === true;
+  if (body.similarityCleared && !similarityFlag) return apiError("This attempt has no similarity flag to clear.");
+  const previousSimilarityReview = similarityFlag
+    ? await admin.from("review_decisions").select("id").eq("attempt_id", attempt.id).eq("similarity_cleared", true).limit(1).maybeSingle()
+    : { data: null, error: null };
+  if (previousSimilarityReview.error) return apiError("Could not load the prior similarity review.", 503);
+  const similarityCleared = !similarityFlag || body.similarityCleared || Boolean(previousSimilarityReview.data);
   if (body.appealId) {
     const { data: appeal } = await admin.from("appeals").select("id, attempt_id, status, criterion").eq("id", body.appealId).maybeSingle();
     if (!appeal || appeal.attempt_id !== attempt.id || appeal.criterion !== body.criterion || !["open", "in_review"].includes(appeal.status)) return apiError("Open appeal was not found.", 404);
@@ -83,7 +91,7 @@ export async function POST(request: NextRequest) {
       composite = weight ? criteria.reduce((sum, item) => sum + item.weight * (scored.get(item.id)?.score ?? 0) / (scored.get(item.id)?.max ?? 1), 0) / weight * 100 : 0;
     }
     const sampleCount = isBoss ? bossIds.size : taskIds.size;
-    const eligible = testPassed && reasoningReady && !activeAppeals.data?.length;
+    const eligible = testPassed && reasoningReady && !activeAppeals.data?.length && similarityCleared;
     const level = !eligible ? "insufficient" : !isBoss && sampleCount < 2 ? "beginner" : composite >= 85 ? "advanced" : composite >= 70 ? "proficient" : composite >= 50 ? "developing" : "beginner";
     const { error: evidenceError } = await admin.from("evidence").insert({
       attempt_id: attempt.id, user_id: attempt.user_id, skill: latestEvidence.skill, language: latestEvidence.language,
@@ -93,9 +101,9 @@ export async function POST(request: NextRequest) {
   }
   const { error: reviewError } = await admin.from("review_decisions").insert({
     attempt_id: attempt.id, reviewer_id: actor.id, criterion: body.criterion,
-    decision: body.decision, score, reason: body.reason,
+    decision: body.decision, score, reason: body.reason, similarity_cleared: body.similarityCleared,
   });
   if (reviewError) return apiError("Review decision could not be audited.", 503);
-  await appendAudit({ actor: actor.id, action: body.decision === "overturned" ? "human_score_overridden" : "human_score_confirmed", attemptId: attempt.id, flags: [], output: { appeal_id: body.appealId ?? null, criterion: body.criterion, score, reason: body.reason } });
+  await appendAudit({ actor: actor.id, action: body.decision === "overturned" ? "human_score_overridden" : "human_score_confirmed", attemptId: attempt.id, flags: [similarityFlag ? (similarityCleared ? "similarity_review_cleared" : "similarity_review_pending") : ""].filter(Boolean), output: { appeal_id: body.appealId ?? null, criterion: body.criterion, score, reason: body.reason, similarity_cleared: body.similarityCleared } });
   return NextResponse.json({ resolved: true, decision: body.decision, criterion: body.criterion, score, confidence: "medium" });
 }

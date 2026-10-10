@@ -10,6 +10,7 @@ Evidence describes performance on these tasks. It is experimental and is not a v
 - Visible tests and rubric are shown before submission. Private edge cases and fixed follow-up answer keys stay server-side.
 - Java and JavaScript submissions run in Judge0 with per-run CPU, wall-time, memory, process, file-size, and network limits.
 - Gemini grades explanations and follow-up answers twice against a fixed JSON rubric. Scores require exact learner-text evidence quotes. Disagreement, injection flags, and provider failures route work to human review.
+- Similarity checks compare a learner's changed code with other submissions for the same versioned task. A possible match is a review flag, never an automatic failure; reviewers can inspect an anonymized comparison and record whether it is cleared.
 - Fixed follow-up questions are chosen from task gap tags. Strong, consistent answers can end the question loop early; the number of questions never changes the criterion score.
 - Attempts, task/rubric/bank versions, results, AI runs, appeals, reviewer decisions, consent changes, and recruiter views are stored in Supabase and audit logged.
 - Each skill has separate sharing consent, off by default. Sharing code and written answers is a separate opt-in. Revoking consent immediately removes the evidence from Nextlearn recruiter search.
@@ -28,6 +29,8 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000). Without `NEXT_PUBLIC_BACKEND_MODE=supabase`, the app uses the browser-only preview and saves synthetic data in local storage. Preview grading uses marker checks and keyword matching; it does not execute code or call AI. Do not use preview results as real skill evidence.
 
+The learner workspace includes a **Learning paths** area with 10 lesson-and-knowledge-check modules each for Data Analytics, Business Analytics, and Communication. The next module opens after a learner passes the current check (2 of 3 questions). Learners can retry; there are no points, streaks, timers, or leaderboards. In local preview, learning progress is stored in that browser. In the authenticated workspace, attempts are stored per learner in Supabase and remain separate from recruiter evidence.
+
 ## Authenticated backend setup
 
 1. Create a Supabase project. For local development, install Docker and run:
@@ -37,7 +40,7 @@ Open [http://localhost:3000](http://localhost:3000). Without `NEXT_PUBLIC_BACKEN
    npx supabase db reset
    ```
 
-   This starts the local Supabase services, applies all migrations, and loads `supabase/seed.sql`. For a hosted project, link it with `npx supabase link --project-ref <project-ref>`, apply migrations with `npx supabase db push`, then run `supabase/seed.sql` once from the Supabase SQL editor.
+   This starts the local Supabase services, applies all migrations, and loads `supabase/seed.sql`. For a hosted project, link it with `supabase link --project-ref <project-ref>` and apply migrations with `supabase db push`. The learning-path catalog is served by the app; learner module attempts are stored by the new `202610100005_learning_paths.sql` migration. Existing task content remains seeded by `supabase/seed.sql`.
 
 2. Copy `.env.example` to `.env.local`. Set the Supabase URL, anon key, and server-only service-role key from the project settings. Change:
 

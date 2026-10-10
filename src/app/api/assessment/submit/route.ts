@@ -7,6 +7,7 @@ import { MODEL_NAME, PROMPT_VERSION, SCORING_CONFIGURED, hasManipulationFlag, sc
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { taskReferences, criterionDescriptors } from "@/lib/server/task-reference";
 import { evidencedDebuggingSlugs } from "@/lib/server/progression";
+import { findNearIdenticalSubmission } from "@/lib/server/submission-similarity";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -51,9 +52,11 @@ export async function POST(request: NextRequest) {
     catch { return apiError("Could not evaluate skill progression.", 503); }
     if (!requiredSlugs.every((slug) => completed.has(slug))) return apiError("Complete the prerequisite skill nodes before submitting this mission.", 403);
   }
-  const { data: version } = await admin.from("task_versions").select("id, version, prompt").eq("task_id", task.id).order("version", { ascending: false }).limit(1).maybeSingle();
+  const { data: version } = await admin.from("task_versions").select("id, version, prompt, starter_code").eq("task_id", task.id).order("version", { ascending: false }).limit(1).maybeSingle();
   const { data: rubric } = await admin.from("rubrics").select("id, version, criteria_json").eq("task_id", task.id).order("version", { ascending: false }).limit(1).maybeSingle();
   if (!version || !rubric) return apiError("Task configuration is incomplete.", 503);
+  const similarSubmission = await findNearIdenticalSubmission(admin, version.id, actor.id, body.code, version.starter_code);
+  const similarityFlag = Boolean(similarSubmission);
   const { data: visibleRows } = await admin.from("visible_test_cases").select("title, input_json, expected_json").eq("task_version_id", version.id).order("ordinal");
   const { data: hiddenRow } = await admin.from("hidden_test_suites").select("test_spec").eq("task_version_id", version.id).maybeSingle();
   const { data: bankRows } = await admin.from("followup_bank").select("id, version, trigger_json, question_template, expected_key_points, ordinal").eq("task_id", task.id).order("ordinal");
@@ -73,7 +76,7 @@ export async function POST(request: NextRequest) {
       user_id: actor.id, task_version_id: version.id, rubric_id: rubric.id, attempt_type: "mission",
       code: body.code, ai_disclosure: body.aiDisclosure,
       explanation_json: {
-        report: body.report, prompt_version: PROMPT_VERSION, selected_question_ids: [], gap_tags: ["runner_failure"],
+        report: body.report, prompt_version: PROMPT_VERSION, selected_question_ids: [], gap_tags: ["runner_failure", ...(similarityFlag ? ["similar_submission"] : [])], similarity_review: similarityFlag,
         test_summary: { visible_total: visible.total, visible_passed: visible.passed, hidden_total: hidden.total, hidden_passed: hidden.passed, runner_failure: true },
         runner_failure: true,
       },
@@ -91,8 +94,8 @@ export async function POST(request: NextRequest) {
       actor: actor.id, action: "assessment_runner_failed", attemptId: failureAttempt.data.id,
       taskVersion: version.version, rubricVersion: rubric.version, bankVersion: 1, promptVersion: PROMPT_VERSION,
       inputHash: createHash("sha256").update(`${body.code}\n${learnerText}`).digest("hex"),
-      flags: ["runner_failure", "low_confidence"],
-      output: { visible_summary: { total: visible.total, passed: visible.passed }, hidden_summary: { total: hidden.total, passed: hidden.passed } },
+      flags: ["runner_failure", ...(similarityFlag ? ["near_identical_submission"] : []), "low_confidence"],
+      output: { visible_summary: { total: visible.total, passed: visible.passed }, hidden_summary: { total: hidden.total, passed: hidden.passed }, similarity_review: similarityFlag },
     });
     return NextResponse.json({
       attemptId: failureAttempt.data.id, submittedAt: failureAttempt.data.submitted_at,
@@ -125,7 +128,7 @@ export async function POST(request: NextRequest) {
     return Math.abs(explanationRuns[0][criterion] - explanationRuns[1][criterion]);
   };
   const differences = [runDisagreement("root_cause"), runDisagreement("explanation")];
-  const baseConfidence = flagged || modelError || differences.some((value) => value > 1) || explanationRuns?.some((run) => run.ambiguous || run.injection_suspected)
+  const baseConfidence = flagged || similarityFlag || modelError || differences.some((value) => value > 1) || explanationRuns?.some((run) => run.ambiguous || run.injection_suspected)
     ? "low" : differences.some((value) => value === 1) ? "medium" : "medium";
   const rootScore = explanationRuns ? Math.min(...explanationRuns.map((run) => run.root_cause)) : 0;
   const explanationScore = explanationRuns ? Math.min(...explanationRuns.map((run) => run.explanation)) : 0;
@@ -150,7 +153,8 @@ export async function POST(request: NextRequest) {
     attempt_type: "mission" as const, code: body.code, ai_disclosure: body.aiDisclosure,
     explanation_json: {
       report: body.report, prompt_version: PROMPT_VERSION,
-      selected_question_ids: selectedQuestionIds, gap_tags: tags,
+      selected_question_ids: selectedQuestionIds, gap_tags: [...tags, ...(similarityFlag ? ["similar_submission"] : [])],
+      similarity_review: similarityFlag,
       test_summary: { visible_total: visible.total, visible_passed: visible.passed, hidden_total: hidden.total, hidden_passed: hidden.passed },
       model_runs: explanationRuns,
     },
@@ -169,7 +173,7 @@ export async function POST(request: NextRequest) {
   if (scoresError) return apiError("The assessment was saved but its criterion record could not be completed. It is in the review queue.", 503);
 
   const inputHash = createHash("sha256").update(`${body.code}\n${learnerText}`).digest("hex");
-  const flags = [flagged ? "injection_precheck" : "", modelError ? "reasoning_provider_unavailable" : "", baseConfidence === "low" ? "low_confidence" : ""].filter(Boolean);
+  const flags = [flagged ? "injection_precheck" : "", similarityFlag ? "near_identical_submission" : "", modelError ? "reasoning_provider_unavailable" : "", baseConfidence === "low" ? "low_confidence" : ""].filter(Boolean);
   await appendAudit({
     actor: actor.id, action: "assessment_submitted", attemptId: attempt.id,
     taskVersion: version.version, rubricVersion: rubric.version,
@@ -178,13 +182,13 @@ export async function POST(request: NextRequest) {
     output: {
       visible: visible.checks.map(({ title, passed }) => ({ title, passed })),
       hidden_summary: { total: hidden.total, passed: hidden.passed },
-      explanation_runs: explanationRuns, confidence: baseConfidence,
+      explanation_runs: explanationRuns, confidence: baseConfidence, similarity_review: similarityFlag,
     },
   });
 
   return NextResponse.json({
     attemptId: attempt.id, submittedAt: attempt.submitted_at,
-    status: modelError ? "review_required" : "followup_required",
+    status: modelError || similarityFlag ? "review_required" : "followup_required",
     confidence: baseConfidence, flags, model: explanationRuns ? MODEL_NAME : null,
     scores: { fix_correctness: visibleScore, edge_cases: hiddenScore, root_cause: rootScore, explanation: explanationScore },
     visibleTests: visible.checks.map(({ title, passed, compileError }) => ({ title, passed, ...(compileError ? { compileError } : {}) })),
