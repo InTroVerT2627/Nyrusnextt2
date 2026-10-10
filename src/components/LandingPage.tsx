@@ -1,18 +1,23 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import {
-  MissionIcon,
-  TreeIcon,
-  EvidenceIcon,
-  RecruiterIcon,
-  ReviewIcon,
-  LabIcon,
-  ValidationIcon,
-  ArrowRightIcon,
-  ShieldIcon,
-  CheckIcon,
-} from "@/components/Icons";
+  Terminal,
+  FileCheck2,
+  HelpCircle,
+  Award,
+  Lock,
+  Search,
+  ArrowRight,
+  Shield,
+  Layers,
+  GraduationCap,
+  FlaskConical,
+  ClipboardCheck,
+  CheckCircle2,
+  FileText,
+  Sparkles,
+} from "lucide-react";
 
 type LandingPageProps = {
   onEnterLearner: () => void;
@@ -22,6 +27,114 @@ type LandingPageProps = {
   onEnterValidation: () => void;
 };
 
+type StepKey = "mission" | "rubric" | "followups" | "evidence" | "consent" | "recruiter";
+
+interface StepInfo {
+  key: StepKey;
+  number: string;
+  title: string;
+  summary: string;
+  icon: React.ReactNode;
+  sampleBadge: string;
+  sampleTitle: string;
+  sampleDetails: { label: string; value: string }[];
+  sampleVisual: string;
+}
+
+const STEPS: StepInfo[] = [
+  {
+    key: "mission",
+    number: "01",
+    title: "Incident Mission",
+    summary: "Debug realistic production code in Monaco with visible acceptance checks.",
+    icon: <Terminal size={18} strokeWidth={1.8} />,
+    sampleBadge: "Illustrative sample",
+    sampleTitle: "Mission #01 · Pagination Off-By-One Bug",
+    sampleDetails: [
+      { label: "Environment", value: "Judge0 isolated container (Node.js 18)" },
+      { label: "Visible checks", value: "3 deterministic tests displayed before coding" },
+      { label: "Hidden suite", value: "Edge cases evaluated strictly server-side" },
+    ],
+    sampleVisual: "function paginate(items, page, size) {\n  // Visible check: page 1, size 10 -> [0..9]\n  const start = (page - 1) * size;\n  return items.slice(start, start + size);\n}",
+  },
+  {
+    key: "rubric",
+    number: "02",
+    title: "Visible Rubric",
+    summary: "Clear scoring criteria and weights visible before a single line is written.",
+    icon: <FileCheck2 size={18} strokeWidth={1.8} />,
+    sampleBadge: "Illustrative sample",
+    sampleTitle: "Evaluation Rubric v1.2",
+    sampleDetails: [
+      { label: "Fix correctness (35%)", value: "Deterministic visible unit tests" },
+      { label: "Edge-case handling (15%)", value: "Private server-side test suite" },
+      { label: "Root cause & clarity (30%)", value: "Incident report heading breakdown" },
+      { label: "Follow-up defense (20%)", value: "Targeted adaptive reasoning questions" },
+    ],
+    sampleVisual: "RUBRIC WEIGHTING\n[███████   ] 35% Code tests\n[███       ] 15% Edge cases\n[██████    ] 30% Incident report\n[████      ] 20% Follow-up defense",
+  },
+  {
+    key: "followups",
+    number: "03",
+    title: "Fixed Follow-ups",
+    summary: "Conversational thread probing gaps; count never changes score, only confidence.",
+    icon: <HelpCircle size={18} strokeWidth={1.8} />,
+    sampleBadge: "Illustrative sample",
+    sampleTitle: "Targeted Reasoning Defense",
+    sampleDetails: [
+      { label: "Triggered because", value: "Report did not explain empty array behavior" },
+      { label: "Dual-run Gemini", value: "Scored twice with schema validation" },
+      { label: "Language fairness", value: "Content-only scoring; zero grammar/dialect bias" },
+    ],
+    sampleVisual: "QUESTION: What occurs when `items.length === 0`?\nLEARNER: `slice(0, 0)` safely returns `[]` without throwing.\nRESULT: Pass (+1.0) · High confidence justification",
+  },
+  {
+    key: "evidence",
+    number: "04",
+    title: "Evidence Card",
+    summary: "Granular skills with a 3-step confidence meter. Zero aggregate point rollups.",
+    icon: <Award size={18} strokeWidth={1.8} />,
+    sampleBadge: "Illustrative sample",
+    sampleTitle: "Proof-of-Skill Record · Debugging",
+    sampleDetails: [
+      { label: "Proficiency", value: "Proficient (Task v1, Rubric v1)" },
+      { label: "Confidence meter", value: "High (Judge0 tests passed + dual-run AI aligned)" },
+      { label: "Audit trail", value: "Linked to timestamped submission & rubric version" },
+    ],
+    sampleVisual: "PROFICIENCY: PROFICIENT\nCONFIDENCE: [ HIGH ●●● ]\nEVIDENCE TRAIL: Mission #01 · Oct 10 · 0 Appeals\nSTATUS: Stored privately in learner vault",
+  },
+  {
+    key: "consent",
+    number: "05",
+    title: "Learner Consent",
+    summary: "Off by default, granular per skill, and instantly revocable at any moment.",
+    icon: <Lock size={18} strokeWidth={1.8} />,
+    sampleBadge: "Illustrative sample",
+    sampleTitle: "Consent & Privacy Gateway",
+    sampleDetails: [
+      { label: "Default status", value: "Strictly Off for all 4 competency tracks" },
+      { label: "Per-skill control", value: "Toggle Debugging on while keeping SQL private" },
+      { label: "Raw code toggle", value: "Separate consent to share code vs high-level cards" },
+    ],
+    sampleVisual: "DEBUGGING EVIDENCE   [ TOGGLED ON  ]\nDATA ANALYTICS       [ TOGGLED OFF ]\nINCLUDE RAW CODE     [ TOGGLED OFF ]\nLive Recruiter View: 1 of 4 skills visible",
+  },
+  {
+    key: "recruiter",
+    number: "06",
+    title: "Recruiter Search",
+    summary: "NxtMove talent discovery with transparent 'why surfaced' criteria matching.",
+    icon: <Search size={18} strokeWidth={1.8} />,
+    sampleBadge: "Illustrative sample",
+    sampleTitle: "NxtMove Talent Discovery",
+    sampleDetails: [
+      { label: "Role matching", value: "Junior Developer · Requires Debugging (Proficient)" },
+      { label: "Why surfaced", value: "Candidate consented + meets explicit criteria" },
+      { label: "Human decision", value: "Recruiter must submit written reason for shortlist" },
+    ],
+    sampleVisual: "MATCH: Alex Morgan (cand_0142)\nWHY SURFACED: Consented · Proficient · High Confidence\nACTION: [ Shortlist with reason ] [ Pass ]\nAUDIT: View logged in append-only table",
+  },
+];
+
 export default function LandingPage({
   onEnterLearner,
   onEnterNyeras,
@@ -29,174 +142,149 @@ export default function LandingPage({
   onEnterScenarios,
   onEnterValidation,
 }: LandingPageProps) {
+  const [activeStep, setActiveStep] = useState<StepKey>("mission");
+
+  const currentStep = STEPS.find((s) => s.key === activeStep) || STEPS[0];
+
   return (
     <div className="landing-container">
       {/* Hero Section */}
       <section className="landing-hero" aria-labelledby="hero-title">
         <div className="landing-badge">
-          <ShieldIcon size={14} />
-          <span>SAMARTHA HACKATHON · INNOVATION IN EDUCATION · PART A</span>
+          <Shield size={14} strokeWidth={2} />
+          <span>MISSION CONTROL FOR SKILLS · NYERAS TO NXTMOVE</span>
         </div>
+
         <h1 id="hero-title" className="landing-title">
-          Proof of skill, not proof of course completion.
+          Mission control for skills.
         </h1>
+
         <p className="landing-subtitle">
-          Online courses distribute certificates at scale, but completion does not prove a learner can debug production code or analyze data.
-          <strong> ProofLoop</strong> bridges Nyeras learning to NxtMove employability through realistic incident sandboxes, adaptive reasoning defense, and candidate-consented evidence profiles.
+          Prove what you can do through realistic incidents, transparent rubrics, and learner-controlled evidence.
+          No gamified streaks or XP — Unlocks follow demonstrated understanding only.
         </p>
 
-        {/* 10-Second Elevator Pitch Card */}
-        <div className="elevator-pitch-card">
-          <div className="pitch-header">
-            <span className="pitch-tag">THE 10-SECOND SUMMARY</span>
-            <span className="pitch-engine">Judge0 CE + Gemini 3.8 Flash + Supabase</span>
-          </div>
-          <div className="pitch-grid">
-            <div className="pitch-col">
-              <strong>1. Realistic Work Samples</strong>
-              <p>Debug production incidents, write SQL in WASM SQLite, build unit economics, or draft crisis memos. Graded by deterministic tests.</p>
-            </div>
-            <div className="pitch-col">
-              <strong>2. Defend Your Reasoning</strong>
-              <p>Adaptive follow-up questions target your specific gaps. Gemini scores technical reasoning twice with zero grammar bias.</p>
-            </div>
-            <div className="pitch-col">
-              <strong>3. Evidence, Not Opaque Scores</strong>
-              <p>No aggregate points, XP, or streaks. Granular evidence cards shared with recruiters only when you explicitly opt in.</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Primary Action Buttons */}
+        {/* Primary CTA Buttons */}
         <div className="landing-cta-group">
-          <button className="cta-primary" onClick={onEnterLearner}>
-            <span>Launch Sandbox Demo (Learner)</span>
-            <ArrowRightIcon size={16} />
-          </button>
-          <button className="cta-secondary" onClick={onEnterNyeras}>
-            <MissionIcon size={16} />
-            <span>Simulate Nyeras LMS Handoff</span>
+          <button className="cta-primary btn-cyan" onClick={onEnterLearner}>
+            <span>Try the demo</span>
+            <ArrowRight size={16} strokeWidth={2} />
           </button>
           <button className="cta-secondary" onClick={onEnterRecruiter}>
-            <RecruiterIcon size={16} />
-            <span>Recruiter View (NxtMove)</span>
+            <Search size={16} strokeWidth={1.8} />
+            <span>Recruiter search preview</span>
+          </button>
+          <button className="cta-secondary" onClick={onEnterNyeras}>
+            <GraduationCap size={16} strokeWidth={1.8} />
+            <span>Nyeras handoff simulation</span>
           </button>
           <button className="cta-secondary" onClick={onEnterScenarios}>
-            <LabIcon size={16} />
-            <span>Failure Scenarios Lab</span>
+            <FlaskConical size={16} strokeWidth={1.8} />
+            <span>Failure scenarios lab</span>
           </button>
         </div>
-
-        <p className="landing-disclaimer">
-          Experimental evidence sandbox. We never claim automated scores are validated hiring predictors.
-        </p>
       </section>
 
-      {/* Feature Architecture Matrix */}
-      <section className="landing-features" aria-labelledby="features-title">
+      {/* Interactive 6-Step "How It Works" Strip */}
+      <section className="landing-strip-section" aria-labelledby="strip-title">
         <div className="section-title-wrap">
-          <span className="section-kicker">ENGINEERING PRINCIPLES</span>
-          <h2 id="features-title">How ProofLoop Guarantees Fair & Auditable Evidence</h2>
-          <p>Built strictly to the hackathon specification with zero proxy gamification and full append-only auditability.</p>
+          <span className="section-kicker">INTERACTIVE WALKTHROUGH</span>
+          <h2 id="strip-title">How Proof-of-Skill Works</h2>
+          <p>Tap or hover any step to see an illustrative preview of the sandbox workflow.</p>
         </div>
 
-        <div className="features-grid">
-          <div className="feature-card">
-            <div className="feature-icon mint">
-              <MissionIcon size={20} />
+        {/* 6 Tabs */}
+        <div className="strip-tabs" role="tablist" aria-label="Workflow steps">
+          {STEPS.map((step) => {
+            const isActive = step.key === activeStep;
+            return (
+              <button
+                key={step.key}
+                role="tab"
+                aria-selected={isActive}
+                className={`strip-tab-btn ${isActive ? "active" : ""}`}
+                onClick={() => setActiveStep(step.key)}
+                onMouseEnter={() => setActiveStep(step.key)}
+              >
+                <div className="strip-tab-top">
+                  <span className="strip-tab-number">{step.number}</span>
+                  <span className="strip-tab-icon">{step.icon}</span>
+                </div>
+                <strong className="strip-tab-title">{step.title}</strong>
+                <p className="strip-tab-summary">{step.summary}</p>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Interactive Step Preview Card */}
+        <div className="strip-preview-card" role="region" aria-live="polite">
+          <div className="preview-card-header">
+            <div className="preview-card-tags">
+              <span className="sample-badge">{currentStep.sampleBadge}</span>
+              <span className="step-tag">STEP {currentStep.number} · {currentStep.title.toUpperCase()}</span>
             </div>
-            <h3>Deterministic Test Execution</h3>
-            <p>
-              Tests decide code correctness in isolated Judge0 containers with CPU and memory limits. AI has no authority over test results.
-            </p>
-            <ul className="feature-bullets">
-              <li><CheckIcon size={14} /> Visible acceptance checks shown upfront</li>
-              <li><CheckIcon size={14} /> Private edge-case suite runs server-side</li>
-              <li><CheckIcon size={14} /> Never leaks hidden tests or test keys</li>
-            </ul>
+            <strong className="preview-card-title">{currentStep.sampleTitle}</strong>
           </div>
 
-          <div className="feature-card">
-            <div className="feature-icon sky">
-              <TreeIcon size={20} />
+          <div className="preview-card-grid">
+            <div className="preview-card-details">
+              <h4>System Guarantees</h4>
+              <dl className="preview-dl">
+                {currentStep.sampleDetails.map((detail, idx) => (
+                  <div key={idx} className="preview-dl-row">
+                    <dt>{detail.label}</dt>
+                    <dd>{detail.value}</dd>
+                  </div>
+                ))}
+              </dl>
             </div>
-            <h3>Adaptive Follow-Up Defense</h3>
-            <p>
-              Interviewer-style targeted follow-up questions from a pre-written bank probe root causes and trade-offs based on the learner’s gaps.
-            </p>
-            <ul className="feature-bullets">
-              <li><CheckIcon size={14} /> Rule-based gap tag matching (1–3 questions)</li>
-              <li><CheckIcon size={14} /> Dual-run Gemini scoring against fixed keys</li>
-              <li><CheckIcon size={14} /> Question count changes confidence, never score</li>
-            </ul>
-          </div>
 
-          <div className="feature-card">
-            <div className="feature-icon amber">
-              <EvidenceIcon size={20} />
+            <div className="preview-card-code">
+              <div className="preview-code-header">
+                <span>SIMULATED SYSTEM ARTIFACT</span>
+                <span className="preview-code-pill">Deterministic</span>
+              </div>
+              <pre className="preview-code-block">{currentStep.sampleVisual}</pre>
             </div>
-            <h3>Learner-Owned Consent Engine</h3>
-            <p>
-              Recruiter sharing is off by default, per skill, and instantly revocable. Submissions require explicit secondary consent.
-            </p>
-            <ul className="feature-bullets">
-              <li><CheckIcon size={14} /> Off by default; revocable anytime</li>
-              <li><CheckIcon size={14} /> Submissions need separate explicit opt-in</li>
-              <li><CheckIcon size={14} /> Recruiter searches filter only consented records</li>
-            </ul>
-          </div>
-
-          <div className="feature-card">
-            <div className="feature-icon rose">
-              <ReviewIcon size={20} />
-            </div>
-            <h3>Human-in-the-Loop Governance</h3>
-            <p>
-              Disagreements between AI runs, prompt injection patterns, learner challenges, and low-confidence attempts route to human review.
-            </p>
-            <ul className="feature-bullets">
-              <li><CheckIcon size={14} /> Anonymized peer submission similarity diff</li>
-              <li><CheckIcon size={14} /> Mandatory written override rationale</li>
-              <li><CheckIcon size={14} /> Append-only audit log of all decisions</li>
-            </ul>
           </div>
         </div>
       </section>
 
-      {/* Hero Visual: The 4 Core Competency Pathways */}
+      {/* 4 Competency Pathways Matrix */}
       <section className="pathways-showcase" aria-labelledby="paths-title">
         <div className="section-title-wrap">
           <span className="section-kicker">FOUR SPECIALIZED PATHWAYS</span>
           <h2 id="paths-title">Authentic Work Samples Across Roles</h2>
-          <p>Every competency pathway includes structured lessons and real work-sample tasks producing verifiable evidence cards.</p>
+          <p>Every competency pathway includes structured modules and real work-sample tasks producing verifiable evidence cards.</p>
         </div>
 
         <div className="pathway-cards-grid">
           <div className="pathway-summary-card">
-            <div className="pathway-tag debug">FLAGSHIP</div>
+            <div className="pathway-tag debug">FLAGSHIP PATHWAY</div>
             <h3>Production Debugging</h3>
-            <p>Monaco editor with Java and JavaScript incident missions, 5-node bug type skill tree, and the &quot;Catch the AI&apos;s mistake&quot; boss round.</p>
-            <span className="pathway-meta">4 Incidents · 1 Boss Round · Judge0 Runner</span>
+            <p>Monaco editor with Java and JavaScript incidents, 5-node bug type skill tree, and the &quot;Catch the AI&apos;s mistake&quot; boss round.</p>
+            <span className="pathway-meta">4 Incidents · 1 Boss Round · Judge0 Execution</span>
           </div>
 
           <div className="pathway-summary-card">
-            <div className="pathway-tag data">NEW · WASM SQLITE</div>
+            <div className="pathway-tag data">WASM SQLITE</div>
             <h3>Data Analytics</h3>
             <p>In-browser SQLite sandbox on seeded tables. Runs deterministic result checks and rubric-scored insight write-ups with follow-ups.</p>
             <span className="pathway-meta">10 Modules · In-Browser SQL · Synthesis Memo</span>
           </div>
 
           <div className="pathway-summary-card">
-            <div className="pathway-tag biz">NEW · SPREADSHEET</div>
+            <div className="pathway-tag biz">SPREADSHEET GRID</div>
             <h3>Business Analytics</h3>
-            <p>Live spreadsheet grid with real financial formulas (CAC, LTV, Payback). Deterministic numeric verification and executive memo.</p>
+            <p>Live spreadsheet grid with real SaaS financial formulas (CAC, LTV, Payback). Deterministic numeric verification and executive memo.</p>
             <span className="pathway-meta">10 Modules · Live Modeling · Strategy Memo</span>
           </div>
 
           <div className="pathway-summary-card">
-            <div className="pathway-tag comm">NEW · WORKPLACE</div>
+            <div className="pathway-tag comm">WORKPLACE WRITING</div>
             <h3>Technical Communication</h3>
-            <p>Postmortem escalation, stakeholder status updates, and non-technical translations with rubric scoring and revision loops.</p>
+            <p>P0 outage escalation, stakeholder status updates, and non-technical translations with rubric scoring and revision loops.</p>
             <span className="pathway-meta">10 Modules · Revise Loop · Follow-Up Bank</span>
           </div>
         </div>
@@ -212,11 +300,11 @@ export default function LandingPage({
               Strict API boundaries separate the learning LMS (Nyeras) from the recruiter search (NxtMove). Data crosses the boundary only when the learner explicitly toggles consent.
             </p>
             <div className="handoff-ctas">
-              <button className="cta-primary small" onClick={onEnterRecruiter}>
+              <button className="cta-primary small btn-cyan" onClick={onEnterRecruiter}>
                 Inspect Recruiter Search
               </button>
               <button className="cta-secondary small" onClick={onEnterValidation}>
-                <ValidationIcon size={14} />
+                <ClipboardCheck size={14} />
                 Validation & Limits
               </button>
             </div>
@@ -249,6 +337,16 @@ export default function LandingPage({
           </div>
         </div>
       </section>
+
+      {/* Mandatory Disclaimer Footer */}
+      <footer className="landing-footer">
+        <div className="disclaimer">
+          <Shield size={18} strokeWidth={2} />
+          <p>
+            <strong>Mandatory Disclaimer:</strong> ProofLoop produces experimental task evidence from practical sandboxes. It is not a validated predictor of job performance, does not rank or automatically reject applicants, and never tracks speed or typing telemetry. Sharing with recruiters is off by default and revocable at any time.
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }
