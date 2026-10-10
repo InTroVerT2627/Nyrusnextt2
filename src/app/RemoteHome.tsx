@@ -38,6 +38,7 @@ import ReviewerQueueView from "@/components/ReviewerQueueView";
 import AuditLogView from "@/components/AuditLogView";
 import AssessmentReplayView from "@/components/AssessmentReplayView";
 import RoleReadinessMapView from "@/components/RoleReadinessMapView";
+import FairnessLabView from "@/components/FairnessLabView";
 import { Search, Briefcase } from "lucide-react";
 
 type Role = "learner" | "recruiter" | "reviewer";
@@ -705,6 +706,8 @@ export default function RemoteHome() {
             />
           ) : section === "Recruiter preview" ? (
             <RecruiterDashboardView />
+          ) : section === "Fairness lab" ? (
+            <FairnessLabView />
           ) : section === "Review queue" ? (
             <ReviewerQueueView
               onDone={async () => {

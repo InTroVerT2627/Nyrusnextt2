@@ -113,6 +113,19 @@ export default function ValidationPage() {
         </p>
       </div>
 
+      {/* Fairness Lab Link Panel */}
+      <div className="panel" style={{ margin: "16px 0", border: "1px solid var(--border)", background: "var(--ice)", borderRadius: "12px", padding: "18px" }}>
+        <div className="panel-kicker">EMPIRICAL FAIRNESS & LANGUAGE CONSISTENCY LAB</div>
+        <h2 style={{ fontSize: "16px", margin: "4px 0 8px" }}>Reviewer Consistency Across 7 Phrasing & Language Variants</h2>
+        <p style={{ margin: "0 0 12px", fontSize: "13px", color: "var(--text)" }}>
+          Measures evaluator stability across Plain English, Polished formal syntax, Short conversational phrasing, Hinglish mix, Hindi (Devanagari), Telugu script, and Typo-heavy variations on 12 verified base benchmarks.
+        </p>
+        <a href="/fairness" className="secondary small" style={{ display: "inline-flex", alignItems: "center", gap: "6px", textDecoration: "none" }}>
+          <span>Open Fairness Lab (Reviewer Workspace)</span>
+          <span>↗</span>
+        </a>
+      </div>
+
       {/* Benchmark Agreement Table */}
       <div className="panel validation-table-panel">
         <div className="panel-kicker">BENCHMARK EVALUATION TABLE (N = 15 BENCHMARKS)</div>
