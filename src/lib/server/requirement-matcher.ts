@@ -145,7 +145,7 @@ export function evaluateRequirement(
 
   if (!isAgeMet) {
     reasons.push(`Evidence is ${actualAgeDays} days old (exceeds ${req.max_age_days}-day recency window).`);
-    advice.push("Evidence is older than the role window: completing a fresh task will renew recency.");
+    advice.push(`Evidence is older than ${req.max_age_days} days: a refresh task would update it.`);
   }
 
   if (!isConfidenceMet) {

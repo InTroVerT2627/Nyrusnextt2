@@ -37,7 +37,8 @@ import RecruiterDashboardView from "@/components/RecruiterDashboardView";
 import ReviewerQueueView from "@/components/ReviewerQueueView";
 import AuditLogView from "@/components/AuditLogView";
 import AssessmentReplayView from "@/components/AssessmentReplayView";
-import { Search } from "lucide-react";
+import RoleReadinessMapView from "@/components/RoleReadinessMapView";
+import { Search, Briefcase } from "lucide-react";
 
 type Role = "learner" | "recruiter" | "reviewer";
 type Section =
@@ -46,6 +47,8 @@ type Section =
   | "Missions"
   | "Skill tree"
   | "My evidence"
+  | "Role readiness"
+  | "Fairness lab"
   | "Recruiter preview"
   | "Review queue"
   | "Audit log"
@@ -198,12 +201,13 @@ const pathByRole: Record<Role, Section[]> = {
     "Missions",
     "Skill tree",
     "My evidence",
+    "Role readiness",
     "Failure scenarios",
     "Validation",
     "Audit log",
   ],
   recruiter: ["Recruiter preview", "Overview", "Validation", "Audit log"],
-  reviewer: ["Review queue", "Overview", "Failure scenarios", "Validation", "Audit log"],
+  reviewer: ["Review queue", "Overview", "Fairness lab", "Failure scenarios", "Validation", "Audit log"],
 };
 
 function renderNavIcon(name: Section) {
@@ -218,6 +222,10 @@ function renderNavIcon(name: Section) {
       return <TreeIcon size={16} />;
     case "My evidence":
       return <EvidenceIcon size={16} />;
+    case "Role readiness":
+      return <Briefcase size={16} />;
+    case "Fairness lab":
+      return <LabIcon size={16} />;
     case "Recruiter preview":
       return <RecruiterIcon size={16} />;
     case "Review queue":
@@ -687,6 +695,14 @@ export default function RemoteHome() {
             />
           ) : section === "My evidence" ? (
             <EvidenceProfileView profile={profile!} onConsent={saveConsent} onOpenAttempt={setActiveAttempt} />
+          ) : section === "Role readiness" ? (
+            <RoleReadinessMapView
+              onOpenEvidence={(attId) => {
+                const found = profile?.attempts.find((a) => a.id === attId);
+                if (found) setActiveAttempt(found);
+              }}
+              onNavigateToConsent={() => setSection("My evidence")}
+            />
           ) : section === "Recruiter preview" ? (
             <RecruiterDashboardView />
           ) : section === "Review queue" ? (

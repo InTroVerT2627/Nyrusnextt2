@@ -16,6 +16,8 @@ import {
   Keyboard,
   X,
   ArrowRight,
+  Briefcase,
+  Scale,
 } from "lucide-react";
 
 export interface CommandItem {
@@ -72,6 +74,28 @@ export default function CommandPalette({ onNavigate }: CommandPaletteProps) {
           setIsOpen(false);
         },
         shortcut: "G E",
+      },
+      {
+        id: "role-readiness",
+        title: "Role Readiness Map (Private Planning)",
+        category: "Navigation",
+        icon: <Briefcase size={16} strokeWidth={1.8} />,
+        action: () => {
+          onNavigate("Role readiness");
+          setIsOpen(false);
+        },
+        shortcut: "G D",
+      },
+      {
+        id: "fairness-lab",
+        title: "Fairness Lab (Language & Phrasing)",
+        category: "Navigation",
+        icon: <Scale size={16} strokeWidth={1.8} />,
+        action: () => {
+          onNavigate("Fairness lab");
+          setIsOpen(false);
+        },
+        shortcut: "G F",
       },
       {
         id: "learning-paths",
