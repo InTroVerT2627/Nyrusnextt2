@@ -46,7 +46,6 @@ async function seedRecruiterData() {
 
   // 2. Fetch Tasks and Versions
   const { data: tasks } = await admin.from('tasks').select('id, slug, language');
-  const findMax = tasks.find(t => t.slug === 'find-max');
   const remDup = tasks.find(t => t.slug === 'remove-duplicates');
   const custKey = tasks.find(t => t.slug === 'customer-key');
   const sqlTask = tasks.find(t => t.slug === 'sql-cohort-revenue');

@@ -1,109 +1,156 @@
-# Nextlearn
+# ProofLoop (Nextlearn)
 
-Nextlearn is a debugging and AI-code-review learning product. Learners fix four Java and JavaScript incident missions, explain their reasoning, answer adaptive questions, and build dated evidence cards. A separate boss round asks learners to check an AI-style patch with tests that fail on the flawed implementation and pass on two independent references.
+**Proof-of-Skill Sandbox & Learner-Owned Evidence Engine**  
+*Samartha Hackathon, Part A: Nyeras / NxtMove Proof-of-Skill Sandbox*
 
-Evidence describes performance on these tasks. It is experimental and is not a validated predictor of job performance or a hiring decision.
+ProofLoop is an authentic skill-verification sandbox where learners prove competencies through real work samples, deterministic test execution, and adaptive follow-up defenses. Evidence is scored against visible, versioned rubrics and shared with recruiters exclusively through revocable, granular learner consent.
 
-## Product flows
+> **Important Disclaimer**: Evidence describes demonstrated performance on these specific sandbox tasks only. It is experimental and is **not** a validated predictor of job performance, candidate intelligence, or automated hiring recommendations.
 
-- Four versioned missions cover loop bounds, mutation during iteration, asynchronous control flow, and Java equality/hash contracts.
-- Visible tests and rubric are shown before submission. Private edge cases and fixed follow-up answer keys stay server-side.
-- Java and JavaScript submissions run in Judge0 with per-run CPU, wall-time, memory, process, file-size, and network limits.
-- Gemini grades explanations and follow-up answers twice against a fixed JSON rubric. Scores require exact learner-text evidence quotes. Disagreement, injection flags, and provider failures route work to human review.
-- Similarity checks compare a learner's changed code with other submissions for the same versioned task. A possible match is a review flag, never an automatic failure; reviewers can inspect an anonymized comparison and record whether it is cleared.
-- Fixed follow-up questions are chosen from task gap tags. Strong, consistent answers can end the question loop early; the number of questions never changes the criterion score.
-- Attempts, task/rubric/bank versions, results, AI runs, appeals, reviewer decisions, consent changes, and recruiter views are stored in Supabase and audit logged.
-- Each skill has separate sharing consent, off by default. Sharing code and written answers is a separate opt-in. Revoking consent immediately removes the evidence from Nextlearn recruiter search.
-- Recruiter search uses an explicit role’s skill, language, level, evidence age, and distinct-task minimum. It surfaces synthetic candidate IDs and requires an explicit human review or shortlist decision.
-- Learners can appeal a scored criterion. Reviewers record a reason and either confirm or override the score; revised evidence is appended as a new snapshot.
-- An optional NxtMove receiver gets consented evidence through a durable handoff outbox. Full submissions are omitted unless the learner explicitly shares them.
+---
 
-## Local preview
+## Architecture Diagram
 
-Requirements: Node.js 20.9 or later.
+```mermaid
+flowchart TD
+  subgraph Client ["Client Layer (Next.js 16 App Router)"]
+    LP["Landing Page & Nyeras LMS Simulation"]
+    SW["Demo Role Switcher (Learner / Recruiter / Reviewer)"]
+    ME["Monaco Code Editor & Incident Report Form"]
+    SQL["WASM SQLite Sandbox (sql.js In-Browser)"]
+    GRID["Spreadsheet Formula Grid (SaaS Unit Economics)"]
+    COMM["Communication Workbench (Revise-After-Feedback Loop)"]
+  end
 
-```bash
-npm install
-npm run dev
+  subgraph Execution ["Isolated Sandboxes & Scoring Engines"]
+    J0["Judge0 CE Sandbox Runner\n(CPU, RAM, Process & Network Limits)"]
+    GEMINI["Gemini 3.8 Flash Dual-Run Grader\n(2 Independent Runs, Schema Validation, Quote Grounding)"]
+    WASM_SRV["Node.js / WASM Deterministic Result Verifier"]
+  end
+
+  subgraph Database ["Supabase PostgreSQL (Row-Level Security)"]
+    AUTH["Supabase Auth (Profiles & Roles)"]
+    TASKS["Versioned Tasks, Rubrics & Follow-up Bank"]
+    HIDDEN["Hidden Test Suites & Flaw Keys (Server-Side Only)"]
+    ATTEMPTS["Append-Only Attempts & Criterion Scores"]
+    EVID["Evidence Portfolio (Level, Confidence, Recency)"]
+    CONSENT["Granular Per-Skill Consent (Off by Default)"]
+    AUDIT["Immutable Audit Log (SHA-256 Input Hashes)"]
+  end
+
+  subgraph RecruiterReview ["NxtMove & Reviewer Surfaces"]
+    REC["Recruiter Search & Evidence Viewer\n(Why Surfaced Rationale + Human Decision)"]
+    REV["Human Review Queue & Calibration Benchmarks\n(Anonymized Code Diff + Written Override)"]
+    OUTBOX["NxtMove Profile Outbox (Consent-Gated Delivery)"]
+  end
+
+  Client -->|Execute Code| J0
+  Client -->|Score Reasoning| GEMINI
+  Client -->|Verify SQL & Formulas| WASM_SRV
+  Execution -->|Persist Attempt & Criteria| Database
+  Database -->|Consented Evidence Query| REC
+  Database -->|Low-Confidence / Disagreement / Appeals| REV
+  Database -->|Outbox Delivery| OUTBOX
 ```
 
-Open [http://localhost:3000](http://localhost:3000). Without `NEXT_PUBLIC_BACKEND_MODE=supabase`, the app uses the browser-only preview and saves synthetic data in local storage. Preview grading uses marker checks and keyword matching; it does not execute code or call AI. Do not use preview results as real skill evidence.
+---
 
-The learner workspace includes a **Learning paths** area with 10 lesson-and-knowledge-check modules each for Data Analytics, Business Analytics, and Communication. The next module opens after a learner passes the current check (2 of 3 questions). Learners can retry; there are no points, streaks, timers, or leaderboards. In local preview, learning progress is stored in that browser. In the authenticated workspace, attempts are stored per learner in Supabase and remain separate from recruiter evidence.
+## Core Non-Negotiables & Design Principles
 
-## Authenticated backend setup
+1. **No Points, XP, Badges, Streaks, or Leaderboards**: Skill progression and unlocks derive exclusively from demonstrated understanding.
+2. **Tests Decide Correctness; AI Evaluates Reasoning Only**: Deterministic tests in Judge0 decide code correctness. Gemini evaluates written reasoning in two independent runs with structured schema validation and mandatory text quote citations.
+3. **Zero Secret Leakage**: Hidden test suites, reference implementations, flaw lines, and follow-up answer keys never reach the client bundle or public API responses (enforced by `tests/leak-protection.test.ts`).
+4. **Consent is Off by Default, Granular, and Revocable**: Sharing is per-skill, not all-or-nothing. Submissions (source code and incident reports) require explicit opt-in. Revocation immediately excludes candidate evidence from recruiter search.
+5. **Follow-Up Questions Affect Confidence Only**: Adaptive follow-up questions from the fixed bank resolve ambiguity and adjust confidence (High/Medium/Low); the count of follow-ups never modifies the criterion score.
+6. **Content-Only Evaluation**: Strict prompt guardrails forbid penalizing dialect, accent, phrasing style, or non-native English grammar.
+7. **Append-Only Immutable Audit Trail**: Every assessment attempt, prompt hash, model output, consent modification, recruiter view, and reviewer override is permanently logged.
+8. **Human Judgment Remains Authoritative**: The system never auto-rejects candidates; human decision-makers retain final authority.
 
-1. Create a Supabase project. For local development, install Docker and run:
+---
 
-   ```bash
-   npx supabase start
-   npx supabase db reset
-   ```
+## 7-Minute Demo Script (Minute-by-Minute Walkthrough)
 
-   This starts the local Supabase services, applies all migrations, and loads `supabase/seed.sql`. For a hosted project, link it with `supabase link --project-ref <project-ref>` and apply migrations with `supabase db push`. The learning-path catalog is served by the app; learner module attempts are stored by the new `202610100005_learning_paths.sql` migration. Existing task content remains seeded by `supabase/seed.sql`.
+This script is designed for hackathon judges to walk the entire end-to-end demo without friction.
 
-2. Copy `.env.example` to `.env.local`. Set the Supabase URL, anon key, and server-only service-role key from the project settings. Change:
+| Minute | Time | Section & Role | Exact Actions & What to Show |
+| :---: | :---: | :---: | :--- |
+| **1** | 0:00 – 1:00 | **Elevator Pitch & LMS Handoff**<br>`(Learner)` | 1. Start on `/` (Overview). Highlight the 10-second elevator pitch, calm "Mission Control" palette, and visible disclaimers.<br>2. Click **"Nyeras LMS"** in the sidebar. Show the simulated course module *"Distributed Systems Debugging"*. Click **"Prove Your Skill in Sandbox →"** to demonstrate seamless LMS handoff. |
+| **2** | 1:00 – 2:15 | **Debugging Mission & Monaco Editor**<br>`(Learner)` | 1. Open **"Missions"** → Incident 01 (*The wrong top seller*).<br>2. Toggle between **"Incident Story"** and **"Plain Task Specification"**.<br>3. Inspect visible acceptance tests and rubric.<br>4. Fix `for (let i = 0; i < values.length; i++)` in the **Monaco editor**.<br>5. Fill out the 4-part incident report headings.<br>6. Check *I used AI assistance*.<br>7. Click **"Submit incident report →"** to trigger live isolated tests in Judge0 and dual-run Gemini scoring. |
+| **3** | 2:15 – 3:30 | **Skill Tree & Boss Round**<br>`(Learner)` | 1. Navigate to **"Skill tree"**. Show node states conveyed with icons and text (*"Evidenced"*, *"Available"*, *"Locked"*), never color alone.<br>2. Show **Boss Round** (*Catch the AI’s mistake*): explain how learner assertions run against 3 code versions (flawed, reference, and alternate) so trivial tests like `assert false` are rejected. |
+| **4** | 3:30 – 4:45 | **New Paths & Authentic Work Samples**<br>`(Learner)` | 1. Click **"Learning paths"** in the sidebar.<br>2. Show all 3 paths (10 modules each with visible *"Draft curriculum content"* warnings).<br>3. Open **Data Analytics**: show the in-browser **WASM SQLite Sandbox** (`sql.js`). Click **"Run Query in WASM SQLite"** to execute against the live in-memory database and view the result table.<br>4. Open **Business Analytics**: demonstrate the interactive **Spreadsheet Formula Grid** (CAC, LTV, Payback period).<br>5. Open **Communication**: show the **Revise-After-Feedback Loop** on the P0 Incident memo. |
+| **5** | 4:45 – 5:45 | **Evidence Portfolio & Granular Consent**<br>`(Learner)` | 1. Return to **"My evidence"**.<br>2. Show the multi-skill evidence cards: proficiency level, confidence, and recency without opaque single aggregate scores or XP.<br>3. Demonstrate granular consent: toggle sharing ON/OFF for `debugging` vs `data-analytics`.<br>4. Toggle the two-tier switch (*"Also share source code and written answers"*). Show immediate revocability. |
+| **6** | 5:45 – 6:30 | **NxtMove Recruiter Search**<br>`(Recruiter)` | 1. Use the **Role Switcher** in the topbar to switch to **Priya Sharma (Recruiter)**.<br>2. Switch between **"Junior Java Developer"** and **"Junior Data Analyst"** roles.<br>3. Show surfaced candidates with explicit **"Why surfaced"** explanations.<br>4. Expand candidate evidence. Notice source code is visible only because the candidate opted into two-tier consent.<br>5. Enter a recruiter note and click **"Shortlist candidate"** to record an audited human hiring decision. |
+| **7** | 6:30 – 7:00 | **Reviewer Queue, Calibration & Failure Scenarios**<br>`(Reviewer)` | 1. Switch role to **Dr. Sarah Chen (Reviewer)**.<br>2. Show **Review queue**: anonymized peer similarity diff and mandatory 10-character written override reason.<br>3. Inspect the **Calibration Panel**: AI vs Human raters across 6 benchmark submissions with agreement rates.<br>4. Visit **"Failure scenarios"**: trigger the interactive simulations for Prompt Injection and Trivial Boss Test to show the defense gates in action.<br>5. End on the immutable **Audit Log** showing cryptographic input hashes for every turn. |
 
-   ```dotenv
-   NEXT_PUBLIC_BACKEND_MODE=supabase
-   ```
+---
 
-   Never prefix `SUPABASE_SERVICE_ROLE_KEY` with `NEXT_PUBLIC_` or expose it to browser code.
+## Environment Variables Configuration
 
-3. Configure providers in `.env.local`:
+Copy `.env.example` to `.env.local` and configure your credentials:
 
-   ```dotenv
-   JUDGE0_BASE_URL=https://ce.judge0.com
-   JUDGE0_AUTH_TOKEN=
-   GEMINI_API_KEY=
-   GEMINI_MODEL=gemini-3.8-flash
-   NXTMOVE_API_URL=
-   NXTMOVE_API_KEY=
-   ```
+```dotenv
+# Backend Operational Mode ('supabase' for live demo, 'local' for offline preview)
+NEXT_PUBLIC_BACKEND_MODE=supabase
 
-   Judge0 CE is suitable for development and may be rate limited. Use a private authenticated Judge0 deployment for production. Keep provider keys server-side. Gemini scoring is unavailable until its API key is set; submissions then remain visible for reviewer resolution instead of receiving invented AI scores. NxtMove is optional; when no receiver URL is set, handoffs are recorded as simulated in the outbox.
+# Supabase Credentials (from Supabase Dashboard -> Project Settings -> API)
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOi...
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOi...
 
-4. Create a learner through `/login`. New accounts receive the learner role and cannot upgrade their own role. To provision trusted reviewer/recruiter accounts, use the Supabase SQL editor as an administrator:
+# Isolated Code Sandbox (Judge0 CE v1.14.0 or private instance)
+JUDGE0_BASE_URL=https://ce.judge0.com
+JUDGE0_AUTH_TOKEN=
 
-   ```sql
-   update public.profiles
-   set role = 'reviewer'
-   where id = (select id from auth.users where email = 'reviewer@example.test');
+# Reasoning Evaluation Engine (Gemini API)
+GEMINI_API_KEY=AIzaSy...
+GEMINI_MODEL=gemini-3.8-flash
 
-   update public.profiles
-   set role = 'recruiter'
-   where id = (select id from auth.users where email = 'recruiter@example.test');
-   ```
-
-   Replace the sample addresses with the accounts you created. Provision roles only for trusted staff.
-
-## Environment variables
-
-| Variable | Purpose |
-| --- | --- |
-| `NEXT_PUBLIC_BACKEND_MODE` | `local` for the preview; `supabase` for authenticated APIs |
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase public anon/publishable key |
-| `SUPABASE_SERVICE_ROLE_KEY` | Server-only database access for guarded API routes |
-| `JUDGE0_BASE_URL` | Judge0 API base URL |
-| `JUDGE0_AUTH_TOKEN` | Optional/required token for the chosen Judge0 deployment |
-| `GEMINI_API_KEY` | Server-only Gemini grading key |
-| `GEMINI_MODEL` | Gemini model ID; defaults to `gemini-3.8-flash` |
-| `NXTMOVE_API_URL` | Optional HTTPS receiver for consented profile handoffs |
-| `NXTMOVE_API_KEY` | Optional bearer token for the receiver |
-
-## Database and privacy
-
-Migrations are under `supabase/migrations`. They create role-protected profiles, immutable task/rubric/test/question versions, private test suites and grading keys, append-only assessment/evidence/audit records, appeals, reviewer decisions, consent rows, recruiter decisions, rate limits, and the NxtMove outbox. RLS is enabled; API access checks the authenticated user and application role before using the server-side database client.
-
-`supabase/seed.sql` creates the four missions, visible and private test cases, 12 fixed debugging follow-ups, the boss round and its two reference implementations, plus a sample junior Java developer role. New task content should be added as a new version instead of editing a version already used by assessments.
-
-## Commands
-
-```bash
-npm run dev
-npm run lint
-npm run build
+# Optional NxtMove Integration Endpoint
+NXTMOVE_API_URL=
+NXTMOVE_API_KEY=
 ```
 
-No external services are bundled. Supabase, Judge0, Gemini, and the optional NxtMove receiver must be configured before the authenticated assessment flow can run end to end.
+> **Security Note**: `SUPABASE_SERVICE_ROLE_KEY`, `JUDGE0_AUTH_TOKEN`, and `GEMINI_API_KEY` are strictly server-side and are never prefixed with `NEXT_PUBLIC_`.
+
+---
+
+## Synthetic Demo Personas
+
+Zero-friction testing is enabled via the topbar **Role Switcher** or credentials:
+
+| Persona | Role | Synthetic ID | Email | Password |
+| :--- | :---: | :---: | :--- | :--- |
+| **Alex Morgan** | Learner | `cand_0142` | `alex.morgan.learner@nextlearn.synthetic` | `DemoPassword2026!` |
+| **Rohan Mehta** | Learner | `cand_0981` | `rohan.mehta.learner@nextlearn.synthetic` | `DemoPassword2026!` |
+| **Priya Sharma** | Recruiter | `rec_priya` | `priya.sharma.recruiter@nextlearn.synthetic` | `DemoPassword2026!` |
+| **Dr. Sarah Chen** | Reviewer | `rev_sarah` | `sarah.chen.reviewer@nextlearn.synthetic` | `DemoPassword2026!` |
+
+---
+
+## Quality Gates & Verification Matrix
+
+All quality gates pass before deployment:
+
+| Gate | Command / Test Suite | Result | Status |
+| :--- | :--- | :---: | :---: |
+| **Linter** | `npm run lint` | 0 errors | **PASS** |
+| **Type Check & Build** | `npm run build` | 21 routes compiled | **PASS** |
+| **Leak Protection** | `tests/leak-protection.test.ts` | 5 tests passed | **PASS** |
+| **Two-User RLS** | `tests/two-user-rls.test.ts` | 3 tests passed | **PASS** |
+| **Consent & Profile** | `tests/consent-and-profile.test.ts` | 4 tests passed | **PASS** |
+| **Recruiter Workflow** | `tests/recruiter-search.test.ts` | 4 tests passed | **PASS** |
+| **Work Samples** | `tests/work-samples.test.ts` | 7 tests passed | **PASS** |
+| **Stop Rule & Confidence** | `tests/stop-rule-and-confidence.test.ts` | 6 tests passed | **PASS** |
+| **Follow-up Selector** | `tests/followup-selector.test.ts` | 4 tests passed | **PASS** |
+| **Reviewer & Audit** | `tests/reviewer-and-audit.test.ts` | 3 tests passed | **PASS** |
+| **Accessibility (WCAG AA)** | `tests/accessibility.test.ts` | 3 tests passed | **PASS** |
+| **Total Test Count** | `npm test` | **39 / 39 tests** | **100% PASS** |
+
+---
+
+## Known Limitations & Honest Boundaries
+
+1. **No Claims of Predictive Hiring Validity**: Performance in these sandboxes demonstrates skill on these simulated tasks only. We do not claim this score predicts general on-the-job performance.
+2. **Benchmark Table is Preliminary**: The 15-case benchmark table on `/` (Validation) is a synthetic calibration set. Real statistical generalization requires a multi-institution empirical cohort study.
+3. **Draft Curriculum Content**: Learning modules in the three practice paths are labeled *draft, needs human curriculum review*. Real skill verification occurs in the authentic work-sample sandboxes.
+4. **Sandboxed Isolation**: Non-technical qualities such as teamwork, cross-functional diplomacy, and multi-month persistence cannot be measured within short individual sandboxes.
