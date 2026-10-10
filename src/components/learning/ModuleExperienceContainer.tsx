@@ -45,6 +45,10 @@ export default function ModuleExperienceContainer({
   const [sessionLoading, setSessionLoading] = useState(true);
   const [advanceError, setAdvanceError] = useState("");
 
+  const handleMinTimeComplete = useCallback(() => {
+    setIsMinTimeSatisfied(true);
+  }, []);
+
   const currentPage = module.pages[currentPageIndex];
   const currentPageType: PageType = currentPage.pageType;
 
@@ -362,7 +366,7 @@ export default function ModuleExperienceContainer({
         currentPageIndex={currentPageIndex}
         currentPageType={currentPageType}
         minSeconds={minSeconds}
-        onMinTimeComplete={() => setIsMinTimeSatisfied(true)}
+        onMinTimeComplete={handleMinTimeComplete}
         canAdvance={canAdvance}
         advanceReasonHint={advanceReasonHint}
         onAdvance={handleAdvance}

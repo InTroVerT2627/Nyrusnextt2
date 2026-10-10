@@ -22,6 +22,12 @@ export default function ReadingRing({
   const [isCompleted, setIsCompleted] = useState(false);
   const [screenReaderAnnouncement, setScreenReaderAnnouncement] = useState("");
   const completedRef = useRef(false);
+  const onCompleteRef = useRef(onComplete);
+
+  // Keep onCompleteRef up to date with caller prop
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
 
   // Reset when minSeconds or active changes
   useEffect(() => {
@@ -31,17 +37,25 @@ export default function ReadingRing({
     completedRef.current = false;
   }, [minSeconds, active]);
 
+  // Handle immediate completion if minSeconds <= 0
   useEffect(() => {
-    if (!active || isPaused || isCompleted) return;
+    if (!active || isPaused) return;
+    if (minSeconds <= 0 && !completedRef.current) {
+      completedRef.current = true;
+      setIsCompleted(true);
+      setScreenReaderAnnouncement("Ready to continue.");
+      onCompleteRef.current();
+    }
+  }, [minSeconds, active, isPaused]);
+
+  // Timer interval for positive minSeconds
+  useEffect(() => {
+    if (!active || isPaused || isCompleted || minSeconds <= 0) return;
 
     const interval = setInterval(() => {
       setElapsedSeconds((prev) => {
         const next = prev + 0.2;
-        if (next >= minSeconds && !completedRef.current) {
-          completedRef.current = true;
-          setIsCompleted(true);
-          setScreenReaderAnnouncement("Ready to continue.");
-          onComplete();
+        if (next >= minSeconds) {
           return minSeconds;
         }
         return next;
@@ -49,7 +63,17 @@ export default function ReadingRing({
     }, 200);
 
     return () => clearInterval(interval);
-  }, [active, isPaused, isCompleted, minSeconds, onComplete]);
+  }, [active, isPaused, isCompleted, minSeconds]);
+
+  // Safely trigger onComplete in an effect when elapsedSeconds reaches minSeconds
+  useEffect(() => {
+    if (minSeconds > 0 && elapsedSeconds >= minSeconds && !completedRef.current) {
+      completedRef.current = true;
+      setIsCompleted(true);
+      setScreenReaderAnnouncement("Ready to continue.");
+      onCompleteRef.current();
+    }
+  }, [elapsedSeconds, minSeconds]);
 
   // Circular SVG geometry
   const radius = 16;
