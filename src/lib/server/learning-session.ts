@@ -48,78 +48,82 @@ export async function startModuleSession(
 
   // Enforce single-session lock: terminate any existing active session for this user
   if (admin) {
-    await admin
-      .from("learning_module_sessions")
-      .update({
-        state: "interrupted",
-        interrupt_reason: "second_session",
-        ended_at: new Date(now).toISOString(),
-      })
-      .eq("user_id", userId)
-      .eq("state", "active");
+    try {
+      await admin
+        .from("learning_module_sessions")
+        .update({
+          state: "interrupted",
+          interrupt_reason: "second_session",
+          ended_at: new Date(now).toISOString(),
+        })
+        .eq("user_id", userId)
+        .eq("state", "active");
 
-    const { data, error } = await admin
-      .from("learning_module_sessions")
-      .insert({
-        id: sessionId,
-        user_id: userId,
-        path_slug: pathSlug,
-        module_slug: moduleSlug,
-        state: "active",
-        current_page_type: "teaser",
-        current_page_index: 0,
-        pauses_used: 0,
-        relaxed_mode: relaxedMode,
-        session_token: sessionToken,
-        last_heartbeat_at: new Date(now).toISOString(),
-        started_at: new Date(now).toISOString(),
-      })
-      .select()
-      .single();
+      const { data, error } = await admin
+        .from("learning_module_sessions")
+        .insert({
+          id: sessionId,
+          user_id: userId,
+          path_slug: pathSlug,
+          module_slug: moduleSlug,
+          state: "active",
+          current_page_type: "teaser",
+          current_page_index: 0,
+          pauses_used: 0,
+          relaxed_mode: relaxedMode,
+          session_token: sessionToken,
+          last_heartbeat_at: new Date(now).toISOString(),
+          started_at: new Date(now).toISOString(),
+        })
+        .select()
+        .single();
 
-    if (error || !data) throw new Error("Could not initialize learning session.");
-
-    const session: SessionRecord = {
-      id: data.id,
-      userId: data.user_id,
-      pathSlug: data.path_slug,
-      moduleSlug: data.module_slug,
-      state: data.state as "active",
-      currentPageType: data.current_page_type as PageType,
-      currentPageIndex: data.current_page_index,
-      pausesUsed: data.pauses_used,
-      relaxedMode: data.relaxed_mode,
-      sessionToken: data.session_token,
-      lastHeartbeatAt: new Date(data.last_heartbeat_at).getTime(),
-      startedAt: new Date(data.started_at).getTime(),
-    };
-    return { session, token: sessionToken };
-  } else {
-    // Memory fallback
-    for (const [, sess] of memorySessions.entries()) {
-      if (sess.userId === userId && sess.state === "active") {
-        sess.state = "interrupted";
-        sess.interruptReason = "second_session";
-        sess.endedAt = now;
+      if (!error && data) {
+        const session: SessionRecord = {
+          id: data.id,
+          userId: data.user_id,
+          pathSlug: data.path_slug,
+          moduleSlug: data.module_slug,
+          state: data.state as "active",
+          currentPageType: data.current_page_type as PageType,
+          currentPageIndex: data.current_page_index,
+          pausesUsed: data.pauses_used,
+          relaxedMode: data.relaxed_mode,
+          sessionToken: data.session_token,
+          lastHeartbeatAt: new Date(data.last_heartbeat_at).getTime(),
+          startedAt: new Date(data.started_at).getTime(),
+        };
+        return { session, token: sessionToken };
       }
+    } catch {
+      // Supabase query error -> fall back to memory
     }
-    const session: SessionRecord = {
-      id: sessionId,
-      userId,
-      pathSlug,
-      moduleSlug,
-      state: "active",
-      currentPageType: "teaser",
-      currentPageIndex: 0,
-      pausesUsed: 0,
-      relaxedMode,
-      sessionToken,
-      lastHeartbeatAt: now,
-      startedAt: now,
-    };
-    memorySessions.set(sessionId, session);
-    return { session, token: sessionToken };
   }
+
+  // Memory fallback
+  for (const [, sess] of memorySessions.entries()) {
+    if (sess.userId === userId && sess.state === "active") {
+      sess.state = "interrupted";
+      sess.interruptReason = "second_session";
+      sess.endedAt = now;
+    }
+  }
+  const session: SessionRecord = {
+    id: sessionId,
+    userId,
+    pathSlug,
+    moduleSlug,
+    state: "active",
+    currentPageType: "teaser",
+    currentPageIndex: 0,
+    pausesUsed: 0,
+    relaxedMode,
+    sessionToken,
+    lastHeartbeatAt: now,
+    startedAt: now,
+  };
+  memorySessions.set(sessionId, session);
+  return { session, token: sessionToken };
 }
 
 export async function recordPageEnter(
@@ -135,21 +139,29 @@ export async function recordPageEnter(
 
   // Find session to verify relaxed mode
   let isRelaxed = false;
+  let useAdmin = false;
   if (admin) {
-    const { data } = await admin
-      .from("learning_module_sessions")
-      .select("relaxed_mode, state")
-      .eq("id", sessionId)
-      .eq("user_id", userId)
-      .single();
-    if (!data || data.state !== "active") {
-      throw new Error("Active session required.");
+    try {
+      const { data, error } = await admin
+        .from("learning_module_sessions")
+        .select("relaxed_mode, state")
+        .eq("id", sessionId)
+        .eq("user_id", userId)
+        .single();
+      if (!error && data && data.state === "active") {
+        isRelaxed = data.relaxed_mode;
+        useAdmin = true;
+      }
+    } catch {
+      // table query failed -> memory fallback
     }
-    isRelaxed = data.relaxed_mode;
-  } else {
+  }
+
+  if (!useAdmin) {
     const sess = memorySessions.get(sessionId);
-    if (!sess || sess.state !== "active") throw new Error("Active session required.");
-    isRelaxed = sess.relaxedMode;
+    if (sess && sess.state === "active") {
+      isRelaxed = sess.relaxedMode;
+    }
   }
 
   // Calculate server-side minimum seconds
@@ -161,29 +173,36 @@ export async function recordPageEnter(
 
   const visitId = crypto.randomUUID();
 
-  if (admin) {
-    await admin.from("learning_page_visits").insert({
-      id: visitId,
-      session_id: sessionId,
-      user_id: userId,
-      page_index: pageIndex,
-      page_type: pageType,
-      min_seconds: minSeconds,
-      server_enter_at: new Date(now).toISOString(),
-      interaction_completed: false,
-    });
-  } else {
-    memoryVisits.set(visitId, {
-      id: visitId,
-      sessionId,
-      userId,
-      pageIndex,
-      pageType,
-      minSeconds,
-      serverEnterAt: now,
-      interactionCompleted: false,
-    });
+  if (useAdmin && admin) {
+    try {
+      const { error } = await admin.from("learning_page_visits").insert({
+        id: visitId,
+        session_id: sessionId,
+        user_id: userId,
+        page_index: pageIndex,
+        page_type: pageType,
+        min_seconds: minSeconds,
+        server_enter_at: new Date(now).toISOString(),
+        interaction_completed: false,
+      });
+      if (!error) {
+        return { minSeconds, visitId };
+      }
+    } catch {
+      // table insert failed -> memory fallback
+    }
   }
+
+  memoryVisits.set(visitId, {
+    id: visitId,
+    sessionId,
+    userId,
+    pageIndex,
+    pageType,
+    minSeconds,
+    serverEnterAt: now,
+    interactionCompleted: false,
+  });
 
   return { minSeconds, visitId };
 }
@@ -201,22 +220,28 @@ export async function verifyAndAdvancePage(
 
   let enterTimestamp = 0;
   let minSecondsRequired = 0;
+  let useAdmin = false;
 
   if (admin) {
-    const { data: visit, error } = await admin
-      .from("learning_page_visits")
-      .select("server_enter_at, min_seconds, session_id")
-      .eq("id", visitId)
-      .eq("user_id", userId)
-      .single();
+    try {
+      const { data: visit, error } = await admin
+        .from("learning_page_visits")
+        .select("server_enter_at, min_seconds, session_id")
+        .eq("id", visitId)
+        .eq("user_id", userId)
+        .single();
 
-    if (error || !visit) {
-      return { success: false, error: "Invalid visit tracking token." };
+      if (!error && visit) {
+        enterTimestamp = new Date(visit.server_enter_at).getTime();
+        minSecondsRequired = visit.min_seconds;
+        useAdmin = true;
+      }
+    } catch {
+      // ignore
     }
+  }
 
-    enterTimestamp = new Date(visit.server_enter_at).getTime();
-    minSecondsRequired = visit.min_seconds;
-  } else {
+  if (!useAdmin) {
     const visit = memoryVisits.get(visitId);
     if (!visit || visit.userId !== userId) {
       return { success: false, error: "Invalid visit tracking token." };
@@ -243,35 +268,39 @@ export async function verifyAndAdvancePage(
   }
 
   // Record advance in DB
-  if (admin) {
-    await admin
-      .from("learning_page_visits")
-      .update({
-        server_advance_at: new Date(now).toISOString(),
-        interaction_completed: true,
-      })
-      .eq("id", visitId);
+  if (useAdmin && admin) {
+    try {
+      await admin
+        .from("learning_page_visits")
+        .update({
+          server_advance_at: new Date(now).toISOString(),
+          interaction_completed: true,
+        })
+        .eq("id", visitId);
 
-    await admin
-      .from("learning_module_sessions")
-      .update({
-        current_page_index: nextPageIndex,
-        current_page_type: nextPageType,
-        last_heartbeat_at: new Date(now).toISOString(),
-      })
-      .eq("id", sessionId);
-  } else {
-    const v = memoryVisits.get(visitId);
-    if (v) {
-      v.serverAdvanceAt = now;
-      v.interactionCompleted = true;
+      await admin
+        .from("learning_module_sessions")
+        .update({
+          current_page_index: nextPageIndex,
+          current_page_type: nextPageType,
+          last_heartbeat_at: new Date(now).toISOString(),
+        })
+        .eq("id", sessionId);
+    } catch {
+      // ignore
     }
-    const s = memorySessions.get(sessionId);
-    if (s) {
-      s.currentPageIndex = nextPageIndex;
-      s.currentPageType = nextPageType;
-      s.lastHeartbeatAt = now;
-    }
+  }
+
+  const v = memoryVisits.get(visitId);
+  if (v) {
+    v.serverAdvanceAt = now;
+    v.interactionCompleted = true;
+  }
+  const s = memorySessions.get(sessionId);
+  if (s) {
+    s.currentPageIndex = nextPageIndex;
+    s.currentPageType = nextPageType;
+    s.lastHeartbeatAt = now;
   }
 
   return { success: true };

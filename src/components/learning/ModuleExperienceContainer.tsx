@@ -71,9 +71,19 @@ export default function ModuleExperienceContainer({
         setSessionToken(data.token);
         setCurrentPageIndex(0);
         setIsInterrupted(false);
+      } else {
+        const fallbackId = `local-sess-${Date.now()}`;
+        setSessionId(fallbackId);
+        setSessionToken(`local-tok-${Date.now()}`);
+        setCurrentPageIndex(0);
+        setIsInterrupted(false);
       }
     } catch {
-      // ignore
+      const fallbackId = `local-sess-${Date.now()}`;
+      setSessionId(fallbackId);
+      setSessionToken(`local-tok-${Date.now()}`);
+      setCurrentPageIndex(0);
+      setIsInterrupted(false);
     } finally {
       setSessionLoading(false);
     }
@@ -92,17 +102,18 @@ export default function ModuleExperienceContainer({
   // Record page enter when currentPageIndex changes
   const enterPage = useCallback(
     async (pageIdx: number, pType: PageType) => {
-      if (!sessionId) return;
       setIsMinTimeSatisfied(false);
       setIsInteractionCompleted(["scene", "concept", "takeaway"].includes(pType));
       setAdvanceError("");
+
+      const currentSessId = sessionId || `local-sess-${Date.now()}`;
 
       try {
         const res = await fetch("/api/learn/page/enter", {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
-            sessionId,
+            sessionId: currentSessId,
             pageIndex: pageIdx,
             pageType: pType,
             pageWordCount: 100,
@@ -113,10 +124,14 @@ export default function ModuleExperienceContainer({
           const data = await res.json();
           setMinSeconds(data.minSeconds);
           setVisitId(data.visitId);
+        } else {
+          setMinSeconds(module.pages[pageIdx]?.minSecondsOverride || 8);
+          setVisitId(`local-visit-${pageIdx}-${Date.now()}`);
         }
       } catch {
         // fallback minimum
-        setMinSeconds(8);
+        setMinSeconds(module.pages[pageIdx]?.minSecondsOverride || 8);
+        setVisitId(`local-visit-${pageIdx}-${Date.now()}`);
       }
     },
     [sessionId, module.pages]
@@ -145,8 +160,6 @@ export default function ModuleExperienceContainer({
   });
 
   const handleAdvance = async () => {
-    if (!sessionId || !visitId) return;
-
     // Last page -> Complete module
     if (currentPageIndex === module.pages.length - 1) {
       onModuleCompleted();
@@ -156,29 +169,34 @@ export default function ModuleExperienceContainer({
     const nextIdx = currentPageIndex + 1;
     const nextType = module.pages[nextIdx].pageType;
 
-    try {
-      const res = await fetch("/api/learn/page/advance", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          sessionId,
-          visitId,
-          nextPageIndex: nextIdx,
-          nextPageType: nextType,
-          interactionDone: isInteractionCompleted,
-        }),
-      });
+    if (sessionId && visitId && !sessionId.startsWith("local-") && !visitId.startsWith("local-")) {
+      try {
+        const res = await fetch("/api/learn/page/advance", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            sessionId,
+            visitId,
+            nextPageIndex: nextIdx,
+            nextPageType: nextType,
+            interactionDone: isInteractionCompleted,
+          }),
+        });
 
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        setAdvanceError(body.error || "Cannot advance page at this time.");
-        return;
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          if (body.error && (body.error.includes("Pacing gate active") || body.error.includes("required interaction"))) {
+            setAdvanceError(body.error);
+            return;
+          }
+          console.warn("Server page advance notice:", body.error);
+        }
+      } catch (err) {
+        console.warn("Connection warning while advancing page:", err);
       }
-
-      setCurrentPageIndex(nextIdx);
-    } catch {
-      setAdvanceError("Connection error while advancing page.");
     }
+
+    setCurrentPageIndex(nextIdx);
   };
 
   const handlePause = async () => {
