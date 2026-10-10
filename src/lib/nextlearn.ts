@@ -58,7 +58,16 @@ export function scoreFollowUp(answer: string, keys: string[]) {
 export function selectQuestions(mission: Mission, solution: string, report: string) {
   const source = `${solution}\n${report}`.toLowerCase();
   const flagged = /ignore (the )?(rubric|instructions)|give me full marks|override.*score/.test(source);
-  const recognized = source.includes(mission.expected.toLowerCase());
+  const code = solution.toLowerCase();
+  const recognized = mission.id === "loop-bounds"
+    ? /i\s*<\s*values\.length\s*;/.test(code) && code.includes("return best")
+    : mission.id === "mutation"
+      ? code.includes("linkedhashset") && code.includes("add(")
+      : mission.id === "async-flow"
+        ? code.includes("promise.all") && code.includes(".map(")
+        : mission.id === "hashing"
+          ? code.includes("hashcode(")
+          : source.includes(mission.expected.toLowerCase());
   const keys = mission.questions;
   const selected = recognized
     ? keys.filter((question) => question.trigger === "stretch")

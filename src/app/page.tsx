@@ -1,95 +1,147 @@
-const missions = [
-  {
-    number: "01",
-    title: "The wrong top seller",
-    severity: "S3 · Low",
-    skill: "Loop bounds",
-    language: "JavaScript",
-    state: "Ready to try",
-    accent: "mint",
-    description: "A dashboard leaves out the product that should be leading the weekly report.",
-  },
-  {
-    number: "02",
-    title: "Customers missing from the list",
-    severity: "S3 · Low",
-    skill: "Mutation during iteration",
-    language: "Java",
-    state: "Locked · Complete mission 01",
-    accent: "blue",
-    description: "Some customers disappear while an operations team cleans up duplicate records.",
-  },
-  {
-    number: "03",
-    title: "The report arrives too soon",
-    severity: "S2 · Medium",
-    skill: "Async flow",
-    language: "JavaScript",
-    state: "Locked · Complete mission 01",
-    accent: "amber",
-    description: "An order summary renders before all of its data has finished loading.",
-  },
-  {
-    number: "04",
-    title: "A cache that never gets a hit",
-    severity: "S1 · High",
-    skill: "Equality and hashing",
-    language: "Java",
-    state: "Locked · Complete mission 02 or 03",
-    accent: "rose",
-    description: "A customer cache misses even when the requested key looks familiar.",
-  },
-];
+"use client";
 
-const rubric = [
-  ["Fix correctness", "35%", "Visible tests"],
-  ["Edge cases", "15%", "Hidden tests"],
-  ["Root cause", "20%", "Reasoning review"],
-  ["Explanation", "10%", "Reasoning review"],
-  ["Follow-up reasoning", "20%", "Fixed question bank"],
-];
+import { useEffect, useMemo, useState } from "react";
+import { getEvidenceState, missions, scoreFollowUp, selectQuestions, type Mission } from "@/lib/nextlearn";
+
+type Section = "Missions" | "Skill tree" | "My evidence" | "Recruiter preview" | "Review queue" | "Audit log";
+type Attempt = { id: string; missionId: string; date: string; codePassed: boolean; followUpScore: number; confidence: string; report: string; code: string; answers: string[]; aiUsed: boolean; flagged: boolean; questionIds: string[]; challenge?: string };
+type Saved = { attempts: Attempt[]; sharing: boolean; reviewResolved: string[] };
+const storageKey = "nextlearn.demo.v1";
+const blank: Saved = { attempts: [], sharing: false, reviewResolved: [] };
+const rubric = [["Fix correctness", "35%", "Visible tests"], ["Edge-case handling", "15%", "Hidden tests"], ["Root-cause identification", "20%", "Reasoning review"], ["Explanation clarity", "10%", "Reasoning review"], ["Follow-up reasoning", "20%", "Fixed question bank"]];
+
+function Icon({ children }: { children: React.ReactNode }) { return <span className="nav-icon" aria-hidden="true">{children}</span>; }
 
 export default function Home() {
-  return (
-    <main className="shell">
-      <aside className="rail" aria-label="Main navigation">
-        <a className="brand" href="#top" aria-label="ProofLoop home"><span className="brand-mark">P</span><span>proofloop</span></a>
-        <div className="rail-label">WORKSPACE</div>
-        <a className="nav-link active" href="#missions"><span className="nav-icon">◈</span> Missions</a>
-        <a className="nav-link" href="#progress"><span className="nav-icon">⌘</span> Skill tree</a>
-        <a className="nav-link" href="#evidence"><span className="nav-icon">▤</span> My evidence</a>
-        <div className="rail-bottom"><div className="avatar">A</div><div><strong>Alex Morgan</strong><small>Learner workspace</small></div><span className="more">···</span></div>
-      </aside>
+  const [section, setSection] = useState<Section>("Missions");
+  const [saved, setSaved] = useState<Saved>(blank);
+  const [ready, setReady] = useState(false);
+  const [mission, setMission] = useState<Mission | null>(null);
+  const [code, setCode] = useState("");
+  const [report, setReport] = useState("");
+  const [aiUsed, setAiUsed] = useState(false);
+  const [questions, setQuestions] = useState<{id:string; question:string; keys:string[]}[]>([]);
+  const [answers, setAnswers] = useState<string[]>([]);
+  const [draftAttempt, setDraftAttempt] = useState<Omit<Attempt,"id"|"date"|"code"|"answers"|"aiUsed"> | null>(null);
+  const [notice, setNotice] = useState("");
+  const [selectedEvidence, setSelectedEvidence] = useState<Attempt | null>(null);
+  const [challenge, setChallenge] = useState("");
+  const [bossOpen, setBossOpen] = useState(false);
 
-      <section className="main-area" id="top">
-        <header className="topbar"><div className="breadcrumb">Nyeras <span>/</span> <strong>Proof of skill</strong></div><div className="top-actions"><span className="sandbox-pill"><i /> Sandbox environment</span><button className="icon-button" aria-label="Notifications">♧</button></div></header>
-        <div className="content">
-          <section className="welcome">
-            <div><div className="eyebrow">YOUR PRACTICE SPACE</div><h1>Show what you can do.</h1><p>Work through realistic debugging incidents. Your evidence grows when you can explain the thinking behind your fix.</p></div>
-            <div className="welcome-art" aria-hidden="true"><div className="orbit orbit-one"/><div className="orbit orbit-two"/><div className="spark">✳</div><div className="art-card"><span>proof</span><b>✓</b></div></div>
-          </section>
+  useEffect(() => {
+    try { const raw = localStorage.getItem(storageKey); if (raw) setSaved({ ...blank, ...JSON.parse(raw) }); }
+    catch { setNotice("Saved demo data could not be read; a fresh workspace is ready."); }
+    setReady(true);
+  }, []);
+  useEffect(() => { if (ready) localStorage.setItem(storageKey, JSON.stringify(saved)); }, [ready, saved]);
 
-          <section className="progress-row" id="progress" aria-label="Your progress">
-            <div className="progress-copy"><span className="progress-icon">⌁</span><div><strong>Your debugging path</strong><small>Build evidence one mission at a time</small></div></div>
-            <div className="path-nodes"><span className="node next">1</span><i className="path-line"/><span className="node">2</span><i className="path-line"/><span className="node">3</span><i className="path-line"/><span className="node">4</span></div>
-            <div className="progress-count"><strong>0 <span>/ 4</span></strong><small>missions evidenced</small></div>
-          </section>
+  const evidenceIds = useMemo(() => [...new Set(saved.attempts.filter((a) => a.codePassed && a.followUpScore >= 1 && !a.flagged).map((a) => a.missionId))], [saved.attempts]);
+  const reviewItems = saved.attempts.filter((a) => (a.flagged || a.confidence === "Low" || a.challenge) && !saved.reviewResolved.includes(a.id));
+  const startMission = (item: Mission) => { setMission(item); setCode(item.starter); setReport(""); setQuestions([]); setAnswers([]); setDraftAttempt(null); setAiUsed(false); setNotice(""); };
+  const closeMission = () => { setMission(null); setQuestions([]); setAnswers([]); setDraftAttempt(null); };
+  const submit = () => {
+    if (!mission) return;
+    const picked = selectQuestions(mission, code, report);
+    const passed = picked.recognized;
+    setQuestions(picked.selected.map(({id,question,keys}) => ({id,question,keys})));
+    setAnswers(picked.selected.map(() => ""));
+    setDraftAttempt({ missionId: mission.id, codePassed: passed, followUpScore: 0, confidence: picked.flagged ? "Low" : passed ? "Medium" : "Low", report, flagged: picked.flagged, questionIds: picked.selected.map((q) => q.id) });
+    setNotice(picked.flagged ? "A possible rubric-manipulation phrase was flagged for human review." : passed ? "The local pattern check found an expected fix marker. This is a simulation, not code execution. Now explain your reasoning." : "The local pattern check did not find the expected fix marker. Your work is saved for feedback and retry.");
+  };
+  const finishAttempt = () => {
+    if (!draftAttempt) return;
+    const earned = questions.reduce((sum,q,i) => sum + scoreFollowUp(answers[i] || "",q.keys),0);
+    const possible = questions.length * 2;
+    const followUpScore = possible ? earned / questions.length : 0;
+    const confidence = draftAttempt.flagged || followUpScore < 1 ? "Low" : followUpScore === 2 && draftAttempt.codePassed ? "High" : "Medium";
+    const next: Attempt = { ...draftAttempt, followUpScore, confidence, code, answers, aiUsed, id: crypto.randomUUID(), date: new Date().toISOString() };
+    setSaved((current) => ({ ...current, attempts: [next, ...current.attempts] }));
+    setNotice(confidence === "Low" ? "Attempt recorded with low confidence and sent to the review queue." : "Attempt saved. Open your evidence to review the criterion-level result.");
+    setDraftAttempt(null); setQuestions([]); setAnswers([]);
+  };
+  const openEvidence = (item: Attempt) => { setSelectedEvidence(item); setChallenge(""); };
+  const submitChallenge = () => {
+    if (!selectedEvidence || !challenge.trim()) return;
+    setSaved((current) => ({ ...current, attempts: current.attempts.map((a) => a.id === selectedEvidence.id ? { ...a, challenge: challenge.trim(), confidence: "Low" } : a) }));
+    setSelectedEvidence(null); setNotice("Challenge submitted. It is now in the human review queue.");
+  };
+  const navItems: {name:Section; icon:string}[] = [{name:"Missions",icon:"◈"},{name:"Skill tree",icon:"⌘"},{name:"My evidence",icon:"▤"},{name:"Recruiter preview",icon:"◎"},{name:"Review queue",icon:"☷"},{name:"Audit log",icon:"◷"}];
 
-          <div className="section-heading" id="missions"><div><div className="eyebrow">INCIDENT MISSIONS</div><h2>Choose a place to start</h2></div><button className="text-button">View skill tree <span>↗</span></button></div>
-
-          <section className="mission-grid" aria-label="Debugging missions">
-            {missions.map((mission) => <article className={`mission-card ${mission.accent}`} key={mission.number}>
-              <div className="card-top"><span className="mission-number">MISSION {mission.number}</span><span className="severity">{mission.severity}</span></div>
-              <div className="mission-illustration"><div className="code-window"><div className="window-dots"><i/><i/><i/></div><div className="code-line short"/><div className="code-line"/><div className="code-line medium"/><div className="bug-mark">!</div></div><div className="mission-symbol">{mission.number === "01" ? "↗" : mission.number === "02" ? "⌁" : mission.number === "03" ? "◷" : "◇"}</div></div>
-              <div className="mission-body"><div className="mission-tags"><span>{mission.language}</span><span>{mission.skill}</span></div><h3>{mission.title}</h3><p>{mission.description}</p><div className="card-footer"><span className={mission.number === "01" ? "ready" : "locked"}>{mission.number === "01" ? "●" : "◌"} {mission.state}</span><button disabled={mission.number !== "01"} aria-label={mission.number === "01" ? "Start mission 1" : `Mission ${mission.number} locked`}>{mission.number === "01" ? "Start mission" : "Locked"} <span>→</span></button></div></div>
-            </article>)}
-          </section>
-
-          <section className="rubric-panel"><div className="rubric-intro"><div className="rubric-icon">◎</div><div><div className="eyebrow">CLEAR BEFORE YOU BEGIN</div><h2>How your work is reviewed</h2><p>Every mission uses the same visible rubric. Tests check your code; reasoning is reviewed against fixed criteria.</p><a href="#rubric-table">See the full rubric <span>→</span></a></div></div><div className="rubric-table" id="rubric-table"><div className="table-head"><span>CRITERION</span><span>WEIGHT</span><span>REVIEWED BY</span></div>{rubric.map(([name, weight, reviewer]) => <div className="table-row" key={name}><span>{name}</span><strong>{weight}</strong><span>{reviewer}</span></div>)}</div></section>
-
-          <footer className="disclaimer"><span>ⓘ</span><p>This is a practice sandbox. Evidence reflects work in these tasks and is not a validated predictor of job performance. Sharing is always your choice.</p><a href="#evidence">Privacy & sharing</a></footer>
-        </div>
-      </section>
-    </main>
-  );
+  return <main className="shell">
+    <aside className="rail" aria-label="Main navigation">
+      <a className="brand" href="#top"><span className="brand-mark">N</span><span>nextlearn</span></a>
+      <div className="rail-label">WORKSPACE</div>
+      {navItems.map((item) => <button key={item.name} className={`nav-link ${section===item.name?"active":""}`} onClick={() => { setSection(item.name); closeMission(); }}><Icon>{item.icon}</Icon>{item.name}</button>)}
+      <div className="rail-bottom"><div className="avatar">A</div><div><strong>Alex Morgan</strong><small>Synthetic learner</small></div><span className="more">···</span></div>
+    </aside>
+    <section className="main-area" id="top">
+      <header className="topbar"><div className="breadcrumb">Nyeras <span>/</span> <strong>{section}</strong></div><div className="top-actions"><span className="sandbox-pill"><i/> Local demo · synthetic data</span><button className="icon-button" aria-label="Notifications" onClick={() => setNotice("No new notifications.")}>♧</button></div></header>
+      <div className="content">
+        {notice && <div className="notice" role="status"><span>{notice}</span><button aria-label="Dismiss" onClick={() => setNotice("")}>×</button></div>}
+        {mission ? <MissionWorkspace mission={mission} code={code} setCode={setCode} report={report} setReport={setReport} aiUsed={aiUsed} setAiUsed={setAiUsed} questions={questions} answers={answers} setAnswers={setAnswers} draftAttempt={draftAttempt} submit={submit} finish={finishAttempt} close={closeMission} /> : <>
+          {section === "Missions" && <MissionHub evidenceIds={evidenceIds} onStart={startMission} onSection={setSection} attempts={saved.attempts.length} />}
+          {section === "Skill tree" && (bossOpen ? <BossRound onClose={()=>setBossOpen(false)} onComplete={(result)=>{const attempt:Attempt={id:crypto.randomUUID(),missionId:"boss-review",date:new Date().toISOString(),codePassed:result,followUpScore:result?1.5:0,confidence:result?"Medium":"Low",report:"Reviewed the prewritten AI patch.",code:"function findMax(values) { return values[0]; }",answers:["Valid last-element counterexample"],aiUsed:false,flagged:!result,questionIds:["boss-valid-test"]};setSaved((s)=>({...s,attempts:[attempt,...s.attempts]}));setBossOpen(false);setNotice(result?"Boss evidence saved to your separate AI-code review card.":"The boss attempt needs another review; no debugging level changed.");}} /> : <SkillTree evidenceIds={evidenceIds} attempts={saved.attempts} onStart={startMission} onEvidence={openEvidence} onBoss={()=>setBossOpen(true)} />)}
+          {section === "My evidence" && <Evidence attempts={saved.attempts} sharing={saved.sharing} setSharing={(sharing) => setSaved((s) => ({...s,sharing}))} onOpen={openEvidence} />}
+          {section === "Recruiter preview" && <Recruiter sharing={saved.sharing} attempts={saved.attempts} />}
+          {section === "Review queue" && <ReviewQueue items={reviewItems} onResolve={(id) => setSaved((s) => ({...s,reviewResolved:[id,...s.reviewResolved]}))} />}
+          {section === "Audit log" && <AuditLog attempts={saved.attempts} sharing={saved.sharing} />}
+        </>}
+      </div>
+    </section>
+    {selectedEvidence && <div className="overlay" role="presentation" onMouseDown={(e) => {if(e.target===e.currentTarget)setSelectedEvidence(null);}}><section className="dialog" role="dialog" aria-modal="true" aria-labelledby="evidence-title"><button className="dialog-close" onClick={() => setSelectedEvidence(null)} aria-label="Close">×</button><div className="eyebrow">EVIDENCE CARD · {selectedEvidence.id.slice(0,8)}</div><h2 id="evidence-title">{missions.find((m) => m.id===selectedEvidence.missionId)?.skill || "Reviewing AI-written code"}</h2><p>{missions.find((m) => m.id===selectedEvidence.missionId)?.title || "Catch the AI’s mistake"}</p><div className="score-grid"><Score label="Code checks" value={selectedEvidence.codePassed?"Pass":"Needs work"}/><Score label="Follow-up" value={`${selectedEvidence.followUpScore.toFixed(1)} / 2`}/><Score label="Confidence" value={selectedEvidence.confidence}/><Score label="Attempt" value={new Date(selectedEvidence.date).toLocaleDateString()}/></div><div className="rubric-table detail-table">{rubric.map(([name,weight,reviewer])=><div className="table-row" key={name}><span>{name}</span><strong>{weight}</strong><span>{reviewer}</span></div>)}</div><details className="submission-detail"><summary>View submission and follow-up answers</summary><pre>{selectedEvidence.code}</pre><p><strong>AI assistance disclosed:</strong> {selectedEvidence.aiUsed?"Yes":"No"}</p>{selectedEvidence.answers.map((answer,i)=><p key={selectedEvidence.questionIds[i]}><strong>{selectedEvidence.questionIds[i]}:</strong> {answer||"No answer recorded"}</p>)}<p><strong>Incident report:</strong> {selectedEvidence.report||"No report provided"}</p></details><div className="disclaimer"><span>ⓘ</span><p>Experimental evidence from a local demo, not a validated predictor of job performance.</p></div><label className="field-label" htmlFor="challenge">Challenge this result</label><textarea id="challenge" rows={3} value={challenge} onChange={(e)=>setChallenge(e.target.value)} placeholder="Choose a criterion and explain your concern"/><button className="primary" onClick={submitChallenge} disabled={!challenge.trim()}>Send for human review</button></section></div>}
+  </main>;
 }
+
+function MissionHub({evidenceIds,onStart,onSection,attempts}:{evidenceIds:string[];onStart:(m:Mission)=>void;onSection:(s:Section)=>void;attempts:number}) {
+  return <>
+    <section className="welcome"><div><div className="eyebrow">YOUR PRACTICE SPACE</div><h1>Show what you can do.</h1><p>Debug realistic incidents, explain your fix, and build a private evidence record you control.</p></div><div className="welcome-art" aria-hidden="true"><div className="orbit orbit-one"/><div className="orbit orbit-two"/><div className="spark">✳</div><div className="art-card"><span>proof</span><b>✓</b></div></div></section>
+    <section className="progress-row"><div className="progress-copy"><span className="progress-icon">⌁</span><div><strong>Your debugging path</strong><small>Progress follows demonstrated understanding</small></div></div><div className="path-nodes">{missions.map((m,i)=><span key={m.id} className={`node ${evidenceIds.includes(m.id)?"done":getEvidenceState(m.id,evidenceIds)==="Available"?"next":""}`}>{evidenceIds.includes(m.id)?"✓":i+1}</span>)}</div><div className="progress-count"><strong>{evidenceIds.length} <span>/ 4</span></strong><small>{attempts} attempts · no time score</small></div></section>
+    <div className="section-heading"><div><div className="eyebrow">INCIDENT MISSIONS</div><h2>Choose a place to start</h2></div><button className="text-button" onClick={()=>onSection("Skill tree")}>View skill tree <span>↗</span></button></div>
+    <section className="mission-grid" aria-label="Debugging missions">{missions.map((m,i)=>{const state=getEvidenceState(m.id,evidenceIds);return <article className={`mission-card ${["mint","blue","amber","rose"][i]}`} key={m.id}><div className="card-top"><span className="mission-number">MISSION {String(i+1).padStart(2,"0")}</span><span className="severity">{m.severity}</span></div><div className="mission-illustration"><div className="code-window"><div className="window-dots"><i/><i/><i/></div><div className="code-line short"/><div className="code-line"/><div className="code-line medium"/><div className="bug-mark">!</div></div><div className="mission-symbol">{["↗","⌁","◷","◇"][i]}</div></div><div className="mission-body"><div className="mission-tags"><span>{m.language}</span><span>{m.skill}</span></div><h3>{m.title}</h3><p>{m.description}</p><div className="card-footer"><span className={state==="Evidenced"?"ready":state==="Available"?"ready":"locked"}>{state==="Evidenced"?"✓":"◌"} {state}</span><button onClick={()=>onStart(m)}>{state==="Locked"?"Preview & try":"Start mission"} <span>→</span></button></div></div></article>;})}</section>
+    <section className="rubric-panel"><div className="rubric-intro"><div className="rubric-icon">◎</div><div><div className="eyebrow">CLEAR BEFORE YOU BEGIN</div><h2>How your work is reviewed</h2><p>Tests check code correctness. Reasoning is compared with a fixed question bank in this demo.</p><a href="#rubric-table">See the full rubric <span>→</span></a></div></div><div className="rubric-table" id="rubric-table"><div className="table-head"><span>CRITERION</span><span>WEIGHT</span><span>REVIEWED BY</span></div>{rubric.map(([name,weight,reviewer])=><div className="table-row" key={name}><span>{name}</span><strong>{weight}</strong><span>{reviewer}</span></div>)}</div></section>
+    <div className="disclaimer"><span>ⓘ</span><p>Practice sandbox. Evidence reflects this demo only and is not a validated predictor of job performance. Sharing is off until you choose it.</p><button className="link-button" onClick={()=>onSection("My evidence")}>Privacy & sharing</button></div>
+  </>;
+}
+
+function MissionWorkspace({mission,code,setCode,report,setReport,aiUsed,setAiUsed,questions,answers,setAnswers,draftAttempt,submit,finish,close}:{mission:Mission;code:string;setCode:(s:string)=>void;report:string;setReport:(s:string)=>void;aiUsed:boolean;setAiUsed:(v:boolean)=>void;questions:{id:string;question:string;keys:string[]}[];answers:string[];setAnswers:(a:string[])=>void;draftAttempt:Omit<Attempt,"id"|"date"|"code"|"answers"|"aiUsed">|null;submit:()=>void;finish:()=>void;close:()=>void}) {
+  return <><button className="back-link" onClick={close}>← Back to missions</button><section className="workspace-heading"><div><div className="eyebrow">INCIDENT MISSION · {mission.severity}</div><h1>{mission.title}</h1><p>{mission.description}</p></div><span className="severity">{mission.language} · {mission.skill}</span></section>
+    <div className="workspace-grid"><div className="workspace-primary"><section className="panel ticket-panel"><div className="panel-kicker">INCIDENT TICKET</div><p>{mission.ticket}</p><div className="ticket-meta"><span><b>Symptom</b>{mission.symptom}</span><span><b>Acceptance check</b>{mission.visible.join(" · ")}</span></div></section>
+      <section className="panel editor-panel"><div className="panel-title"><div><div className="panel-kicker">YOUR WORKSPACE</div><h2>Review and fix the code</h2></div><span className="language-tag">{mission.language}</span></div><textarea className="code-editor" aria-label="Code editor" spellCheck={false} value={code} onChange={(e)=>setCode(e.target.value)}/><div className="report-grid">{["What broke","Why it broke","The fix","How to prevent it"].map((heading,i)=><label key={heading}><span>{heading}</span><textarea value={i===0?report.split("\n")[0]||"":report.split("\n")[i]||""} onChange={(e)=>{const lines=report.split("\n");lines[i]=e.target.value;setReport(lines.join("\n"));}} placeholder={i===0?"Describe the user-visible impact":"Add a short note"}/></label>)}</div><label className="check-row"><input type="checkbox" checked={aiUsed} onChange={(e)=>setAiUsed(e.target.checked)}/> I used AI assistance while working (optional, never penalized).</label><div className="ai-disclosure">AI-use disclosure: this prototype uses a local deterministic simulation. No AI service is connected and no code is executed on a server.</div>{!draftAttempt&&<button className="primary" onClick={submit}>Submit incident report <span>→</span></button>}</section>
+      {draftAttempt&&<section className="panel result-panel"><div className="panel-kicker">DEMO CHECK RESULT</div><h2>{draftAttempt.codePassed?"Expected marker found · defend your reasoning":"No expected marker found · review and retry"}</h2><div className={`result-banner ${draftAttempt.codePassed?"success":"needs-work"}`}><span>{draftAttempt.codePassed?"✓":"!"}</span><p>{draftAttempt.codePassed?"A local text check found the expected fix marker. It does not execute code or verify correctness.":"The local text check did not find the expected fix marker. Edit your work and retry any time."}</p></div>{questions.length>0?<><div className="panel-kicker question-kicker">FOLLOW-UP QUESTIONS · FIXED BANK V1</div>{questions.map((q,i)=><label className="question-card" key={q.id}><span>QUESTION {i+1}</span><strong>{q.question}</strong><textarea value={answers[i]||""} onChange={(e)=>{const next=[...answers];next[i]=e.target.value;setAnswers(next);}} placeholder="Explain your reasoning in your own words"/></label>)}<p className="fine-print">The question count never changes the score. Answers in this demo are matched against fixed concepts; wording and grammar are not assessed.</p><button className="primary" onClick={finish}>Save attempt & view feedback</button></>:<button className="primary" onClick={finish}>Save attempt</button>}</section>}
+    </div><aside className="workspace-side"><section className="panel"><div className="panel-kicker">VISIBLE RUBRIC</div><h2>What counts</h2>{rubric.map(([n,w])=><div className="rubric-mini" key={n}><span>{n}</span><b>{w}</b></div>)}</section><section className="panel"><div className="panel-kicker">TASK VIEW</div><h2>Plain language</h2><p className="side-copy">{mission.symptom} The story text does not disclose the expected fix. There is no countdown and no time-based score.</p></section><section className="panel safety-panel"><span>ⓘ</span><p>Hidden tests and answer keys are not used in this browser demo. Results are local examples, not validated skill claims.</p></section></aside></div>
+  </>;
+}
+
+function SkillTree({evidenceIds,attempts,onStart,onEvidence,onBoss}:{evidenceIds:string[];attempts:Attempt[];onStart:(m:Mission)=>void;onEvidence:(a:Attempt)=>void;onBoss:()=>void}) {
+  const bossUnlocked=evidenceIds.length>=3;
+  return <><PageIntro eyebrow="PROGRESSION FROM EVIDENCE" title="Your skill tree" copy="Nodes change state when you demonstrate understanding. Labels and unlock rules stay visible; colour is never the only signal."/><section className="panel tree-panel"><div className="tree-path">{missions.map((m,i)=>{const state=getEvidenceState(m.id,evidenceIds);const latest=attempts.find((a)=>a.missionId===m.id);return <article className={`tree-node ${state.toLowerCase()}`} key={m.id}><div className="tree-connector"/><span className="tree-number">{evidenceIds.includes(m.id)?"✓":i+1}</span><div className="tree-node-copy"><div className="panel-kicker">NODE {i+1} · {m.skill}</div><h2>{m.shortTitle}</h2><p>{i===0?"Starting node":m.id==="hashing"?"Requires node 2 or node 3 evidence":"Requires node 1 evidence"}</p><span className="state-label">{state}</span></div><div className="tree-actions">{latest&&<button className="text-button" onClick={()=>onEvidence(latest)}>View evidence</button>}<button className="secondary" onClick={()=>onStart(m)}>{state==="Locked"?"Preview mission":"Open mission"}</button></div></article>;})}<article className={`tree-node boss-node ${bossUnlocked?"available":"locked"}`}><span className="tree-number">✦</span><div className="tree-node-copy"><div className="panel-kicker">BOSS ROUND · REVIEWING AI-WRITTEN CODE</div><h2>Catch the AI’s mistake</h2><p>Review a prewritten patch, identify the flaw, and prove it with a valid failing test.</p><span className="state-label">{bossUnlocked?"Available":"Locked · evidence 3 of 4 nodes"}</span></div><button className="secondary" disabled={!bossUnlocked} onClick={onBoss}>{bossUnlocked?"Start boss round":"Locked"}</button></article></div></section><div className="disclaimer"><span>ⓘ</span><p>Thresholds in this prototype are illustrative. A real evidence state needs the documented test, reasoning and confidence conditions.</p></div></>;
+}
+
+function BossRound({onClose,onComplete}:{onClose:()=>void;onComplete:(passed:boolean)=>void}) {
+  const [decision,setDecision]=useState("");const [lines,setLines]=useState<number[]>([]);const [test,setTest]=useState("assert(findMax([4, 8, 2]) === 8);\nassert(findMax([3, 7, 9]) === 9);");const [explanation,setExplanation]=useState("");const [result,setResult]=useState("");
+  const patchLines=["function findMax(values) {","  let best = values[0];","  for (let i = 0; i < values.length - 1; i++) {","    if (values[i] > best) best = values[i];","  }","  return best;","}"];
+  const run=()=>{const valid=/assert\s*\(/i.test(test)&&!/assert\s*\(\s*false\s*\)/i.test(test)&&test.includes("9")&&test.includes("3");const rejects=lines.includes(3)&&/last|final|end|length|skip/i.test(explanation);const accepts=decision==="reject";const passed=valid&&rejects&&accepts;setResult(passed?"Valid demo test: it fails on the suggested patch and passes on both reference variants. The flawed loop skips the last element.":"Test not accepted. A trivial or unrelated assertion also fails on correct implementations. Add a last-element counterexample, flag the loop bound and explain the input.");};
+  return <><button className="back-link" onClick={onClose}>← Back to skill tree</button><PageIntro eyebrow="BOSS ROUND · SYNTHETIC PATCH" title="Catch the AI’s mistake" copy="The patch below is fixed for every learner. Review it, locate the flaw, and prove it with a meaningful test. No external model or runner is connected."/><div className="workspace-grid"><div className="workspace-primary"><section className="panel"><div className="panel-kicker">AI-GENERATED SUGGESTION · PREWRITTEN</div><p className="side-copy">This patch looks plausible and passes the ordinary examples. Decide whether to trust it.</p><div className="boss-code">{patchLines.map((line,i)=><button className={lines.includes(i+1)?"flagged-line":""} key={i} onClick={()=>setLines((old)=>old.includes(i+1)?old.filter((n)=>n!==i+1):[...old,i+1])}><span>{i+1}</span><code>{line}</code><em>{lines.includes(i+1)?"Flagged":""}</em></button>)}</div><div className="decision-row"><button className={decision==="accept"?"decision selected":"decision"} onClick={()=>setDecision("accept")}>Accept patch</button><button className={decision==="reject"?"decision selected":"decision"} onClick={()=>setDecision("reject")}>Reject patch</button></div><label className="field-label">Write a test that exposes the flaw</label><textarea className="code-editor" value={test} onChange={(e)=>setTest(e.target.value)}/><label className="field-label">Explain which input breaks it</label><textarea value={explanation} onChange={(e)=>setExplanation(e.target.value)} placeholder="For example: the loop omits the final element when the maximum is there"/><button className="primary" onClick={run}>Run demo checks</button>{result&&<div className={`result-banner ${result.startsWith("Valid")?"success":"needs-work"}`}><span>{result.startsWith("Valid")?"✓":"!"}</span><p>{result}</p></div>}{result.startsWith("Valid")&&<button className="primary" onClick={()=>onComplete(true)}>Save separate boss evidence</button>}</section></div><aside className="workspace-side"><section className="panel"><div className="panel-kicker">BOSS CHECKS</div><h2>What is reviewed</h2>{["Decision to reject the flawed patch","Correct lines flagged","Meaningful last-element test","Explanation of the failure"].map((x)=><div className="rubric-mini" key={x}><span>{x}</span><b>✓</b></div>)}</section><section className="panel safety-panel"><span>ⓘ</span><p>Checks are simulated in this local demo. A production boss requires three independent code executions against flawed, reference and alternate implementations.</p></section></aside></div></>;
+}
+
+function Evidence({attempts,sharing,setSharing,onOpen}:{attempts:Attempt[];sharing:boolean;setSharing:(v:boolean)=>void;onOpen:(a:Attempt)=>void}) {
+  return <><PageIntro eyebrow="LEARNER-CONTROLLED PROFILE" title="My evidence" copy="Every attempt is linked to its task and date. Skills do not roll up into one overall score."/><section className="sharing-card"><div><div className="panel-kicker">NYERAS → NXTMOVE SIMULATION</div><h2>Share debugging evidence</h2><p>Recruiter preview only includes this synthetic learner when you turn sharing on.</p></div><label className="switch-row"><input type="checkbox" checked={sharing} onChange={(e)=>setSharing(e.target.checked)}/><span>{sharing?"Sharing on":"Sharing off"}</span></label></section><div className="section-heading"><div><div className="eyebrow">EVIDENCE HISTORY</div><h2>{attempts.length} recorded {attempts.length===1?"attempt":"attempts"}</h2></div></div>{attempts.length===0?<EmptyState title="Your evidence cards will appear here" copy="Complete an incident and answer its fixed follow-up questions to create your first card."/>:<div className="evidence-list">{attempts.map((a)=><button className="evidence-card" key={a.id} onClick={()=>onOpen(a)}><span className="evidence-icon">▤</span><span className="evidence-main"><small>{missions.find((m)=>m.id===a.missionId)?.skill} · {new Date(a.date).toLocaleDateString()}</small><strong>{missions.find((m)=>m.id===a.missionId)?.title}</strong><em>{a.codePassed?"Checks passed":"Retry recommended"} · follow-up {a.followUpScore.toFixed(1)}/2</em></span><span className={`confidence ${a.confidence.toLowerCase()}`}>{a.confidence} confidence</span><span className="evidence-arrow">→</span></button>)}</div>}<div className="disclaimer"><span>ⓘ</span><p>Experimental task evidence only. Not a validated predictor of job performance. You can revoke sharing at any time.</p></div></>;
+}
+
+function Recruiter({sharing,attempts}:{sharing:boolean;attempts:Attempt[]}) {
+  const surfaced=sharing&&attempts.length>=2?attempts.filter((a)=>a.codePassed):[];
+  return <><PageIntro eyebrow="NXTMOVE · SIMULATED RECRUITER VIEW" title="Find evidence for a role" copy="Synthetic candidate data, explicit job requirements, and a human decision at every step."/><section className="role-card"><div><div className="panel-kicker">SAMPLE ROLE</div><h2>Junior Java Developer</h2><p>Debugging · Java · developing evidence or above · recent evidence · at least 2 attempts</p></div><span className="role-status">{surfaced.length} matches</span></section>{!sharing?<EmptyState title="No candidates have opted in" copy="This learner's profile is hidden because sharing is off. Consent defaults to off."/>:surfaced.length===0?<EmptyState title="No match yet" copy="The synthetic learner needs at least two attempts and a passing Java evidence card for this role's explicit requirements."/>:<div className="candidate-list"><article className="candidate-card"><div className="avatar">A</div><div className="candidate-content"><div className="panel-kicker">CANDIDATE · SYNTHETIC ID CAND_0142</div><h2>Alex Morgan</h2><p>Why surfaced: consented to share · {attempts.length} task attempts · {surfaced.length} passing evidence cards</p>{surfaced.map((a)=><div className="match-row" key={a.id}><span>✓</span>Debugging evidence · {missions.find((m)=>m.id===a.missionId)?.skill} · {new Date(a.date).toLocaleDateString()} · {a.confidence} confidence</div>)}<div className="disclaimer"><span>ⓘ</span><p>Evidence supports human review. It is not a validated hiring predictor. The system does not rank or auto-reject.</p></div><button className="secondary" onClick={()=>window.alert("Demo only: recruiter reviews evidence; no shortlist is stored.")}>Review evidence</button></div></article></div>}</>;
+}
+
+function ReviewQueue({items,onResolve}:{items:Attempt[];onResolve:(id:string)=>void}) {
+  return <><PageIntro eyebrow="HUMAN REVIEW" title="Review queue" copy="Flagged, low-confidence and challenged attempts appear here. Human confirmation requires a reason in a connected deployment."/>{items.length===0?<EmptyState title="The review queue is clear" copy="Prompt-manipulation flags, uncertain answers and learner challenges will be visible here."/>:<div className="review-list">{items.map((a)=><article className="panel review-item" key={a.id}><div className="panel-kicker">{a.flagged?"MANIPULATION FLAG":a.challenge?"LEARNER CHALLENGE":"LOW CONFIDENCE"} · {a.id.slice(0,8)}</div><h2>{missions.find((m)=>m.id===a.missionId)?.title}</h2><p>{a.challenge||`Confidence: ${a.confidence}. Follow-up reasoning: ${a.followUpScore.toFixed(1)} / 2.`}</p><div className="review-actions"><span className="confidence low">Needs reviewer attention</span><button className="secondary" onClick={()=>onResolve(a.id)}>Mark reviewed (demo)</button></div></article>)}</div>}</>;
+}
+
+function AuditLog({attempts,sharing}:{attempts:Attempt[];sharing:boolean}) {
+  const entries=[...attempts.map((a)=>({date:a.date,kind:a.challenge?"Challenge opened":a.flagged?"Review flag raised":"Assessment recorded",detail:`${missions.find((m)=>m.id===a.missionId)?.shortTitle} · task v1 · rubric v1 · follow-up bank v1 · ${a.questionIds.length} question(s) · ${a.confidence} confidence`})),...(sharing?[{date:new Date().toISOString(),kind:"Sharing consent enabled",detail:"Synthetic debugging evidence · learner controlled"}]:[])].sort((a,b)=>b.date.localeCompare(a.date));
+  return <><PageIntro eyebrow="TRANSPARENT RECORD" title="Audit log" copy="Local demo events show assessment versions, selected bank questions, confidence and consent changes. No model output is generated."/><section className="panel audit-panel">{entries.length===0?<EmptyState title="No events yet" copy="Assessment and consent events will appear here as you use the prototype."/>:entries.map((e,i)=><article className="audit-entry" key={`${e.date}-${i}`}><span className="audit-dot"/><div><strong>{e.kind}</strong><p>{e.detail}</p><small>{new Date(e.date).toLocaleString()}</small></div></article>)}</section></>;
+}
+
+function PageIntro({eyebrow,title,copy}:{eyebrow:string;title:string;copy:string}) { return <section className="page-intro"><div className="eyebrow">{eyebrow}</div><h1>{title}</h1><p>{copy}</p></section>; }
+function EmptyState({title,copy}:{title:string;copy:string}) { return <section className="empty-state"><span>◎</span><h2>{title}</h2><p>{copy}</p></section>; }
+function Score({label,value}:{label:string;value:string}) { return <div className="score-cell"><span>{label}</span><strong>{value}</strong></div>; }
