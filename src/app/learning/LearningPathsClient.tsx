@@ -8,6 +8,8 @@ import CommunicationWorkbench from "@/components/CommunicationWorkbench";
 import ModuleExperienceContainer from "@/components/learning/ModuleExperienceContainer";
 import ReflectionCheckpointView from "@/components/learning/ReflectionCheckpointView";
 import MyReflectionsDrawer from "@/components/learning/MyReflectionsDrawer";
+import JourneyMap from "@/components/learning/JourneyMap";
+import GlobalNotebookModal from "@/components/learning/GlobalNotebookModal";
 import { getFullModule } from "@/lib/learning-seed-data";
 import { FullModule } from "@/lib/learning-experience-types";
 
@@ -64,9 +66,11 @@ export default function LearningPathsClient() {
   const [quizOpen, setQuizOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
   const [activeImmersiveModule, setActiveImmersiveModule] = useState<FullModule | null>(null);
   const [activeCheckpoint, setActiveCheckpoint] = useState<(1 | 2 | 3 | 4) | null>(null);
   const [showReflectionsDrawer, setShowReflectionsDrawer] = useState(false);
+  const [showNotebookModal, setShowNotebookModal] = useState(false);
 
   useEffect(() => {
     let live = true;
@@ -209,9 +213,22 @@ export default function LearningPathsClient() {
       pathSlug={activePath?.slug}
       pathTitle={activePath?.title}
     />
+    <GlobalNotebookModal
+      isOpen={showNotebookModal}
+      onClose={() => setShowNotebookModal(false)}
+      currentPathSlug={activePath?.slug}
+    />
     <header className="learning-topbar">
       <Link className="brand" href="/"><span className="brand-mark">N</span><span>nextlearn</span></Link>
       <div className="learning-top-actions">
+        <button
+          type="button"
+          className="secondary"
+          onClick={() => setShowNotebookModal(true)}
+          style={{ cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "6px" }}
+        >
+          <span>📓 Private Notebook</span>
+        </button>
         <button
           type="button"
           className="secondary"
@@ -237,6 +254,34 @@ export default function LearningPathsClient() {
 
       {activePath && <>
         <section className="learning-path-heading"><div><div className="eyebrow">{activePath.subtitle.toUpperCase()}</div><h2>{activePath.title}</h2><p>{activePath.description}</p></div><div className="learning-path-count"><strong>{passedCount}<span> / {activePath.modules.length}</span></strong><small>modules passed</small></div></section>
+
+        {/* Flight Path Journey Map */}
+        <JourneyMap
+          pathTitle={activePath.title}
+          pathSlug={activePath.slug}
+          nodes={activePath.modules.map((m, idx) => ({
+            slug: m.slug,
+            title: m.title,
+            summary: m.summary,
+            objectives: m.objectives,
+            order: idx + 1,
+            state: moduleState(idx, activePath.modules, progress, activePath.slug),
+            attempts: progress[progressKey(activePath.slug, m.slug)]?.attempts,
+          }))}
+          onSelectModule={(slug) => {
+            setActiveModuleSlug(slug);
+            setActiveView("module");
+          }}
+          onLaunchImmersive={(slug) => {
+            const modIndex = activePath.modules.findIndex((m) => m.slug === slug);
+            const targetMod = activePath.modules[modIndex];
+            if (targetMod) {
+              const fullMod = getFullModule(activePath.slug, activePath.title, targetMod, modIndex);
+              setActiveImmersiveModule(fullMod);
+            }
+          }}
+          onSelectCheckpoint={(cp) => setActiveCheckpoint(cp)}
+        />
 
         <div className="learning-workspace">
           <aside className="learning-map" aria-label={`${activePath.title} module map`}>
