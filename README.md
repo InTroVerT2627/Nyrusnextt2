@@ -129,12 +129,12 @@ Zero-friction testing is enabled via the topbar **Role Switcher** or credentials
 
 ## Quality Gates & Verification Matrix
 
-All quality gates pass before deployment:
+All quality gates pass in automated CI/CD and local environments:
 
 | Gate | Command / Test Suite | Result | Status |
 | :--- | :--- | :---: | :---: |
 | **Linter** | `npm run lint` | 0 errors | **PASS** |
-| **Type Check & Build** | `npm run build` | 21 routes compiled | **PASS** |
+| **Type Check & Build** | `npm run build` | 30 routes compiled | **PASS** |
 | **Leak Protection** | `tests/leak-protection.test.ts` | 5 tests passed | **PASS** |
 | **Two-User RLS** | `tests/two-user-rls.test.ts` | 3 tests passed | **PASS** |
 | **Consent & Profile** | `tests/consent-and-profile.test.ts` | 4 tests passed | **PASS** |
@@ -143,8 +143,23 @@ All quality gates pass before deployment:
 | **Stop Rule & Confidence** | `tests/stop-rule-and-confidence.test.ts` | 6 tests passed | **PASS** |
 | **Follow-up Selector** | `tests/followup-selector.test.ts` | 4 tests passed | **PASS** |
 | **Reviewer & Audit** | `tests/reviewer-and-audit.test.ts` | 3 tests passed | **PASS** |
-| **Accessibility (WCAG AA)** | `tests/accessibility.test.ts` | 3 tests passed | **PASS** |
-| **Total Test Count** | `npm test` | **39 / 39 tests** | **100% PASS** |
+| **Accessibility (WCAG AA)** | `tests/accessibility.test.ts` | 7 tests passed | **PASS** |
+| **Learning Session Engine** | `tests/learning-session-engine.test.ts` | 7 tests passed | **PASS** |
+| **Learning Reflections** | `tests/learning-reflection-and-unlock.test.ts` | 4 tests passed | **PASS** |
+| **Total Test Count** | `npm test` | **54 / 54 tests** | **100% PASS** |
+
+---
+
+## Immersive Learning Paths & Focus Engine
+
+The three learning paths (**Data Analytics**, **Business Analytics**, and **Workplace Communication**; 10 modules each) feature a full-page, half-and-half software-like learning environment:
+- **7-Beat Pedagogical Flow**: (1) Teaser $\rightarrow$ (2) Story Scene with SVG character dialogue $\rightarrow$ (3) Core Concept with glossary tooltips $\rightarrow$ (4) Worked Practical Example $\rightarrow$ (5) Try-It Activity $\rightarrow$ (6) Server-Graded Knowledge Check (2/3 pass) $\rightarrow$ (7) Takeaway Card.
+- **Server-Enforced Reading Pacing**: `clamp(ceil(words / 3.8 * 0.6), 8, 90)` seconds enforced strictly on the server with a calm, non-urgent SVG fill-up ring (`ReadingRing`).
+- **Focus Engine**: Tab visibility + window blur + `document.hasFocus()` tracking with 3s grace period for accidental tab switches, 5s heartbeat (30s timeout), single active session lock, and a Relaxed Focus Mode for accessibility.
+- **Formative Milestone Reflections**: Reflection checkpoints after Modules 3, 6, 9, and Capstone Module 10 reviewed formatively by Gemini Flash with structured feedback (genuine attempt check, understanding tier, strengths, and growth areas).
+- **Narrative Character Arcs**: Three ongoing story arcs—"The Missing Orders" (Meera), "The Tea Stall That Wanted to Grow" (Rohan), and "The Update Nobody Read" (Ananya).
+- **Flight Path Journey Map & Private Notebook**: Interactive 10-station timeline with milestone reflection stops, plus a private searchable notebook with Markdown (.md) export.
+- **Privacy & Override Guarantee**: All timing and focus data is private to the learner and used solely to gate instructional progression. It is never exposed to recruiters, factored into evidence cards, or used in hiring scores.
 
 ---
 

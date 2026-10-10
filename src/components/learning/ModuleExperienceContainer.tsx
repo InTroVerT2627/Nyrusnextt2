@@ -48,18 +48,7 @@ export default function ModuleExperienceContainer({
   const currentPage = module.pages[currentPageIndex];
   const currentPageType: PageType = currentPage.pageType;
 
-  // Onboard modal check: first time user sees the card
-  useEffect(() => {
-    const hasSeen = localStorage.getItem("nextlearn.has_seen_learning_rules");
-    if (!hasSeen) {
-      setShowHowItWorks(true);
-    } else {
-      void initSession(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const initSession = async (useRelaxed = false) => {
+  const initSession = useCallback(async (useRelaxed = false) => {
     setSessionLoading(true);
     setRelaxedMode(useRelaxed);
     try {
@@ -84,7 +73,17 @@ export default function ModuleExperienceContainer({
     } finally {
       setSessionLoading(false);
     }
-  };
+  }, [module.pathSlug, module.slug]);
+
+  // Onboard modal check: first time user sees the card
+  useEffect(() => {
+    const hasSeen = localStorage.getItem("nextlearn.has_seen_learning_rules");
+    if (!hasSeen) {
+      setShowHowItWorks(true);
+    } else {
+      void initSession(false);
+    }
+  }, [initSession]);
 
   // Record page enter when currentPageIndex changes
   const enterPage = useCallback(

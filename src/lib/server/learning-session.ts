@@ -96,7 +96,7 @@ export async function startModuleSession(
     return { session, token: sessionToken };
   } else {
     // Memory fallback
-    for (const [sId, sess] of memorySessions.entries()) {
+    for (const [, sess] of memorySessions.entries()) {
       if (sess.userId === userId && sess.state === "active") {
         sess.state = "interrupted";
         sess.interruptReason = "second_session";
@@ -384,7 +384,6 @@ export async function pauseSession(
   userId: string
 ): Promise<{ paused: boolean; error?: string }> {
   const admin = createSupabaseAdminClient();
-  const now = Date.now();
 
   if (admin) {
     const { data: session } = await admin

@@ -21,8 +21,6 @@ export default function StorySceneSvg({
   const midnight = "#142D4E";
   const cyan = "#06C6E6";
   const ice = "#EAF6FC";
-  const border = "#D9E8F3";
-  const muted = "#64748B";
   const white = "#FFFFFF";
   const warning = "#D97706";
   const success = "#059669";

@@ -83,6 +83,30 @@ export default function TakeawayBeatView({
           </button>
         </div>
       </div>
+
+      <div style={{ marginTop: "24px", display: "flex", justifyContent: "flex-end" }}>
+        <button
+          type="button"
+          className="primary-btn"
+          onClick={onFinished}
+          style={{
+            background: "#142D4E",
+            color: "#FFFFFF",
+            padding: "10px 20px",
+            borderRadius: "8px",
+            fontWeight: "600",
+            fontSize: "13.5px",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "8px",
+            border: "none",
+            cursor: "pointer",
+          }}
+        >
+          <span>Complete Module & Return to Track</span>
+          <ArrowRight size={14} />
+        </button>
+      </div>
     </div>
   );
 }

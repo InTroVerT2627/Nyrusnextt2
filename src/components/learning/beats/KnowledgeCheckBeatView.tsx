@@ -66,13 +66,15 @@ export default function KnowledgeCheckBeatView({
         throw new Error(data.error || "Failed to record quiz.");
       }
 
-      const results: FeedbackItem[] = (data.feedback || []).map((f: any, idx: number) => ({
-        questionIndex: idx,
-        selectedIndex: f.selectedIndex,
-        correctIndex: f.correctIndex,
-        isCorrect: f.correct,
-        explanation: f.explanation,
-      }));
+      const results: FeedbackItem[] = (data.feedback || []).map(
+        (f: { selectedIndex: number; correctIndex: number; correct: boolean; explanation: string }, idx: number) => ({
+          questionIndex: idx,
+          selectedIndex: f.selectedIndex,
+          correctIndex: f.correctIndex,
+          isCorrect: f.correct,
+          explanation: f.explanation,
+        })
+      );
 
       setScore(data.score ?? 0);
       setFeedback(results);

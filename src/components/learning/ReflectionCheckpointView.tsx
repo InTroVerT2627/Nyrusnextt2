@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { Sparkles, CheckCircle2, AlertCircle, ArrowRight, RotateCcw, BookOpen, ShieldCheck } from "lucide-react";
+import { Sparkles, ArrowRight, RotateCcw, ShieldCheck } from "lucide-react";
 import { ReflectionReview } from "@/lib/server/gemini";
 
 export type ReflectionCheckpointProps = {

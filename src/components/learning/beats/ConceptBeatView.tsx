@@ -13,7 +13,6 @@ export default function ConceptBeatView({ content }: ConceptBeatViewProps) {
 
   // Helper to highlight glossary terms inside chunks
   const renderChunkWithGlossary = (chunk: string) => {
-    let renderedText = chunk;
     return (
       <p className="concept-prose-chunk">
         {content.glossaryTooltips.reduce((nodes: (string | React.ReactNode)[], item) => {

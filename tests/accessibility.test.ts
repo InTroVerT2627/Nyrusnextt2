@@ -87,4 +87,33 @@ describe("Accessibility & WCAG AA Compliance (Quality Gate: Accessibility Check)
     expect(source.toLowerCase()).not.toContain("+100 xp");
     expect(source.toLowerCase()).not.toContain("countdown timer");
   });
+
+  it("verifies learning reading ring uses accessible progressbar semantics and calm pacing", () => {
+    const ringSource = fs.readFileSync(
+      path.resolve(process.cwd(), "src/components/learning/ReadingRing.tsx"),
+      "utf8"
+    );
+
+    // ReadingRing must use standard progressbar ARIA attributes
+    expect(ringSource).toContain('role="progressbar"');
+    expect(ringSource).toContain('aria-valuenow');
+    expect(ringSource).toContain('aria-valuemin="0"');
+    expect(ringSource).toContain('aria-valuemax="100"');
+    expect(ringSource).toContain('aria-label');
+  });
+
+  it("verifies journey map conveys states with icons and text labels", () => {
+    const journeySource = fs.readFileSync(
+      path.resolve(process.cwd(), "src/components/learning/JourneyMap.tsx"),
+      "utf8"
+    );
+
+    expect(journeySource).toContain("CheckCircle2");
+    expect(journeySource).toContain("PlayCircle");
+    expect(journeySource).toContain("Lock");
+    expect(journeySource).toContain("Passed");
+    expect(journeySource).toContain("Ready");
+    expect(journeySource).toContain("Locked");
+  });
 });
+
