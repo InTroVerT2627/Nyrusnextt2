@@ -134,7 +134,7 @@ All quality gates pass in automated CI/CD and local environments:
 | Gate | Command / Test Suite | Result | Status |
 | :--- | :--- | :---: | :---: |
 | **Linter** | `npm run lint` | 0 errors | **PASS** |
-| **Type Check & Build** | `npm run build` | 30 routes compiled | **PASS** |
+| **Type Check & Build** | `npm run build` | 39 routes compiled | **PASS** |
 | **Leak Protection** | `tests/leak-protection.test.ts` | 5 tests passed | **PASS** |
 | **Two-User RLS** | `tests/two-user-rls.test.ts` | 3 tests passed | **PASS** |
 | **Consent & Profile** | `tests/consent-and-profile.test.ts` | 4 tests passed | **PASS** |
@@ -146,7 +146,8 @@ All quality gates pass in automated CI/CD and local environments:
 | **Accessibility (WCAG AA)** | `tests/accessibility.test.ts` | 7 tests passed | **PASS** |
 | **Learning Session Engine** | `tests/learning-session-engine.test.ts` | 7 tests passed | **PASS** |
 | **Learning Reflections** | `tests/learning-reflection-and-unlock.test.ts` | 4 tests passed | **PASS** |
-| **Total Test Count** | `npm test` | **54 / 54 tests** | **100% PASS** |
+| **Final Test Engine** | `tests/final-test-engine.test.ts` | 14 tests passed | **PASS** |
+| **Total Test Count** | `npm test` | **68 / 68 tests (12 suites)** | **100% PASS** |
 
 ---
 
@@ -160,6 +161,29 @@ The three learning paths (**Data Analytics**, **Business Analytics**, and **Work
 - **Narrative Character Arcs**: Three ongoing story arcs—"The Missing Orders" (Meera), "The Tea Stall That Wanted to Grow" (Rohan), and "The Update Nobody Read" (Ananya).
 - **Flight Path Journey Map & Private Notebook**: Interactive 10-station timeline with milestone reflection stops, plus a private searchable notebook with Markdown (.md) export.
 - **Privacy & Override Guarantee**: All timing and focus data is private to the learner and used solely to gate instructional progression. It is never exposed to recruiters, factored into evidence cards, or used in hiring scores.
+
+---
+
+## Capstone Final Test & Proof-of-Skill Certification Engine
+
+Each of the three Learning Paths concludes with an authentic **Capstone Final Test** that unlocks strictly after completing all 10 modules and all 3 reflection checkpoints:
+- **Comprehensive Question Pools**: 72+ total questions ($\ge 24$ per path) spanning 6 authentic workplace archetypes:
+  1. *Spot the AI's Mistake* (planted error identification + deterministic span check + AI rationale and fix grading)
+  2. *Case Decision* (ambiguous operational triage + written justification)
+  3. *Fix It* (broken SQL with SQLite execution, broken spreadsheet formulas, or unformatted drafts)
+  4. *Interpret* (misleading dual-axis charts, truncated scales, Simpson's paradox)
+  5. *Triage / Prioritise* (capacity and constraint trade-offs)
+  6. *Rewrite* (executive BLUF, de-escalating scope creep, respectful candid feedback)
+- **Authoritative Server Timer**: 45-minute default time limit (or 67.5 minutes with +50% accessibility accommodation) calculated and enforced 100% on the server, with calm 10m/2m visual warnings and automatic submission on expiration.
+- **Tiered Hints with Deductions**: Nudge (-5%), Pointer (-10%), and Strong Hint (-20%) with a hard cumulative deduction cap of 35% per question and explicit confirmation prompts before reveal.
+- **Absolute Privacy Pre-Test Device Check**:
+  - `getUserMedia` verifies local camera preview and microphone volume meter before starting.
+  - **HARD GUARANTEE**: 0 video/audio recording (`MediaRecorder`), 0 canvas snapshot extraction, 0 WebRTC streaming, 0 biometric/emotion AI, and 0 remote media storage. Video and audio stay 100% inside client memory. Only boolean flags (`camera_ok`, `mic_ok`) are stored on the attempt record.
+  - **Unproctored Alternative**: A neutrally-labeled *"Take without camera & mic"* option is always available with full access to evidence generation.
+  - **Automated CI Audit**: `tests/final-test-engine.test.ts` scans the codebase and fails the build if any media recording or capture APIs are introduced.
+- **Scoring Breakdown & Optimality**: 100-point scale per question. Coding/SQL tasks award 60 points for correctness + 40 points for query optimality (execution plan, index usage, explicit joins). Non-coding tasks award 80 base points + 20 follow-up defense points.
+- **Adaptive Follow-Up Defense & Early-Stop Rule**: Dual-run Gemini grading against fixed rubrics. Follow-up count affects confidence only (never lowering base marks). If base performance is proficient, questioning stops early with High Confidence.
+- **Results, Evidence & Reviewer Appeals**: Question-by-question diagnostic score cards, evidence quotes, skill tier rating (Developing 50-69, Proficient 70-84, Advanced 85+), and one-click *"Challenge this result"* routing to the Human Reviewer Queue.
 
 ---
 

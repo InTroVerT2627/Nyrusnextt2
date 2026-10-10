@@ -24,6 +24,7 @@ export default function StorySceneSvg({
   const white = "#FFFFFF";
   const warning = "#D97706";
   const success = "#059669";
+  const border = "#D9E8F3";
 
   const isUrgent = visualMood === "urgent";
   const isPensive = visualMood === "pensive";

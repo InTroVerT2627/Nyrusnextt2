@@ -1,5 +1,40 @@
 import "server-only";
+import initSqlJs from "sql.js";
 import { FinalTestQuestionServer } from "@/lib/final-test-types";
+
+export const SQL_TEST_SEED = `
+CREATE TABLE customers (
+  id INTEGER PRIMARY KEY,
+  name TEXT,
+  segment TEXT,
+  created_at TEXT
+);
+
+CREATE TABLE orders (
+  id INTEGER PRIMARY KEY,
+  customer_id INTEGER,
+  amount REAL,
+  status TEXT,
+  created_at TEXT,
+  FOREIGN KEY(customer_id) REFERENCES customers(id)
+);
+
+INSERT INTO customers VALUES
+  (1, 'Acme Corp', 'Enterprise', '2026-01-10'),
+  (2, 'Beta LLC', 'Mid-Market', '2026-02-15'),
+  (3, 'Gamma Inc', 'Enterprise', '2026-02-20'),
+  (4, 'Delta Co', 'SMB', '2026-03-01'),
+  (5, 'Epsilon Ltd', 'Mid-Market', '2026-03-12');
+
+INSERT INTO orders VALUES
+  (101, 1, 12000.0, 'completed', '2026-02-01'),
+  (102, 1, 8500.0, 'completed', '2026-03-05'),
+  (103, 2, 4500.0, 'completed', '2026-03-10'),
+  (104, 3, 15000.0, 'completed', '2026-03-15'),
+  (105, 4, 1200.0, 'refunded', '2026-03-18'),
+  (106, 5, 3200.0, 'completed', '2026-03-22'),
+  (107, 2, 2800.0, 'cancelled', '2026-03-25');
+`;
 
 export const dataAnalyticsQuestions: FinalTestQuestionServer[] = [
   // 1. Spot Mistake: Churn Cohort Hallucination
@@ -61,6 +96,79 @@ export const dataAnalyticsQuestions: FinalTestQuestionServer[] = [
       prompt: "Fix the SQL query so it explicitly joins customers and orders, filters for completed orders, and computes total revenue, order count, and AOV.",
       starterContent: `SELECT c.segment, SUM(o.amount) AS total_revenue, COUNT(o.id) AS order_count, AVG(o.amount) AS avg_order_value\nFROM customers c, orders o\nWHERE c.segment = 'Enterprise';`,
       difficulty: "intermediate",
+    },
+    expectedExecutionTest: async (query: string) => {
+      try {
+        const SQL = await initSqlJs();
+        const db = new SQL.Database();
+        db.run(SQL_TEST_SEED);
+        const res = db.exec(query);
+        if (!res || !res.length || !res[0].values.length) {
+          return { passed: false, message: "Query returned 0 rows." };
+        }
+        const row = res[0].values[0];
+        const cols = res[0].columns.map((c) => c.toLowerCase());
+        const segIdx = cols.findIndex((c) => c.includes("segment"));
+        const revIdx = cols.findIndex((c) => c.includes("rev") || c.includes("sum"));
+        const countIdx = cols.findIndex((c) => c.includes("count") || c.includes("order"));
+
+        if (segIdx === -1 || revIdx === -1 || countIdx === -1) {
+          return { passed: false, message: "Missing required aggregated columns." };
+        }
+
+        const seg = String(row[segIdx]);
+        const rev = Number(row[revIdx]);
+        const count = Number(row[countIdx]);
+
+        if (seg.toLowerCase() !== "enterprise") return { passed: false, message: `Expected segment 'Enterprise', got '${seg}'.` };
+        if (Math.abs(rev - 35500) > 1) return { passed: false, message: `Expected $35,500 total revenue, got $${rev}.` };
+        if (count !== 3) return { passed: false, message: `Expected 3 completed orders, got ${count}.` };
+
+        return { passed: true };
+      } catch (e: any) {
+        return { passed: false, message: e?.message || "SQL execution error" };
+      }
+    },
+    optimalityRubric: {
+      maxScore: 40,
+      criteria: [
+        {
+          id: "opt-explicit-join",
+          name: "Explicit ANSI JOIN with key equality",
+          points: 15,
+          test: (input: string) => {
+            const hasJoin = /join\s+orders/i.test(input) || /c\.id\s*=\s*o\.customer_id/i.test(input);
+            return {
+              passed: hasJoin,
+              message: hasJoin ? "Uses explicit join syntax." : "Specify join on c.id = o.customer_id.",
+            };
+          },
+        },
+        {
+          id: "opt-filter-early",
+          name: "Explicit filter for completed status",
+          points: 15,
+          test: (input: string) => {
+            const hasStatus = /o\.status\s*=\s*['"]completed['"]/i.test(input) || /status\s*=\s*['"]completed['"]/i.test(input);
+            return {
+              passed: hasStatus,
+              message: hasStatus ? "Correctly filters o.status = 'completed'." : "Filter where status = 'completed'.",
+            };
+          },
+        },
+        {
+          id: "opt-group-by",
+          name: "Clean GROUP BY on c.segment",
+          points: 10,
+          test: (input: string) => {
+            const hasGroup = /group\s+by\s+c\.segment/i.test(input) || /group\s+by\s+segment/i.test(input);
+            return {
+              passed: hasGroup,
+              message: hasGroup ? "Clean aggregation grouping." : "Aggregate with GROUP BY c.segment.",
+            };
+          },
+        },
+      ],
     },
     referenceCriteria: ["Explicit JOIN on c.id = o.customer_id", "Filter o.status = 'completed'", "Group by c.segment"],
     followupBank: [

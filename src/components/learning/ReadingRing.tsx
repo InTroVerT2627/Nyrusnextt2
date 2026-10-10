@@ -62,8 +62,8 @@ export default function ReadingRing({
       className={`reading-ring-container ${isCompleted ? "completed" : ""} ${className}`}
       role="progressbar"
       aria-valuenow={Math.round(progressFraction * 100)}
-      aria-valuemin="0"
-      aria-valuemax="100"
+      aria-valuemin={0}
+      aria-valuemax={100}
       aria-label={isCompleted ? "Reading time satisfied: Ready to continue" : "Reading time in progress"}
     >
       {/* Screen Reader Polite Live Region (Announces ONCE on completion, not every second) */}

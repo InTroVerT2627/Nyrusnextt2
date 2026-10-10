@@ -7,7 +7,6 @@ import {
 import { getAllQuestionsForPath } from "@/lib/server/final-test-pool";
 import { getAttemptSummary, StoredTestAttempt } from "@/lib/server/final-test-engine";
 import { scoreFollowup, hasManipulationFlag } from "@/lib/server/gemini";
-import { appendAudit } from "@/lib/server/assessment";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 
 export type StoredQuestionScore = {

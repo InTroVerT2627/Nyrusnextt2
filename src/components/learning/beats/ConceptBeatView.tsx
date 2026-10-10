@@ -43,7 +43,7 @@ export default function ConceptBeatView({ content }: ConceptBeatViewProps) {
             });
           });
           return newNodes;
-        }, [renderedText])}
+        }, [chunk])}
       </p>
     );
   };

@@ -428,6 +428,10 @@ export default function LearningPathsClient() {
                       </span>
                     </button>
                   )}
+                </div>
+              );
+            })}
+
             {/* Capstone Final Test Node */}
             <div
               style={{

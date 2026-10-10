@@ -313,9 +313,10 @@ export default function FinalTestShell({
   if (isInterrupted) {
     return (
       <InterruptedOverlay
-        reason={interruptionReason || "Window focus was lost for more than 3 seconds."}
-        onResumeClick={() => onExit()}
-        isTerminated={true}
+        isOpen={true}
+        moduleTitle={`${pathTitle} Final Test`}
+        onRestart={() => onExit()}
+        onExit={() => onExit()}
       />
     );
   }
