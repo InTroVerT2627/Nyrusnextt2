@@ -48,6 +48,8 @@ export default function ModuleExperienceContainer({
   const [minSeconds, setMinSeconds] = useState(10);
   const [isMinTimeSatisfied, setIsMinTimeSatisfied] = useState(false);
   const [isInteractionCompleted, setIsInteractionCompleted] = useState(false);
+  const [isTeaserRevealed, setIsTeaserRevealed] = useState(false);
+  const [completedInteractionsByPage, setCompletedInteractionsByPage] = useState<Record<number, boolean>>({});
   const [isPaused, setIsPaused] = useState(false);
   const [isInterrupted, setIsInterrupted] = useState(false);
   const [warningMessage, setWarningMessage] = useState<string | null>(null);
@@ -60,6 +62,18 @@ export default function ModuleExperienceContainer({
   const handleMinTimeComplete = useCallback(() => {
     setIsMinTimeSatisfied(true);
   }, []);
+
+  const handleTeaserCommitted = useCallback(() => {
+    setIsTeaserRevealed(true);
+    setIsInteractionCompleted(true);
+    setCompletedInteractionsByPage((prev) => ({ ...prev, [0]: true }));
+  }, []);
+
+  const handleStoryChoiceSelected = useCallback(() => {
+    setIsInteractionCompleted(true);
+    setIsTeaserRevealed(true);
+    setCompletedInteractionsByPage((prev) => ({ ...prev, [currentPageIndex]: true, [0]: true }));
+  }, [currentPageIndex]);
 
   const currentPage = module.pages[currentPageIndex];
   const currentPageType: PageType = currentPage.pageType;
@@ -126,7 +140,13 @@ export default function ModuleExperienceContainer({
   const enterPage = useCallback(
     async (pageIdx: number, pType: PageType) => {
       setIsMinTimeSatisfied(false);
-      setIsInteractionCompleted(["scene", "concept", "example", "takeaway"].includes(pType));
+      const isAutoCompleted = ["scene", "concept", "example", "takeaway"].includes(pType);
+      const wasAlreadyCompleted =
+        isAutoCompleted ||
+        Boolean(completedInteractionsByPage[pageIdx]) ||
+        (pType === "teaser" && isTeaserRevealed);
+
+      setIsInteractionCompleted(wasAlreadyCompleted);
       setAdvanceError("");
 
       const currentSessId = sessionId || `local-sess-${Date.now()}`;
@@ -218,7 +238,7 @@ export default function ModuleExperienceContainer({
             visitId,
             nextPageIndex: nextIdx,
             nextPageType: nextType,
-            interactionDone: isInteractionCompleted,
+            interactionDone: effectiveInteractionDone,
           }),
         });
 
@@ -304,12 +324,17 @@ export default function ModuleExperienceContainer({
   // Interaction gating logic per beat type
   const isPacedPage = ["teaser", "scene", "concept", "example", "takeaway"].includes(currentPageType);
   const requiresInteraction = ["teaser", "tryit", "check"].includes(currentPageType);
-  const canAdvance = (!isPacedPage || isMinTimeSatisfied) && (!requiresInteraction || isInteractionCompleted);
+  const effectiveInteractionDone =
+    isInteractionCompleted ||
+    Boolean(completedInteractionsByPage[currentPageIndex]) ||
+    (currentPageType === "teaser" && isTeaserRevealed);
+
+  const canAdvance = (!isPacedPage || isMinTimeSatisfied) && (!requiresInteraction || effectiveInteractionDone);
 
   let advanceReasonHint = "";
   if (isPacedPage && !isMinTimeSatisfied) {
     advanceReasonHint = "Complete the reading time ring to unlock";
-  } else if (requiresInteraction && !isInteractionCompleted) {
+  } else if (requiresInteraction && !effectiveInteractionDone) {
     if (currentPageType === "teaser") {
       advanceReasonHint = "Pick an option or click 'I'm not sure' to reveal the topic";
     } else if (currentPageType === "tryit") {
@@ -330,7 +355,8 @@ export default function ModuleExperienceContainer({
           <TeaserBeatView
             content={currentPage.content as never}
             moduleTitle={module.title}
-            onCommitted={() => setIsInteractionCompleted(true)}
+            isAlreadyRevealed={isTeaserRevealed || Boolean(completedInteractionsByPage[0])}
+            onCommitted={handleTeaserCommitted}
           />
         );
       case "scene":
@@ -343,7 +369,10 @@ export default function ModuleExperienceContainer({
         return (
           <TryItBeatView
             content={currentPage.content as never}
-            onInteractionComplete={() => setIsInteractionCompleted(true)}
+            onInteractionComplete={() => {
+              setIsInteractionCompleted(true);
+              setCompletedInteractionsByPage((prev) => ({ ...prev, [currentPageIndex]: true }));
+            }}
           />
         );
       case "check":
@@ -352,7 +381,10 @@ export default function ModuleExperienceContainer({
             questions={(currentPage.content as { questions: never }).questions}
             pathSlug={module.pathSlug}
             moduleSlug={module.slug}
-            onCheckPassed={() => setIsInteractionCompleted(true)}
+            onCheckPassed={() => {
+              setIsInteractionCompleted(true);
+              setCompletedInteractionsByPage((prev) => ({ ...prev, [currentPageIndex]: true }));
+            }}
           />
         );
       case "takeaway":
@@ -361,7 +393,10 @@ export default function ModuleExperienceContainer({
             content={currentPage.content as never}
             pathSlug={module.pathSlug}
             moduleSlug={module.slug}
-            onFinished={() => setIsInteractionCompleted(true)}
+            onFinished={() => {
+              setIsInteractionCompleted(true);
+              setCompletedInteractionsByPage((prev) => ({ ...prev, [currentPageIndex]: true }));
+            }}
           />
         );
     }
@@ -481,7 +516,13 @@ export default function ModuleExperienceContainer({
         onPause={handlePause}
         onResume={handleResume}
         onExit={onExit}
-        storyPanel={<StorySceneBeatView content={storyPage.content as never} isLeftPanel={true} />}
+        storyPanel={
+          <StorySceneBeatView
+            content={storyPage.content as never}
+            isLeftPanel={true}
+            onChoiceSelected={handleStoryChoiceSelected}
+          />
+        }
         learningPanel={renderLearningPanel()}
         relaxedMode={relaxedMode}
         isAudioReading={isAudioReading}

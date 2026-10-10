@@ -1,23 +1,37 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Sparkles, HelpCircle, Check, ArrowRight } from "lucide-react";
 import { TeaserContent } from "@/lib/learning-experience-types";
 
 type TeaserBeatViewProps = {
   content: TeaserContent;
   moduleTitle: string;
+  isAlreadyRevealed?: boolean;
   onCommitted: () => void;
 };
 
 export default function TeaserBeatView({
   content,
   moduleTitle,
+  isAlreadyRevealed = false,
   onCommitted,
 }: TeaserBeatViewProps) {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [thinkFirstText, setThinkFirstText] = useState("");
-  const [isRevealed, setIsRevealed] = useState(false);
+  const [isRevealed, setIsRevealed] = useState(isAlreadyRevealed);
+
+  useEffect(() => {
+    if (isAlreadyRevealed && !isRevealed) {
+      setIsRevealed(true);
+    }
+  }, [isAlreadyRevealed, isRevealed]);
+
+  useEffect(() => {
+    if (isRevealed) {
+      onCommitted();
+    }
+  }, [isRevealed, onCommitted]);
 
   const handleCommit = (choice?: string) => {
     if (choice) setSelectedOption(choice);

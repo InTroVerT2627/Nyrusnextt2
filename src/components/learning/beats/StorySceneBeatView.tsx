@@ -8,11 +8,13 @@ import { User, MessageSquare, GitBranch, ArrowRight, CheckCircle2 } from "lucide
 type StorySceneBeatViewProps = {
   content: StorySceneContent;
   isLeftPanel?: boolean;
+  onChoiceSelected?: (choiceId: string) => void;
 };
 
 export default function StorySceneBeatView({
   content,
   isLeftPanel = false,
+  onChoiceSelected,
 }: StorySceneBeatViewProps) {
   const [selectedBranchId, setSelectedBranchId] = useState<string | null>(null);
 
@@ -74,7 +76,10 @@ export default function StorySceneBeatView({
                 <button
                   key={choice.id}
                   className={`branch-choice-btn ${selectedBranchId === choice.id ? "selected" : ""}`}
-                  onClick={() => setSelectedBranchId(choice.id)}
+                  onClick={() => {
+                    setSelectedBranchId(choice.id);
+                    onChoiceSelected?.(choice.id);
+                  }}
                 >
                   <span className="choice-label">{choice.label}</span>
                 </button>
