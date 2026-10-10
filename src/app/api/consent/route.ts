@@ -4,7 +4,11 @@ import { appendAudit, apiError, consumeRateLimit, requireActor } from "@/lib/ser
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { deliverNxtMoveProfile } from "@/lib/server/nxtmove";
 
-const schema = z.object({ skill: z.enum(["debugging", "reviewing-ai-written-code"]), shared: z.boolean(), includeSubmissions: z.boolean().default(false) });
+const schema = z.object({
+  skill: z.enum(["debugging", "reviewing-ai-written-code", "data-analytics", "business-analytics", "workplace-communication"]),
+  shared: z.boolean(),
+  includeSubmissions: z.boolean().default(false),
+});
 
 export async function POST(request: NextRequest) {
   const { response, actor } = await requireActor(request, ["learner"]);

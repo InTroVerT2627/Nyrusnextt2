@@ -28,11 +28,11 @@ describe("Consent & Privacy Protections (Section 8 Non-Negotiables)", () => {
   });
 
   it("enforces instant revocation via timestamped revoked_at and shared=false", () => {
-    const consentState = {
+    const consentState: { skill: string; shared: boolean; granted_at: string; revoked_at: string | null } = {
       skill: "debugging",
       shared: true,
       granted_at: "2026-10-10T12:00:00.000Z",
-      revoked_at: null as string | null,
+      revoked_at: null,
     };
 
     // Candidate revokes consent
@@ -42,7 +42,7 @@ describe("Consent & Privacy Protections (Section 8 Non-Negotiables)", () => {
 
     // Recruiter query filter logic:
     // .eq("shared", true).is("revoked_at", null)
-    const matchesRecruiterFilter = consentState.shared === true && consentState.revoked_at === null;
+    const matchesRecruiterFilter = Boolean(consentState.shared && !consentState.revoked_at);
     expect(matchesRecruiterFilter).toBe(false);
   });
 

@@ -1390,9 +1390,15 @@ function ProfileView({
 }) {
   const deb = profile.consents.find((item) => item.skill === "debugging");
   const boss = profile.consents.find((item) => item.skill === "reviewing-ai-written-code");
+  const da = profile.consents.find((item) => item.skill === "data-analytics");
+  const ba = profile.consents.find((item) => item.skill === "business-analytics");
+  const comm = profile.consents.find((item) => item.skill === "workplace-communication");
   const cards = [
     { skill: "debugging", label: "Debugging evidence", consent: deb },
     { skill: "reviewing-ai-written-code", label: "AI-code review evidence", consent: boss },
+    { skill: "data-analytics", label: "Data Analytics evidence", consent: da },
+    { skill: "business-analytics", label: "Business Analytics evidence", consent: ba },
+    { skill: "workplace-communication", label: "Workplace Communication evidence", consent: comm },
   ];
 
   const newest = new Map<string, Evidence>();

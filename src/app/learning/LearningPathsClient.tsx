@@ -2,6 +2,9 @@
 
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import Link from "next/link";
+import SqlSandbox from "@/components/SqlSandbox";
+import SpreadsheetGrid from "@/components/SpreadsheetGrid";
+import CommunicationWorkbench from "@/components/CommunicationWorkbench";
 
 type PublicQuestion = { id: string; prompt: string; choices: string[] };
 type PublicModule = {
@@ -50,6 +53,7 @@ export default function LearningPathsClient() {
   const [progress, setProgress] = useState<Record<string, ModuleProgress>>({});
   const [activePathSlug, setActivePathSlug] = useState("");
   const [activeModuleSlug, setActiveModuleSlug] = useState("");
+  const [activeView, setActiveView] = useState<"module" | "work-sample">("module");
   const [answers, setAnswers] = useState<number[]>([]);
   const [result, setResult] = useState<QuizResult | null>(null);
   const [quizOpen, setQuizOpen] = useState(false);
@@ -100,12 +104,15 @@ export default function LearningPathsClient() {
     const firstOpen = path.modules.findIndex((module, index) => !progress[progressKey(path.slug, module.slug)]?.passed && moduleState(index, path.modules, progress, path.slug) !== "Locked");
     setActivePathSlug(path.slug);
     setActiveModuleSlug(path.modules[firstOpen >= 0 ? firstOpen : path.modules.length - 1]?.slug ?? "");
+    setActiveView("module");
     setAnswers([]); setResult(null); setQuizOpen(false); setError("");
   };
 
   const selectModule = (module: PublicModule, index: number) => {
     if (!activePath || moduleState(index, activePath.modules, progress, activePath.slug) === "Locked") return;
-    setActiveModuleSlug(module.slug); setAnswers([]); setResult(null); setQuizOpen(false); setError("");
+    setActiveModuleSlug(module.slug);
+    setActiveView("module");
+    setAnswers([]); setResult(null); setQuizOpen(false); setError("");
   };
 
   const startQuiz = () => {
@@ -168,32 +175,73 @@ export default function LearningPathsClient() {
         <section className="learning-path-heading"><div><div className="eyebrow">{activePath.subtitle.toUpperCase()}</div><h2>{activePath.title}</h2><p>{activePath.description}</p></div><div className="learning-path-count"><strong>{passedCount}<span> / {activePath.modules.length}</span></strong><small>modules passed</small></div></section>
 
         <div className="learning-workspace">
-          <aside className="learning-map" aria-label={`${activePath.title} module map`}><div className="learning-map-heading"><span>PATH MAP</span><span>{passedCount} passed</span></div>{activePath.modules.map((module, index) => {
-            const state = moduleState(index, activePath.modules, progress, activePath.slug);
-            const moduleProgress = progress[progressKey(activePath.slug, module.slug)];
-            const selected = activeModuleSlug === module.slug;
-            return <button key={module.slug} className={`learning-node ${state.toLowerCase()} ${selected ? "current" : ""}`} onClick={() => selectModule(module, index)} disabled={state === "Locked"} aria-current={selected ? "step" : undefined}>
-              <span className="learning-node-symbol" aria-hidden="true">{state === "Passed" ? "✓" : state === "Ready" ? String(index + 1).padStart(2, "0") : "·"}</span><span className="learning-node-copy"><strong>{module.title}</strong><small>{state}{moduleProgress?.attempts ? ` · ${moduleProgress.attempts} ${moduleProgress.attempts === 1 ? "attempt" : "attempts"}` : ""}</small></span><span className="learning-node-arrow" aria-hidden="true">{selected ? "●" : ""}</span>
-            </button>;
-          })}</aside>
+          <aside className="learning-map" aria-label={`${activePath.title} module map`}>
+            {/* Authentic Work-Sample Button */}
+            <div style={{ padding: "10px", marginBottom: "12px", borderRadius: "6px", background: "rgba(56, 189, 248, 0.08)", border: "1px solid var(--border-color)" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                <span style={{ fontSize: "10px", fontWeight: "700", letterSpacing: "0.05em", color: "var(--color-primary, #38bdf8)" }}>PROOF OF SKILL</span>
+                <span style={{ fontSize: "10px", padding: "1px 5px", borderRadius: "3px", background: "rgba(63, 185, 80, 0.2)", color: "#3fb950", fontWeight: "600" }}>EVIDENCE</span>
+              </div>
+              <button
+                type="button"
+                className={`learning-node ${activeView === "work-sample" ? "current" : ""}`}
+                onClick={() => setActiveView("work-sample")}
+                style={{ width: "100%", textAlign: "left", padding: "8px", border: "none", background: "transparent", cursor: "pointer" }}
+              >
+                <span className="learning-node-symbol" aria-hidden="true">✦</span>
+                <span className="learning-node-copy">
+                  <strong>Work-Sample Task</strong>
+                  <small>
+                    {activePath.slug === "data-analytics" ? "WASM SQLite Sandbox" : activePath.slug === "business-analytics" ? "Spreadsheet Formula Model" : "P0 Escalation Workbench"}
+                  </small>
+                </span>
+              </button>
+            </div>
 
-          {activeModule && <section className="learning-module">
-            <div className="learning-module-kicker"><span>MODULE {String(activeModuleIndex + 1).padStart(2, "0")}</span><span>{activePath.shortTitle.toUpperCase()} PATH</span></div>
-            <h2>{activeModule.title}</h2><p className="learning-module-summary">{activeModule.summary}</p>
-            <div className="learning-objectives"><strong>By the end, you can</strong><ul>{activeModule.objectives.map((objective) => <li key={objective}>{objective}</li>)}</ul></div>
-            <div className="learning-lesson-list">{activeModule.lesson.map((section) => <article className="learning-lesson" key={section.heading}><h3>{section.heading}</h3><p>{section.body}</p></article>)}</div>
-            <aside className="learning-scenario"><span>TRY THIS SCENARIO</span><p>{activeModule.scenario}</p></aside>
+            <div className="learning-map-heading"><span>PATH MAP</span><span>{passedCount} passed</span></div>
+            {activePath.modules.map((module, index) => {
+              const state = moduleState(index, activePath.modules, progress, activePath.slug);
+              const moduleProgress = progress[progressKey(activePath.slug, module.slug)];
+              const selected = activeView === "module" && activeModuleSlug === module.slug;
+              return <button key={module.slug} className={`learning-node ${state.toLowerCase()} ${selected ? "current" : ""}`} onClick={() => selectModule(module, index)} disabled={state === "Locked"} aria-current={selected ? "step" : undefined}>
+                <span className="learning-node-symbol" aria-hidden="true">{state === "Passed" ? "✓" : state === "Ready" ? String(index + 1).padStart(2, "0") : "·"}</span><span className="learning-node-copy"><strong>{module.title}</strong><small>{state}{moduleProgress?.attempts ? ` · ${moduleProgress.attempts} ${moduleProgress.attempts === 1 ? "attempt" : "attempts"}` : ""}</small></span><span className="learning-node-arrow" aria-hidden="true">{selected ? "●" : ""}</span>
+              </button>;
+            })}
+          </aside>
 
-            {!quizOpen && !result && <button className="primary learning-start" onClick={startQuiz}>Start the knowledge check <span>→</span></button>}
+          {activeView === "work-sample" ? (
+            <section className="learning-module" style={{ padding: "24px" }}>
+              {activePath.slug === "data-analytics" && <SqlSandbox />}
+              {activePath.slug === "business-analytics" && <SpreadsheetGrid />}
+              {activePath.slug === "communication" && <CommunicationWorkbench />}
+            </section>
+          ) : activeModule && (
+            <section className="learning-module">
+              {/* Draft Notice Banner */}
+              <div className="notice" style={{ marginBottom: "16px", borderLeft: "3px solid #eab308", display: "flex", alignItems: "center", gap: "10px" }}>
+                <span>⚠</span>
+                <p style={{ margin: 0, fontSize: "13px" }}>
+                  <strong>Draft curriculum content — for demonstration purposes; requires human curriculum review.</strong> Do not invent statistics. Real skills are proven in the Authentic Work-Sample Sandbox.
+                </p>
+              </div>
 
-            {quizOpen && !result && <form className="learning-quiz" onSubmit={submitQuiz}>
-              <div className="learning-quiz-heading"><div><span className="eyebrow">KNOWLEDGE CHECK</span><h3>Choose the best answer</h3></div><small>Pass mark: 2 of {activeModule.questions.length}</small></div>
-              {activeModule.questions.map((question, questionIndex) => <fieldset className="learning-question" key={question.id}><legend><span>QUESTION {questionIndex + 1}</span>{question.prompt}</legend><div className="learning-options">{question.choices.map((choice, choiceIndex) => <label className={`learning-option ${answers[questionIndex] === choiceIndex ? "checked" : ""}`} key={choice}><input type="radio" name={question.id} value={choiceIndex} checked={answers[questionIndex] === choiceIndex} onChange={() => setAnswers((current) => current.map((answer, index) => index === questionIndex ? choiceIndex : answer))}/><span>{choice}</span></label>)}</div></fieldset>)}
-              <div className="learning-submit-row"><p>There is no timer. Your score does not depend on speed.</p><button className="primary" disabled={!answeredAll || busy}>{busy ? "Saving your result…" : "Submit knowledge check"} <span>→</span></button></div>
-            </form>}
+              <div className="learning-module-kicker"><span>MODULE {String(activeModuleIndex + 1).padStart(2, "0")}</span><span>{activePath.shortTitle.toUpperCase()} PATH</span></div>
+              <h2>{activeModule.title}</h2><p className="learning-module-summary">{activeModule.summary}</p>
+              <div className="learning-objectives"><strong>By the end, you can</strong><ul>{activeModule.objectives.map((objective) => <li key={objective}>{objective}</li>)}</ul></div>
+              <div className="learning-lesson-list">{activeModule.lesson.map((section) => <article className="learning-lesson" key={section.heading}><h3>{section.heading}</h3><p>{section.body}</p></article>)}</div>
+              <aside className="learning-scenario"><span>TRY THIS SCENARIO</span><p>{activeModule.scenario}</p></aside>
 
-            {result && <section className={`learning-result ${result.passed ? "passed" : "retry"}`} aria-live="polite"><div className="learning-result-heading"><span className="learning-result-icon" aria-hidden="true">{result.passed ? "✓" : "↻"}</span><div><div className="eyebrow">{result.passed ? "MODULE PASSED" : "KEEP PRACTICING"}</div><h3>{result.score} of {result.questionCount} correct</h3><p>{result.passed ? "You showed enough understanding to continue. Review the explanations, then open the next module when you are ready." : "Read the explanations, revisit the lesson, and try again. Your next module stays available once you pass."}</p></div></div><div className="learning-answer-review">{activeModule.questions.map((question, index) => { const item = result.feedback[index]; return <article className="learning-answer" key={question.id}><strong>{item.correct ? "✓ Correct" : "Review this one"} · Question {index + 1}</strong><p>{item.explanation}</p>{!item.correct && <small>Best answer: {question.choices[item.correctIndex]}</small>}</article>; })}</div><div className="learning-result-actions">{nextModule && nextIsAvailable ? <button className="primary" onClick={continuePath}>Continue to {nextModule.title} <span>→</span></button> : result.passed ? <span className="learning-path-complete">✓ You completed this path. All ten modules are passed.</span> : <button className="secondary" onClick={startQuiz}>Try the knowledge check again <span>↻</span></button>}</div></section>}
-          </section>}
+              {!quizOpen && !result && <button className="primary learning-start" onClick={startQuiz}>Start the knowledge check <span>→</span></button>}
+
+              {quizOpen && !result && <form className="learning-quiz" onSubmit={submitQuiz}>
+                <div className="learning-quiz-heading"><div><span className="eyebrow">KNOWLEDGE CHECK</span><h3>Choose the best answer</h3></div><small>Pass mark: 2 of {activeModule.questions.length}</small></div>
+                {activeModule.questions.map((question, questionIndex) => <fieldset className="learning-question" key={question.id}><legend><span>QUESTION {questionIndex + 1}</span>{question.prompt}</legend><div className="learning-options">{question.choices.map((choice, choiceIndex) => <label className={`learning-option ${answers[questionIndex] === choiceIndex ? "checked" : ""}`} key={choice}><input type="radio" name={question.id} value={choiceIndex} checked={answers[questionIndex] === choiceIndex} onChange={() => setAnswers((current) => current.map((answer, index) => index === questionIndex ? choiceIndex : answer))}/><span>{choice}</span></label>)}</div></fieldset>)}
+                <div className="learning-submit-row"><p>There is no timer. Your score does not depend on speed.</p><button className="primary" disabled={!answeredAll || busy}>{busy ? "Saving your result…" : "Submit knowledge check"} <span>→</span></button></div>
+              </form>}
+
+              {result && <section className={`learning-result ${result.passed ? "passed" : "retry"}`} aria-live="polite"><div className="learning-result-heading"><span className="learning-result-icon" aria-hidden="true">{result.passed ? "✓" : "↻"}</span><div><div className="eyebrow">{result.passed ? "MODULE PASSED" : "KEEP PRACTICING"}</div><h3>{result.score} of {result.questionCount} correct</h3><p>{result.passed ? "You showed enough understanding to continue. Review the explanations, then open the next module when you are ready." : "Read the explanations, revisit the lesson, and try again. Your next module stays available once you pass."}</p></div></div><div className="learning-answer-review">{activeModule.questions.map((question, index) => { const item = result.feedback[index]; return <article className="learning-answer" key={question.id}><strong>{item.correct ? "✓ Correct" : "Review this one"} · Question {index + 1}</strong><p>{item.explanation}</p>{!item.correct && <small>Best answer: {question.choices[item.correctIndex]}</small>}</article>; })}</div><div className="learning-result-actions">{nextModule && nextIsAvailable ? <button className="primary" onClick={continuePath}>Continue to {nextModule.title} <span>→</span></button> : result.passed ? <span className="learning-path-complete">✓ You completed this path. All ten modules are passed.</span> : <button className="secondary" onClick={startQuiz}>Try the knowledge check again <span>↻</span></button>}</div></section>}
+            </section>
+          )}
         </div>
         <p className="learning-integrity-note">Learning-path results are private practice progress. They are separate from assessment evidence and are not shared with recruiters.</p>
       </>}
