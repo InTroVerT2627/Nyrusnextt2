@@ -680,9 +680,50 @@ export const communicationModule1: FullModule = {
 
 export const seededModulesMap: Record<string, FullModule> = {
   "data-analytics/frame-the-question": dataAnalyticsModule1,
+  "business-analytics/frame-a-decision": businessAnalyticsModule1,
   "business-analytics/frame-the-business-problem": businessAnalyticsModule1,
+  "communication/read-the-room": communicationModule1,
   "communication/know-your-audience": communicationModule1,
 };
+
+const DATA_ARC_SCENES = [
+  { setting: "QuickBite Operations Center · 09:14 AM", mood: "urgent" as const, objects: ["laptop", "coffee_mug", "dashboard_monitor", "sticky_notes"] },
+  { setting: "Database Console & Schema Inspector · 10:30 AM", mood: "focused" as const, objects: ["sql_terminal", "schema_diagram", "coffee_mug"] },
+  { setting: "Staging Data Warehouse · 11:45 AM", mood: "focused" as const, objects: ["data_grid", "server_stack", "sticky_notes"] },
+  { setting: "Analytics Desk & Distribution Plots · 01:15 PM", mood: "pensive" as const, objects: ["box_plot", "laptop", "calculator"] },
+  { setting: "Production SQL Sandbox · 02:40 PM", mood: "focused" as const, objects: ["sql_terminal", "dashboard_monitor", "notebook"] },
+  { setting: "Join Validation Lab · 03:50 PM", mood: "urgent" as const, objects: ["schema_diagram", "server_stack", "laptop"] },
+  { setting: "Cohort Workbench · 04:30 PM", mood: "focused" as const, objects: ["cohort_table", "dashboard_monitor", "sticky_notes"] },
+  { setting: "Data Visualization Studio · 05:15 PM", mood: "pensive" as const, objects: ["chart_wireframe", "laptop", "color_palette"] },
+  { setting: "Impact Assessment Room · 06:00 PM", mood: "focused" as const, objects: ["experiment_log", "laptop", "coffee_mug"] },
+  { setting: "Executive Boardroom · 07:15 PM", mood: "triumphant" as const, objects: ["projector_screen", "executive_table", "final_brief"] },
+];
+
+const BUSINESS_ARC_SCENES = [
+  { setting: "Flagship Chai Stall, Koramangala · 08:30 AM", mood: "urgent" as const, objects: ["tea_kettle", "cash_register", "counter"] },
+  { setting: "Kitchen Operations & Recipe Station · 10:00 AM", mood: "focused" as const, objects: ["milk_crates", "recipe_board", "inventory_sheet"] },
+  { setting: "Morning Rush Counter · 11:30 AM", mood: "urgent" as const, objects: ["strainer_pot", "order_queue", "timer"] },
+  { setting: "Customer Survey Table · 01:00 PM", mood: "pensive" as const, objects: ["clipboard", "tea_cup", "notes"] },
+  { setting: "Unit Economics Spreadsheet Desk · 02:30 PM", mood: "focused" as const, objects: ["calculator", "spreadsheet_grid", "laptop"] },
+  { setting: "Scenario Modeling Whiteboard · 03:45 PM", mood: "focused" as const, objects: ["whiteboard", "markers", "scenario_matrix"] },
+  { setting: "Variance Breakdown Counter · 04:45 PM", mood: "pensive" as const, objects: ["daily_ledger", "receipt_tape", "laptop"] },
+  { setting: "Experiment Matrix Station · 05:30 PM", mood: "focused" as const, objects: ["pilot_log", "test_batch", "sticky_notes"] },
+  { setting: "Stall Strategy Review · 06:15 PM", mood: "focused" as const, objects: ["recommendation_memo", "tea_kettle", "laptop"] },
+  { setting: "Investor & Growth Briefing · 07:00 PM", mood: "triumphant" as const, objects: ["pitch_deck", "business_case_binder", "banner"] },
+];
+
+const COMM_ARC_SCENES = [
+  { setting: "Incident War Room · 09:00 AM", mood: "urgent" as const, objects: ["incident_board", "laptop", "red_phone"] },
+  { setting: "Slack Broadcast Command · 10:15 AM", mood: "focused" as const, objects: ["slack_window", "laptop", "sticky_notes"] },
+  { setting: "Documentation Forge · 11:30 AM", mood: "focused" as const, objects: ["markdown_editor", "diff_viewer", "coffee_mug"] },
+  { setting: "Cross-Functional Sync Space · 01:30 PM", mood: "pensive" as const, objects: ["meeting_table", "whiteboard", "notebook"] },
+  { setting: "Evidence Verification Desk · 02:45 PM", mood: "focused" as const, objects: ["telemetry_graphs", "laptop", "audit_log"] },
+  { setting: "Private Coaching Room · 04:00 PM", mood: "pensive" as const, objects: ["sofa", "notepad", "feedback_guide"] },
+  { setting: "Postmortem Conference Hall · 04:45 PM", mood: "focused" as const, objects: ["timeline_chart", "action_item_board", "microphone"] },
+  { setting: "Asynchronous Handoff Terminal · 05:30 PM", mood: "focused" as const, objects: ["time_zone_clocks", "laptop", "handover_doc"] },
+  { setting: "VP Q&A Amphitheater · 06:15 PM", mood: "urgent" as const, objects: ["podium", "slide_clicker", "qna_screen"] },
+  { setting: "Leadership Alignment Summit · 07:00 PM", mood: "triumphant" as const, objects: ["signed_roadmap", "conference_table", "laptop"] },
+];
 
 export type PublicModuleInput = {
   slug: string;
@@ -709,6 +750,9 @@ export function getFullModule(
   const character = pathSlug === "data-analytics" ? "Meera" : pathSlug === "business-analytics" ? "Rohan" : "Ananya";
   const characterRole = pathSlug === "data-analytics" ? "Junior Data Analyst" : pathSlug === "business-analytics" ? "Business Strategist" : "Engineering Lead";
   const storyArcTitle = pathSlug === "data-analytics" ? "The Missing Orders" : pathSlug === "business-analytics" ? "The Tea Stall That Wanted to Grow" : "The Update Nobody Read";
+
+  const sceneMetaList = pathSlug === "data-analytics" ? DATA_ARC_SCENES : pathSlug === "business-analytics" ? BUSINESS_ARC_SCENES : COMM_ARC_SCENES;
+  const currentSceneMeta = sceneMetaList[Math.min(index, sceneMetaList.length - 1)];
 
   return {
     slug: module.slug,
@@ -746,9 +790,9 @@ export function getFullModule(
           sceneNumber: index + 1,
           character,
           characterRole,
-          setting: "Operations Hub · Case Briefing",
-          visualMood: "focused",
-          sceneObjects: ["laptop", "dashboard_monitor", "sticky_notes"],
+          setting: currentSceneMeta.setting,
+          visualMood: currentSceneMeta.mood,
+          sceneObjects: currentSceneMeta.objects,
           narrative: module.scenario || `The team gathers to resolve an operational challenge around ${module.title}. Every stakeholder is waiting for a concrete, defensible direction.`,
           dialogue: [
             { speaker: "Stakeholder", text: `We need clear answers regarding ${module.title}. What should we focus on?` },
