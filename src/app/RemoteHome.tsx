@@ -32,6 +32,7 @@ import { ToastProvider } from "@/components/ToastContext";
 import SkillTreeSvg from "@/components/SkillTreeSvg";
 import CodingWorkspace from "@/components/CodingWorkspace";
 import BossRoundWorkbench from "@/components/BossRoundWorkbench";
+import EvidenceProfileView from "@/components/EvidenceProfileView";
 import { Search } from "lucide-react";
 
 type Role = "learner" | "recruiter" | "reviewer";
@@ -681,7 +682,7 @@ export default function RemoteHome() {
               }
             />
           ) : section === "My evidence" ? (
-            <ProfileView profile={profile!} onConsent={saveConsent} onOpen={setActiveAttempt} />
+            <EvidenceProfileView profile={profile!} onConsent={saveConsent} onOpenAttempt={setActiveAttempt} />
           ) : section === "Recruiter preview" ? (
             <RecruiterView />
           ) : section === "Review queue" ? (
