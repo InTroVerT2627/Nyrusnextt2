@@ -1,6 +1,6 @@
-# ProofLoop
+# Nextlearn
 
-ProofLoop is a proof-of-skill sandbox for debugging in Java and JavaScript. Learners solve realistic incident missions, explain their reasoning, and build evidence cards they choose whether to share.
+Nextlearn is a proof-of-skill sandbox for debugging in Java and JavaScript. Learners solve realistic incident missions, explain their reasoning, and build evidence cards they choose whether to share.
 
 The product is experimental. Evidence describes performance on these tasks; it is not a validated predictor of job performance or a hiring decision.
 
