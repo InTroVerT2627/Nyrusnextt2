@@ -412,25 +412,27 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   align-items: center;
   gap: 8px;
   padding: 6px 14px;
-  border: 1.5px solid var(--mint-deep);
+  border: 1.5px solid var(--forest);
   border-radius: 9999px;
-  background: var(--lime-light);
+  background: var(--white);
   color: var(--ink);
   font-size: 12px;
   font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(15, 61, 42, 0.08);
   transition: all 0.15s ease;
 }
 
 .role-switcher-btn:hover {
-  background: var(--lime-mid);
-  border-color: var(--forest);
+  background: var(--lime-light);
+  border-color: var(--mint-deep);
 }
 
 .role-label {
   font-size: 10px;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 0.8px;
-  color: var(--muted);
+  color: var(--forest);
 }
 
 .role-active-name {
@@ -440,94 +442,241 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 
 .role-active-badge {
   font-size: 11px;
-  color: var(--forest);
+  font-weight: 600;
+  color: var(--mint-deep);
 }
 
 .dropdown-caret {
   font-size: 10px;
-  color: var(--muted);
+  color: var(--forest);
 }
 
 .role-dropdown-menu {
   position: absolute;
-  top: calc(100% + 6px);
+  top: calc(100% + 8px);
   right: 0;
-  width: 290px;
-  background: var(--white);
-  border: 1.5px solid var(--mint-deep);
+  width: 310px;
+  background: #FFFFFF;
+  border: 2px solid var(--forest);
   border-radius: 16px;
-  box-shadow: var(--modal-shadow);
+  box-shadow: 0 16px 40px rgba(15, 61, 42, 0.22);
   padding: 8px;
-  z-index: 50;
+  z-index: 100;
 }
 
 .dropdown-title {
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  color: var(--text-dim);
-  padding: 6px 10px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--forest);
+  padding: 6px 10px 8px;
 }
 
 .dropdown-item {
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 10px;
-  border-radius: 6px;
-  border: 0;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1.5px solid transparent;
   background: transparent;
-  color: var(--text-main);
+  color: var(--ink);
   text-align: left;
-  transition: background 0.12s ease;
+  cursor: pointer;
+  transition: all 0.15s ease;
 }
 
 .dropdown-item:hover {
-  background: var(--bg-surface-elevated);
+  background: var(--lime-light);
+  border-color: rgba(49, 148, 94, 0.3);
 }
 
 .dropdown-item.selected {
-  background: var(--primary-subtle);
-  color: var(--primary-text);
+  background: var(--lime-light);
+  border-color: var(--mint-deep);
 }
 
 .avatar-chip {
-  width: 22px;
-  height: 22px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
-  background: var(--primary);
-  color: #fff;
+  background: var(--header-dark);
+  color: var(--lime);
   display: grid;
   place-items: center;
-  font-size: 10px;
-  font-weight: 700;
+  font-size: 11px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.item-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--lime-light);
+  color: var(--header-dark);
+  flex-shrink: 0;
 }
 
 .item-details strong {
   display: block;
-  font-size: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
 }
 
 .item-details small {
   display: block;
-  font-size: 10px;
-  color: var(--text-dim);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.dropdown-item.selected .item-details strong {
+  color: var(--forest);
+  font-weight: 800;
+}
+
+.dropdown-item.selected .item-details small {
+  color: var(--mint-deep);
+  font-weight: 600;
 }
 
 .item-check {
   margin-left: auto;
-  color: var(--primary-text);
-  font-weight: 700;
+  color: var(--forest);
+  font-weight: 800;
+  font-size: 14px;
 }
 
 .dropdown-footer {
-  border-top: 1px solid var(--border);
+  border-top: 1px solid rgba(49, 148, 94, 0.25);
   margin-top: 6px;
   padding: 8px 10px 4px;
-  color: var(--text-dim);
+  color: var(--muted);
   font-size: 10px;
   line-height: 1.4;
+}
+
+/* Dark Theme Overrides for Header and Role Switcher */
+[data-theme="dark"] .topbar {
+  background: var(--header-dark);
+  border-bottom: 1.5px solid var(--border);
+}
+
+[data-theme="dark"] .breadcrumb {
+  color: var(--on-dark-soft);
+}
+
+[data-theme="dark"] .breadcrumb span {
+  color: var(--lime);
+}
+
+[data-theme="dark"] .breadcrumb strong {
+  color: var(--on-dark);
+}
+
+[data-theme="dark"] .sandbox-pill {
+  background: #0F3D2A;
+  border-color: var(--mint);
+  color: var(--on-dark);
+}
+
+[data-theme="dark"] .sandbox-pill i {
+  background: var(--lime);
+  box-shadow: 0 0 8px var(--lime);
+}
+
+[data-theme="dark"] .role-switcher-btn {
+  background: #0F3D2A;
+  border-color: var(--mint);
+  color: var(--on-dark);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+[data-theme="dark"] .role-switcher-btn:hover {
+  background: #17573A;
+  border-color: var(--lime);
+}
+
+[data-theme="dark"] .role-label {
+  color: var(--lime);
+}
+
+[data-theme="dark"] .role-active-name {
+  color: #FFFFFF;
+}
+
+[data-theme="dark"] .role-active-badge {
+  color: var(--lime);
+}
+
+[data-theme="dark"] .dropdown-caret {
+  color: var(--lime);
+}
+
+[data-theme="dark"] .role-dropdown-menu {
+  background: #0B281B;
+  border: 2px solid var(--mint);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+}
+
+[data-theme="dark"] .dropdown-title {
+  color: var(--lime);
+}
+
+[data-theme="dark"] .dropdown-item {
+  color: #FFFFFF;
+}
+
+[data-theme="dark"] .dropdown-item:hover {
+  background: rgba(223, 249, 162, 0.12);
+  border-color: rgba(62, 193, 123, 0.4);
+}
+
+[data-theme="dark"] .dropdown-item.selected {
+  background: rgba(62, 193, 123, 0.24);
+  border-color: var(--mint);
+}
+
+[data-theme="dark"] .avatar-chip {
+  background: var(--mint);
+  color: #082518;
+}
+
+[data-theme="dark"] .item-icon {
+  background: rgba(223, 249, 162, 0.16);
+  color: var(--lime);
+}
+
+[data-theme="dark"] .item-details strong {
+  color: #FFFFFF;
+}
+
+[data-theme="dark"] .item-details small {
+  color: #C3E6D0;
+}
+
+[data-theme="dark"] .dropdown-item.selected .item-details strong {
+  color: var(--lime);
+}
+
+[data-theme="dark"] .dropdown-item.selected .item-details small {
+  color: #EFFCCF;
+}
+
+[data-theme="dark"] .item-check {
+  color: var(--lime);
+}
+
+[data-theme="dark"] .dropdown-footer {
+  border-top-color: rgba(62, 193, 123, 0.3);
+  color: #BBE698;
 }
 
 /* Theme Toggle Button */
