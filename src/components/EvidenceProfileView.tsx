@@ -145,8 +145,30 @@ export default function EvidenceProfileView({
   onOpenAttempt,
 }: EvidenceProfileViewProps) {
   const [activeTab, setActiveTab] = useState<"cards" | "timeline" | "consent">("cards");
+  const [selectedAreaFilter, setSelectedAreaFilter] = useState<string>("all");
   const [expandedAttemptId, setExpandedAttemptId] = useState<string | null>(null);
   const [activeConfidenceTooltip, setActiveConfidenceTooltip] = useState<string | null>(null);
+
+  const getAreaKey = (skill: string) => {
+    if (skill.includes("data")) return "data";
+    if (skill.includes("business") || skill.includes("spreadsheet")) return "biz";
+    if (skill.includes("communication")) return "comm";
+    return "debug";
+  };
+
+  const areaCounts = useMemo(() => {
+    const counts = { all: profile.evidence.length, debug: 0, data: 0, biz: 0, comm: 0 };
+    for (const ev of profile.evidence) {
+      const area = getAreaKey(ev.skill);
+      counts[area] = (counts[area] || 0) + 1;
+    }
+    return counts;
+  }, [profile.evidence]);
+
+  const filteredEvidence = useMemo(() => {
+    if (selectedAreaFilter === "all") return profile.evidence;
+    return profile.evidence.filter((ev) => getAreaKey(ev.skill) === selectedAreaFilter);
+  }, [profile.evidence, selectedAreaFilter]);
 
   // Map newest evidence per attempt
   const newestEvidence = useMemo(() => {
@@ -292,26 +314,79 @@ export default function EvidenceProfileView({
       {/* TAB 1: Evidence Cards */}
       {activeTab === "cards" && (
         <div className="profile-tab-content">
-          {profile.evidence.length === 0 ? (
+          {/* Area Filter Segmented Pills */}
+          <div className="pill-tabs-track" role="tablist" aria-label="Filter evidence by competency area">
+            <button
+              type="button"
+              className={`pill-tab-item ${selectedAreaFilter === "all" ? "active" : ""}`}
+              onClick={() => setSelectedAreaFilter("all")}
+            >
+              <span>All</span>
+              <span className="pill-count-badge">{areaCounts.all}</span>
+            </button>
+            <button
+              type="button"
+              className={`pill-tab-item ${selectedAreaFilter === "debug" ? "active" : ""}`}
+              onClick={() => setSelectedAreaFilter("debug")}
+            >
+              <span>Debugging</span>
+              <span className="pill-count-badge">{areaCounts.debug}</span>
+            </button>
+            <button
+              type="button"
+              className={`pill-tab-item ${selectedAreaFilter === "data" ? "active" : ""}`}
+              onClick={() => setSelectedAreaFilter("data")}
+            >
+              <span>Data Analytics</span>
+              <span className="pill-count-badge">{areaCounts.data}</span>
+            </button>
+            <button
+              type="button"
+              className={`pill-tab-item ${selectedAreaFilter === "biz" ? "active" : ""}`}
+              onClick={() => setSelectedAreaFilter("biz")}
+            >
+              <span>Business Analytics</span>
+              <span className="pill-count-badge">{areaCounts.biz}</span>
+            </button>
+            <button
+              type="button"
+              className={`pill-tab-item ${selectedAreaFilter === "comm" ? "active" : ""}`}
+              onClick={() => setSelectedAreaFilter("comm")}
+            >
+              <span>Communication</span>
+              <span className="pill-count-badge">{areaCounts.comm}</span>
+            </button>
+          </div>
+
+          {filteredEvidence.length === 0 ? (
             <div className="empty-state panel">
               <FileCheck2 size={36} strokeWidth={1.5} />
-              <h2>No evidence cards earned yet</h2>
-              <p>Complete an incident mission and defend your reasoning to produce your first verifiable card.</p>
+              <h2>No evidence cards in this area yet</h2>
+              <p>Complete a mission in this area to produce your first verifiable card.</p>
             </div>
           ) : (
             <div className="evidence-cards-grid">
-              {profile.evidence.map((ev) => {
+              {filteredEvidence.map((ev) => {
                 const attempt = profile.attempts.find((a) => a.id === ev.attempt_id);
                 const scores = profile.criterionScores.filter((s) => s.attempt_id === ev.attempt_id);
                 const followups = profile.followups.filter((f) => f.attempt_id === ev.attempt_id);
                 const isExpanded = expandedAttemptId === ev.attempt_id;
+                const areaKey = getAreaKey(ev.skill);
 
                 return (
                   <article key={ev.id} className="evidence-card-rich panel">
                     <div className="card-top-row">
-                      <div className="skill-identity">
-                        <span className="skill-tag">{ev.language || "CORE"}</span>
-                        <h3 className="skill-title">{ev.skill.replace(/-/g, " ").toUpperCase()}</h3>
+                      <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+                        <div className={`area-tile ${areaKey}`} aria-hidden="true">
+                          {areaKey === "debug" ? <FileCheck2 size={22} /> :
+                           areaKey === "data" ? <Layers size={22} /> :
+                           areaKey === "biz" ? <TrendingUp size={22} /> :
+                           <Sparkles size={22} />}
+                        </div>
+                        <div className="skill-identity">
+                          <span className="skill-tag">{ev.language || "CORE"}</span>
+                          <h3 className="skill-title">{ev.skill.replace(/-/g, " ").toUpperCase()}</h3>
+                        </div>
                       </div>
                       <span className="proficiency-badge">{ev.level.toUpperCase()}</span>
                     </div>

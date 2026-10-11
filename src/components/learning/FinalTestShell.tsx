@@ -187,7 +187,7 @@ export default function FinalTestShell({
 
   const isUrgent = timeRemainingSeconds <= 120; // < 2 mins (red)
   const isWarning = timeRemainingSeconds <= 600 && !isUrgent; // < 10 mins (amber)
-  const timerColor = isUrgent ? "#DC2626" : isWarning ? "#D97706" : "#06C6E6";
+  const timerColor = isUrgent ? "#DC2626" : isWarning ? "#D97706" : "var(--forest)";
 
   // Handle Hint Request
   async function confirmHint(tier: "nudge" | "pointer" | "strong") {
@@ -334,8 +334,8 @@ export default function FinalTestShell({
       <header
         style={{
           height: "60px",
-          borderBottom: "1px solid #D9E8F3",
-          backgroundColor: "#142D4E",
+          borderBottom: "1px solid var(--mint-deep)",
+          backgroundColor: "var(--forest)",
           color: "#FFFFFF",
           display: "flex",
           alignItems: "center",
@@ -348,16 +348,16 @@ export default function FinalTestShell({
       >
         <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
           <Link href="/" style={{ textDecoration: "none", color: "#FFFFFF", display: "flex", alignItems: "center", gap: "8px" }}>
-            <span style={{ fontWeight: 800, backgroundColor: "#06C6E6", color: "#142D4E", padding: "2px 8px", borderRadius: "4px" }}>
+            <span style={{ fontWeight: 800, backgroundColor: "var(--forest)", color: "var(--forest)", padding: "2px 8px", borderRadius: "4px" }}>
               N
             </span>
             <span style={{ fontWeight: 700, fontSize: "15px" }}>nextlearn</span>
           </Link>
 
-          <span style={{ color: "#D9E8F3", fontSize: "14px" }}>|</span>
+          <span style={{ color: "var(--mint-deep)", fontSize: "14px" }}>|</span>
 
           <div>
-            <span style={{ fontSize: "11px", fontWeight: 700, color: "#06C6E6", textTransform: "uppercase" }}>
+            <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--forest)", textTransform: "uppercase" }}>
               FINAL TEST
             </span>
             <span style={{ fontSize: "13px", color: "#FFFFFF", marginLeft: "8px", fontWeight: 600 }}>
@@ -368,15 +368,15 @@ export default function FinalTestShell({
 
         {/* Center: Question Progress */}
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <span style={{ fontSize: "12px", color: "#EAF6FC", fontWeight: 600 }}>
+          <span style={{ fontSize: "12px", color: "var(--lime-light)", fontWeight: 600 }}>
             Question {currentQuestionIndex + 1} of {attempt.totalQuestions}
           </span>
-          <div style={{ width: "120px", height: "6px", backgroundColor: "#334155", borderRadius: "3px", overflow: "hidden" }}>
+          <div style={{ width: "120px", height: "6px", backgroundColor: "var(--ink-soft)", borderRadius: "3px", overflow: "hidden" }}>
             <div
               style={{
                 height: "100%",
                 width: `${Math.round(((currentQuestionIndex + 1) / attempt.totalQuestions) * 100)}%`,
-                backgroundColor: "#06C6E6",
+                backgroundColor: "var(--forest)",
                 transition: "width 200ms ease-out",
               }}
             />
@@ -396,7 +396,7 @@ export default function FinalTestShell({
               borderRadius: "20px",
             }}
           >
-            <span style={{ fontSize: "11px", color: "#EAF6FC" }}>TIME LEFT:</span>
+            <span style={{ fontSize: "11px", color: "var(--lime-light)" }}>TIME LEFT:</span>
             <strong style={{ fontSize: "14px", fontFamily: "JetBrains Mono, monospace", color: timerColor }}>
               {timeFormatted}
             </strong>
@@ -416,9 +416,9 @@ export default function FinalTestShell({
             style={{
               padding: "5px 12px",
               borderRadius: "6px",
-              border: "1px solid #D9E8F3",
+              border: "1px solid var(--mint-deep)",
               backgroundColor: "transparent",
-              color: "#EAF6FC",
+              color: "var(--lime-light)",
               fontSize: "12px",
               cursor: "pointer",
             }}

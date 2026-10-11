@@ -18,13 +18,13 @@ export default function StorySceneSvg({
   className = "",
 }: StorySceneSvgProps) {
   // Palette color definitions
-  const midnight = "#142D4E";
-  const cyan = "#06C6E6";
-  const ice = "#EAF6FC";
+  const midnight = "var(--forest)";
+  const cyan = "var(--forest)";
+  const ice = "var(--lime-light)";
   const white = "#FFFFFF";
   const warning = "#D97706";
   const success = "#059669";
-  const border = "#D9E8F3";
+  const border = "var(--mint-deep)";
 
   const isUrgent = visualMood === "urgent";
   const isPensive = visualMood === "pensive";
@@ -64,7 +64,7 @@ export default function StorySceneSvg({
         {/* Main Work Desk Surface */}
         <path
           d="M60 270 L540 270 L510 320 L90 320 Z"
-          fill="#0c1d33"
+          fill="var(--forest)"
           stroke={cyan}
           strokeWidth="1.5"
           opacity="0.9"

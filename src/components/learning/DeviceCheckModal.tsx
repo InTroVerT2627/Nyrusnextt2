@@ -180,7 +180,7 @@ export default function DeviceCheckModal({
         style={{
           backgroundColor: "#FFFFFF",
           borderRadius: "14px",
-          border: "1px solid #D9E8F3",
+          border: "1px solid var(--mint-deep)",
           maxWidth: "560px",
           width: "100%",
           padding: "24px",
@@ -193,17 +193,17 @@ export default function DeviceCheckModal({
               style={{
                 fontSize: "11px",
                 fontWeight: 700,
-                color: "#142D4E",
+                color: "var(--forest)",
                 letterSpacing: "0.06em",
                 textTransform: "uppercase",
               }}
             >
               FINAL TEST PREPARATION
             </span>
-            <h2 id="device-check-title" style={{ margin: "4px 0 0", fontSize: "20px", fontWeight: 700, color: "#142D4E" }}>
+            <h2 id="device-check-title" style={{ margin: "4px 0 0", fontSize: "20px", fontWeight: 700, color: "var(--forest)" }}>
               Device Readiness & Privacy Check
             </h2>
-            <p style={{ margin: "4px 0 0", fontSize: "13px", color: "#64748B" }}>
+            <p style={{ margin: "4px 0 0", fontSize: "13px", color: "var(--muted)" }}>
               {pathTitle} · 45 minutes · 8 questions
             </p>
           </div>
@@ -219,7 +219,7 @@ export default function DeviceCheckModal({
               border: "none",
               fontSize: "18px",
               cursor: "pointer",
-              color: "#64748B",
+              color: "var(--muted)",
             }}
           >
             ✕
@@ -229,7 +229,7 @@ export default function DeviceCheckModal({
         {/* Video Preview & Mic Bar */}
         <div
           style={{
-            background: "#142D4E",
+            background: "var(--forest)",
             borderRadius: "10px",
             overflow: "hidden",
             position: "relative",
@@ -241,7 +241,7 @@ export default function DeviceCheckModal({
           }}
         >
           {isInitializing ? (
-            <p style={{ color: "#EAF6FC", fontSize: "13px" }}>Checking camera and microphone…</p>
+            <p style={{ color: "var(--lime-light)", fontSize: "13px" }}>Checking camera and microphone…</p>
           ) : hasCamera ? (
             <video
               ref={videoRef}
@@ -256,9 +256,9 @@ export default function DeviceCheckModal({
               }}
             />
           ) : (
-            <div style={{ padding: "20px", textAlign: "center", color: "#EAF6FC" }}>
+            <div style={{ padding: "20px", textAlign: "center", color: "var(--lime-light)" }}>
               <p style={{ margin: 0, fontWeight: 600, fontSize: "14px" }}>Camera preview not active</p>
-              <p style={{ margin: "6px 0 0", fontSize: "12px", color: "#64748B" }}>
+              <p style={{ margin: "6px 0 0", fontSize: "12px", color: "var(--muted)" }}>
                 {deviceError || "No camera detected. You may still proceed with the unproctored route."}
               </p>
             </div>
@@ -292,13 +292,13 @@ export default function DeviceCheckModal({
             {/* Mic Level Bar */}
             {hasMic && (
               <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                <span style={{ fontSize: "10px", color: "#EAF6FC" }}>Audio:</span>
-                <div style={{ width: "60px", height: "6px", backgroundColor: "#334155", borderRadius: "3px", overflow: "hidden" }}>
+                <span style={{ fontSize: "10px", color: "var(--lime-light)" }}>Audio:</span>
+                <div style={{ width: "60px", height: "6px", backgroundColor: "var(--ink-soft)", borderRadius: "3px", overflow: "hidden" }}>
                   <div
                     style={{
                       height: "100%",
                       width: `${audioLevel}%`,
-                      backgroundColor: "#06C6E6",
+                      backgroundColor: "var(--forest)",
                       transition: "width 80ms ease-out",
                     }}
                   />
@@ -311,17 +311,17 @@ export default function DeviceCheckModal({
         {/* Privacy Non-Negotiable Declaration */}
         <div
           style={{
-            backgroundColor: "#EAF6FC",
-            border: "1px solid #D9E8F3",
+            backgroundColor: "var(--lime-light)",
+            border: "1px solid var(--mint-deep)",
             borderRadius: "8px",
             padding: "12px 14px",
             marginBottom: "16px",
             fontSize: "12px",
-            color: "#334155",
+            color: "var(--ink-soft)",
             lineHeight: 1.5,
           }}
         >
-          <strong style={{ color: "#142D4E", display: "block", marginBottom: "4px" }}>
+          <strong style={{ color: "var(--forest)", display: "block", marginBottom: "4px" }}>
             🔒 Strict Privacy Guarantee
           </strong>
           Your video and microphone streams run <strong>100% locally</strong> on your device.
@@ -335,9 +335,9 @@ export default function DeviceCheckModal({
             id="accommodation-check"
             checked={hasAccommodation}
             onChange={(e) => setHasAccommodation(e.target.checked)}
-            style={{ accentColor: "#06C6E6", cursor: "pointer" }}
+            style={{ accentColor: "var(--forest)", cursor: "pointer" }}
           />
-          <label htmlFor="accommodation-check" style={{ fontSize: "12px", color: "#334155", cursor: "pointer" }}>
+          <label htmlFor="accommodation-check" style={{ fontSize: "12px", color: "var(--ink-soft)", cursor: "pointer" }}>
             Enable accessibility accommodation (+50% extra time: 67.5 minutes)
           </label>
         </div>
@@ -350,9 +350,9 @@ export default function DeviceCheckModal({
             style={{
               padding: "9px 14px",
               borderRadius: "6px",
-              border: "1px solid #D9E8F3",
+              border: "1px solid var(--mint-deep)",
               backgroundColor: "#FFFFFF",
-              color: "#334155",
+              color: "var(--ink-soft)",
               fontSize: "13px",
               fontWeight: 600,
               cursor: "pointer",
@@ -371,9 +371,9 @@ export default function DeviceCheckModal({
               style={{
                 padding: "9px 14px",
                 borderRadius: "6px",
-                border: "1px solid #D9E8F3",
+                border: "1px solid var(--mint-deep)",
                 backgroundColor: "#FFFFFF",
-                color: "#64748B",
+                color: "var(--muted)",
                 fontSize: "13px",
                 cursor: "pointer",
               }}
@@ -388,8 +388,8 @@ export default function DeviceCheckModal({
                 padding: "9px 18px",
                 borderRadius: "6px",
                 border: "none",
-                backgroundColor: hasCamera || hasMic ? "#06C6E6" : "#D9E8F3",
-                color: "#142D4E",
+                backgroundColor: hasCamera || hasMic ? "var(--forest)" : "var(--mint-deep)",
+                color: "var(--forest)",
                 fontSize: "13px",
                 fontWeight: 700,
                 cursor: hasCamera || hasMic ? "pointer" : "not-allowed",

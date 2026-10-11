@@ -333,8 +333,8 @@ export default function SkillTreeSvg({
             {/* Defs for gradients & markers */}
             <defs>
               <linearGradient id="edgeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#D9E8F3" stopOpacity="0.8" />
-                <stop offset="100%" stopColor="#06C6E6" stopOpacity="0.6" />
+                <stop offset="0%" stopColor="var(--mint-deep)" stopOpacity="0.8" />
+                <stop offset="100%" stopColor="var(--forest)" stopOpacity="0.8" />
               </linearGradient>
             </defs>
 
@@ -343,7 +343,7 @@ export default function SkillTreeSvg({
             <path
               d="M 190 200 C 260 160, 290 140, 310 135"
               fill="none"
-              stroke={completedSlugs.has("find-max") ? "#06C6E6" : "#D9E8F3"}
+              stroke={completedSlugs.has("find-max") ? "var(--forest)" : "var(--mint-deep)"}
               strokeWidth="2.5"
               strokeDasharray={completedSlugs.has("find-max") ? "none" : "5,5"}
             />
@@ -351,7 +351,7 @@ export default function SkillTreeSvg({
             <path
               d="M 190 240 C 260 280, 290 300, 310 305"
               fill="none"
-              stroke={completedSlugs.has("find-max") ? "#06C6E6" : "#D9E8F3"}
+              stroke={completedSlugs.has("find-max") ? "var(--forest)" : "var(--mint-deep)"}
               strokeWidth="2.5"
               strokeDasharray={completedSlugs.has("find-max") ? "none" : "5,5"}
             />
@@ -359,7 +359,7 @@ export default function SkillTreeSvg({
             <path
               d="M 410 135 C 470 150, 500 180, 530 200"
               fill="none"
-              stroke={completedSlugs.has("remove-duplicates") ? "#06C6E6" : "#D9E8F3"}
+              stroke={completedSlugs.has("remove-duplicates") ? "var(--forest)" : "var(--mint-deep)"}
               strokeWidth="2.5"
               strokeDasharray={completedSlugs.has("remove-duplicates") ? "none" : "5,5"}
             />
@@ -367,7 +367,7 @@ export default function SkillTreeSvg({
             <path
               d="M 410 305 C 470 290, 500 260, 530 240"
               fill="none"
-              stroke={completedSlugs.has("async-results") ? "#06C6E6" : "#D9E8F3"}
+              stroke={completedSlugs.has("async-results") ? "var(--forest)" : "var(--mint-deep)"}
               strokeWidth="2.5"
               strokeDasharray={completedSlugs.has("async-results") ? "none" : "5,5"}
             />
@@ -375,7 +375,7 @@ export default function SkillTreeSvg({
             <path
               d="M 630 220 L 740 220"
               fill="none"
-              stroke={boss?.unlocked ? "#06C6E6" : "#D9E8F3"}
+              stroke={boss?.unlocked ? "var(--forest)" : "var(--mint-deep)"}
               strokeWidth="2.5"
               strokeDasharray={boss?.unlocked ? "none" : "5,5"}
             />
@@ -420,7 +420,7 @@ export default function SkillTreeSvg({
                       r="42"
                       className="node-pulse-ring"
                       fill="none"
-                      stroke="#059669"
+                      stroke="var(--success)"
                       strokeWidth="2"
                     />
                   )}
@@ -429,15 +429,17 @@ export default function SkillTreeSvg({
                   <circle
                     r="34"
                     className="node-bg-circle"
-                    fill={pos.isBoss ? "#142D4E" : isEvidenced ? "#EAF6FC" : "#FFFFFF"}
+                    fill={pos.isBoss ? "var(--forest)" : isEvidenced ? "var(--lime)" : state === "Available" ? "var(--lime-light)" : "var(--paper)"}
                     stroke={
                       isSelected
-                        ? "#06C6E6"
+                        ? "var(--forest)"
                         : isEvidenced
-                        ? "#059669"
+                        ? "var(--success)"
                         : pos.isBoss
-                        ? "#D9E8F3"
-                        : "#D9E8F3"
+                        ? "var(--lime)"
+                        : state === "Available"
+                        ? "var(--accent-debug)"
+                        : "var(--mint-deep)"
                     }
                     strokeWidth={isSelected ? "3.5" : "2"}
                   />
@@ -449,7 +451,7 @@ export default function SkillTreeSvg({
                     fontSize="13"
                     fontWeight="800"
                     fontFamily="var(--font-mono)"
-                    fill={pos.isBoss ? "#06C6E6" : isEvidenced ? "#059669" : "#142D4E"}
+                    fill={pos.isBoss ? "var(--on-forest)" : isEvidenced ? "var(--success)" : "var(--ink)"}
                   >
                     {pos.number}
                   </text>
@@ -465,21 +467,21 @@ export default function SkillTreeSvg({
                       rx="10"
                       fill={
                         isEvidenced
-                          ? "rgba(5, 150, 105, 0.1)"
+                          ? "rgba(11, 122, 67, 0.12)"
                           : state === "Available"
-                          ? "rgba(6, 198, 230, 0.12)"
+                          ? "rgba(15, 61, 42, 0.12)"
                           : state === "Fix works · reasoning needed"
-                          ? "rgba(217, 119, 6, 0.12)"
-                          : "rgba(20, 45, 78, 0.06)"
+                          ? "rgba(154, 91, 0, 0.12)"
+                          : "rgba(49, 148, 94, 0.12)"
                       }
                       stroke={
                         isEvidenced
-                          ? "#059669"
+                          ? "var(--success)"
                           : state === "Available"
-                          ? "#06C6E6"
+                          ? "var(--forest)"
                           : state === "Fix works · reasoning needed"
-                          ? "#D97706"
-                          : "#D9E8F3"
+                          ? "var(--warning)"
+                          : "var(--mint-deep)"
                       }
                       strokeWidth="1"
                     />
@@ -491,12 +493,12 @@ export default function SkillTreeSvg({
                       fontFamily="var(--font-sans)"
                       fill={
                         isEvidenced
-                          ? "#059669"
+                          ? "var(--success)"
                           : state === "Available"
-                          ? "#142D4E"
+                          ? "var(--forest)"
                           : state === "Fix works · reasoning needed"
-                          ? "#D97706"
-                          : "#64748B"
+                          ? "var(--warning)"
+                          : "var(--muted)"
                       }
                     >
                       {state}
@@ -508,7 +510,7 @@ export default function SkillTreeSvg({
                       dy="34"
                       fontSize="11"
                       fontWeight="700"
-                      fill="#142D4E"
+                      fill="var(--ink)"
                     >
                       {pos.title}
                     </text>

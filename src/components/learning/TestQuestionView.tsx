@@ -61,11 +61,11 @@ export default function TestQuestionView({
           gap: "8px",
           padding: "8px 14px",
           borderRadius: "6px",
-          backgroundColor: "#EAF6FC",
-          border: "1px solid #D9E8F3",
+          backgroundColor: "var(--lime-light)",
+          border: "1px solid var(--mint-deep)",
           marginBottom: "16px",
           fontSize: "12px",
-          color: "#142D4E",
+          color: "var(--forest)",
         }}
       >
         <span style={{ color: "#D97706", fontWeight: 700 }}>⚠</span>
@@ -76,7 +76,7 @@ export default function TestQuestionView({
       <div
         style={{
           backgroundColor: "#FFFFFF",
-          border: "1px solid #D9E8F3",
+          border: "1px solid var(--mint-deep)",
           borderRadius: "12px",
           padding: "24px",
           marginBottom: "20px",
@@ -88,7 +88,7 @@ export default function TestQuestionView({
             style={{
               fontSize: "11px",
               fontWeight: 700,
-              color: "#64748B",
+              color: "var(--muted)",
               letterSpacing: "0.06em",
               textTransform: "uppercase",
             }}
@@ -111,26 +111,26 @@ export default function TestQuestionView({
           )}
         </div>
 
-        <h2 style={{ margin: "0 0 12px", fontSize: "20px", color: "#142D4E", fontWeight: 700 }}>
+        <h2 style={{ margin: "0 0 12px", fontSize: "20px", color: "var(--forest)", fontWeight: 700 }}>
           {question.title}
         </h2>
 
         <div
           style={{
-            backgroundColor: "#EAF6FC",
-            borderLeft: "3px solid #06C6E6",
+            backgroundColor: "var(--lime-light)",
+            borderLeft: "3px solid var(--forest)",
             padding: "12px 16px",
             borderRadius: "0 6px 6px 0",
             marginBottom: "16px",
             fontSize: "14px",
-            color: "#334155",
+            color: "var(--ink-soft)",
             lineHeight: 1.6,
           }}
         >
           <strong>Scenario:</strong> {question.scenario}
         </div>
 
-        <p style={{ margin: "0 0 16px", fontSize: "15px", fontWeight: 600, color: "#142D4E" }}>
+        <p style={{ margin: "0 0 16px", fontSize: "15px", fontWeight: 600, color: "var(--forest)" }}>
           {question.prompt}
         </p>
 
@@ -150,7 +150,7 @@ export default function TestQuestionView({
                   padding: "8px 12px",
                   marginBottom: "6px",
                   fontSize: "13px",
-                  color: "#334155",
+                  color: "var(--ink-soft)",
                 }}
               >
                 <strong style={{ color: "#D97706" }}>[{hint.tier.toUpperCase()} -{hint.deduction}%]:</strong> {hint.text}
@@ -160,8 +160,8 @@ export default function TestQuestionView({
         )}
 
         {/* Hint Trigger Buttons (if not already revealed) */}
-        <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap", paddingTop: "8px", borderTop: "1px solid #D9E8F3" }}>
-          <span style={{ fontSize: "12px", color: "#64748B", fontWeight: 600 }}>Need assistance?</span>
+        <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap", paddingTop: "8px", borderTop: "1px solid var(--mint-deep)" }}>
+          <span style={{ fontSize: "12px", color: "var(--muted)", fontWeight: 600 }}>Need assistance?</span>
           {!question.revealedHints.some((h) => h.tier === "nudge") && (
             <button
               type="button"
@@ -171,9 +171,9 @@ export default function TestQuestionView({
                 fontSize: "11px",
                 padding: "4px 10px",
                 borderRadius: "4px",
-                border: "1px solid #D9E8F3",
+                border: "1px solid var(--mint-deep)",
                 backgroundColor: "#FFFFFF",
-                color: "#142D4E",
+                color: "var(--forest)",
                 cursor: "pointer",
               }}
             >
@@ -189,9 +189,9 @@ export default function TestQuestionView({
                 fontSize: "11px",
                 padding: "4px 10px",
                 borderRadius: "4px",
-                border: "1px solid #D9E8F3",
+                border: "1px solid var(--mint-deep)",
                 backgroundColor: "#FFFFFF",
-                color: "#142D4E",
+                color: "var(--forest)",
                 cursor: "pointer",
               }}
             >
@@ -207,7 +207,7 @@ export default function TestQuestionView({
                 fontSize: "11px",
                 padding: "4px 10px",
                 borderRadius: "4px",
-                border: "1px solid #D9E8F3",
+                border: "1px solid var(--mint-deep)",
                 backgroundColor: "#FFFFFF",
                 color: "#D97706",
                 fontWeight: 600,
@@ -227,18 +227,18 @@ export default function TestQuestionView({
           <div
             style={{
               backgroundColor: "#FFFFFF",
-              border: "1px solid #D9E8F3",
+              border: "1px solid var(--mint-deep)",
               borderRadius: "12px",
               padding: "24px",
               marginBottom: "20px",
             }}
           >
-            <label style={{ display: "block", fontSize: "13px", fontWeight: 700, color: "#142D4E", marginBottom: "8px" }}>
+            <label style={{ display: "block", fontSize: "13px", fontWeight: 700, color: "var(--forest)", marginBottom: "8px" }}>
               1. AI Generated Draft (Copy or type the faulty sentence below):
             </label>
             <div
               style={{
-                backgroundColor: "#142D4E",
+                backgroundColor: "var(--forest)",
                 color: "#FFFFFF",
                 borderRadius: "8px",
                 padding: "16px",
@@ -252,7 +252,7 @@ export default function TestQuestionView({
               {question.starterContent}
             </div>
 
-            <label htmlFor="flaw-text-input" style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#142D4E", marginBottom: "4px" }}>
+            <label htmlFor="flaw-text-input" style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "var(--forest)", marginBottom: "4px" }}>
               Faulty Sentence / Flaw Quote:
             </label>
             <textarea
@@ -266,14 +266,14 @@ export default function TestQuestionView({
                 width: "100%",
                 padding: "10px",
                 borderRadius: "6px",
-                border: "1px solid #D9E8F3",
+                border: "1px solid var(--mint-deep)",
                 fontSize: "13px",
-                color: "#334155",
+                color: "var(--ink-soft)",
                 marginBottom: "14px",
               }}
             />
 
-            <label htmlFor="flaw-why-input" style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#142D4E", marginBottom: "4px" }}>
+            <label htmlFor="flaw-why-input" style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "var(--forest)", marginBottom: "4px" }}>
               2. Why is this statement mathematically or conceptually wrong?
             </label>
             <textarea
@@ -287,14 +287,14 @@ export default function TestQuestionView({
                 width: "100%",
                 padding: "10px",
                 borderRadius: "6px",
-                border: "1px solid #D9E8F3",
+                border: "1px solid var(--mint-deep)",
                 fontSize: "13px",
-                color: "#334155",
+                color: "var(--ink-soft)",
                 marginBottom: "14px",
               }}
             />
 
-            <label htmlFor="flaw-correction-input" style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#142D4E", marginBottom: "4px" }}>
+            <label htmlFor="flaw-correction-input" style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "var(--forest)", marginBottom: "4px" }}>
               3. What is the correct number or assertion?
             </label>
             <textarea
@@ -308,9 +308,9 @@ export default function TestQuestionView({
                 width: "100%",
                 padding: "10px",
                 borderRadius: "6px",
-                border: "1px solid #D9E8F3",
+                border: "1px solid var(--mint-deep)",
                 fontSize: "13px",
-                color: "#334155",
+                color: "var(--ink-soft)",
               }}
             />
           </div>
@@ -321,13 +321,13 @@ export default function TestQuestionView({
           <div
             style={{
               backgroundColor: "#FFFFFF",
-              border: "1px solid #D9E8F3",
+              border: "1px solid var(--mint-deep)",
               borderRadius: "12px",
               padding: "24px",
               marginBottom: "20px",
             }}
           >
-            <label style={{ display: "block", fontSize: "13px", fontWeight: 700, color: "#142D4E", marginBottom: "12px" }}>
+            <label style={{ display: "block", fontSize: "13px", fontWeight: 700, color: "var(--forest)", marginBottom: "12px" }}>
               Select your diagnostic action or decision:
             </label>
 
@@ -341,8 +341,8 @@ export default function TestQuestionView({
                     gap: "10px",
                     padding: "12px 14px",
                     borderRadius: "8px",
-                    border: selectedChoiceId === opt.id ? "2px solid #06C6E6" : "1px solid #D9E8F3",
-                    backgroundColor: selectedChoiceId === opt.id ? "#EAF6FC" : "#FFFFFF",
+                    border: selectedChoiceId === opt.id ? "2px solid var(--forest)" : "1px solid var(--mint-deep)",
+                    backgroundColor: selectedChoiceId === opt.id ? "var(--lime-light)" : "#FFFFFF",
                     cursor: "pointer",
                   }}
                 >
@@ -352,15 +352,15 @@ export default function TestQuestionView({
                     value={opt.id}
                     checked={selectedChoiceId === opt.id}
                     onChange={() => setSelectedChoiceId(opt.id)}
-                    style={{ marginTop: "3px", accentColor: "#06C6E6" }}
+                    style={{ marginTop: "3px", accentColor: "var(--forest)" }}
                     required
                   />
                   <div>
-                    <span style={{ fontSize: "14px", fontWeight: 600, color: "#142D4E" }}>
+                    <span style={{ fontSize: "14px", fontWeight: 600, color: "var(--forest)" }}>
                       {opt.label}
                     </span>
                     {opt.detail && (
-                      <p style={{ margin: "4px 0 0", fontSize: "12px", color: "#64748B" }}>
+                      <p style={{ margin: "4px 0 0", fontSize: "12px", color: "var(--muted)" }}>
                         {opt.detail}
                       </p>
                     )}
@@ -369,7 +369,7 @@ export default function TestQuestionView({
               ))}
             </div>
 
-            <label htmlFor="case-justification-input" style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#142D4E", marginBottom: "4px" }}>
+            <label htmlFor="case-justification-input" style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "var(--forest)", marginBottom: "4px" }}>
               Written Justification (Explain why you chose this action and what trade-offs you considered):
             </label>
             <textarea
@@ -383,9 +383,9 @@ export default function TestQuestionView({
                 width: "100%",
                 padding: "10px",
                 borderRadius: "6px",
-                border: "1px solid #D9E8F3",
+                border: "1px solid var(--mint-deep)",
                 fontSize: "13px",
-                color: "#334155",
+                color: "var(--ink-soft)",
               }}
             />
           </div>
@@ -396,13 +396,13 @@ export default function TestQuestionView({
           <div
             style={{
               backgroundColor: "#FFFFFF",
-              border: "1px solid #D9E8F3",
+              border: "1px solid var(--mint-deep)",
               borderRadius: "12px",
               padding: "24px",
               marginBottom: "20px",
             }}
           >
-            <label htmlFor="code-editor-input" style={{ display: "block", fontSize: "13px", fontWeight: 700, color: "#142D4E", marginBottom: "8px" }}>
+            <label htmlFor="code-editor-input" style={{ display: "block", fontSize: "13px", fontWeight: 700, color: "var(--forest)", marginBottom: "8px" }}>
               Repair and optimize the query / formula:
             </label>
             <textarea
@@ -416,8 +416,8 @@ export default function TestQuestionView({
                 width: "100%",
                 padding: "12px",
                 borderRadius: "8px",
-                border: "1px solid #D9E8F3",
-                backgroundColor: "#142D4E",
+                border: "1px solid var(--mint-deep)",
+                backgroundColor: "var(--forest)",
                 color: "#FFFFFF",
                 fontFamily: "JetBrains Mono, monospace",
                 fontSize: "13px",
@@ -426,7 +426,7 @@ export default function TestQuestionView({
               }}
             />
 
-            <label htmlFor="fix-justification-input" style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#142D4E", marginBottom: "4px" }}>
+            <label htmlFor="fix-justification-input" style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "var(--forest)", marginBottom: "4px" }}>
               Brief explanation of what was broken and how you optimized it:
             </label>
             <textarea
@@ -440,9 +440,9 @@ export default function TestQuestionView({
                 width: "100%",
                 padding: "10px",
                 borderRadius: "6px",
-                border: "1px solid #D9E8F3",
+                border: "1px solid var(--mint-deep)",
                 fontSize: "13px",
-                color: "#334155",
+                color: "var(--ink-soft)",
               }}
             />
           </div>
@@ -453,7 +453,7 @@ export default function TestQuestionView({
           <div
             style={{
               backgroundColor: "#FFFFFF",
-              border: "1px solid #D9E8F3",
+              border: "1px solid var(--mint-deep)",
               borderRadius: "12px",
               padding: "24px",
               marginBottom: "20px",
@@ -462,7 +462,7 @@ export default function TestQuestionView({
             {question.starterContent && (
               <div
                 style={{
-                  backgroundColor: "#EAF6FC",
+                  backgroundColor: "var(--lime-light)",
                   padding: "16px",
                   borderRadius: "8px",
                   marginBottom: "16px",
@@ -474,7 +474,7 @@ export default function TestQuestionView({
                 {question.starterContent}
               </div>
             )}
-            <label htmlFor="interpret-analysis-input" style={{ display: "block", fontSize: "13px", fontWeight: 700, color: "#142D4E", marginBottom: "8px" }}>
+            <label htmlFor="interpret-analysis-input" style={{ display: "block", fontSize: "13px", fontWeight: 700, color: "var(--forest)", marginBottom: "8px" }}>
               Your Data Interpretation:
             </label>
             <textarea
@@ -488,9 +488,9 @@ export default function TestQuestionView({
                 width: "100%",
                 padding: "10px",
                 borderRadius: "6px",
-                border: "1px solid #D9E8F3",
+                border: "1px solid var(--mint-deep)",
                 fontSize: "13px",
-                color: "#334155",
+                color: "var(--ink-soft)",
               }}
             />
           </div>
@@ -501,13 +501,13 @@ export default function TestQuestionView({
           <div
             style={{
               backgroundColor: "#FFFFFF",
-              border: "1px solid #D9E8F3",
+              border: "1px solid var(--mint-deep)",
               borderRadius: "12px",
               padding: "24px",
               marginBottom: "20px",
             }}
           >
-            <label style={{ display: "block", fontSize: "13px", fontWeight: 700, color: "#142D4E", marginBottom: "12px" }}>
+            <label style={{ display: "block", fontSize: "13px", fontWeight: 700, color: "var(--forest)", marginBottom: "12px" }}>
               Items to prioritize (Click to rank order):
             </label>
             <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "16px" }}>
@@ -523,15 +523,15 @@ export default function TestQuestionView({
                       justifyContent: "space-between",
                       padding: "10px 14px",
                       borderRadius: "6px",
-                      border: "1px solid #D9E8F3",
-                      backgroundColor: "#EAF6FC",
+                      border: "1px solid var(--mint-deep)",
+                      backgroundColor: "var(--lime-light)",
                     }}
                   >
                     <div>
-                      <span style={{ fontWeight: 700, color: "#142D4E", marginRight: "8px" }}>
+                      <span style={{ fontWeight: 700, color: "var(--forest)", marginRight: "8px" }}>
                         #{index + 1}
                       </span>
-                      <span style={{ fontSize: "13px", color: "#334155" }}>{opt.label}</span>
+                      <span style={{ fontSize: "13px", color: "var(--ink-soft)" }}>{opt.label}</span>
                     </div>
                     <div style={{ display: "flex", gap: "4px" }}>
                       <button
@@ -564,7 +564,7 @@ export default function TestQuestionView({
               })}
             </div>
 
-            <label htmlFor="triage-justification-input" style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#142D4E", marginBottom: "4px" }}>
+            <label htmlFor="triage-justification-input" style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "var(--forest)", marginBottom: "4px" }}>
               Defend your triage priority and explain what you deprioritized:
             </label>
             <textarea
@@ -578,9 +578,9 @@ export default function TestQuestionView({
                 width: "100%",
                 padding: "10px",
                 borderRadius: "6px",
-                border: "1px solid #D9E8F3",
+                border: "1px solid var(--mint-deep)",
                 fontSize: "13px",
-                color: "#334155",
+                color: "var(--ink-soft)",
               }}
             />
           </div>
@@ -591,7 +591,7 @@ export default function TestQuestionView({
           <div
             style={{
               backgroundColor: "#FFFFFF",
-              border: "1px solid #D9E8F3",
+              border: "1px solid var(--mint-deep)",
               borderRadius: "12px",
               padding: "24px",
               marginBottom: "20px",
@@ -599,12 +599,12 @@ export default function TestQuestionView({
           >
             {question.starterContent && (
               <div style={{ marginBottom: "14px" }}>
-                <span style={{ fontSize: "11px", fontWeight: 700, color: "#64748B", textTransform: "uppercase", display: "block", marginBottom: "4px" }}>
+                <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--muted)", textTransform: "uppercase", display: "block", marginBottom: "4px" }}>
                   Original Draft to Rewrite:
                 </span>
                 <div
                   style={{
-                    backgroundColor: "#142D4E",
+                    backgroundColor: "var(--forest)",
                     color: "#FFFFFF",
                     borderRadius: "6px",
                     padding: "12px 14px",
@@ -617,7 +617,7 @@ export default function TestQuestionView({
               </div>
             )}
 
-            <label htmlFor="rewrite-text-input" style={{ display: "block", fontSize: "13px", fontWeight: 700, color: "#142D4E", marginBottom: "6px" }}>
+            <label htmlFor="rewrite-text-input" style={{ display: "block", fontSize: "13px", fontWeight: 700, color: "var(--forest)", marginBottom: "6px" }}>
               Your Revised Message (Calm, structured, executive-ready):
             </label>
             <textarea
@@ -631,14 +631,14 @@ export default function TestQuestionView({
                 width: "100%",
                 padding: "10px",
                 borderRadius: "6px",
-                border: "1px solid #D9E8F3",
+                border: "1px solid var(--mint-deep)",
                 fontSize: "13px",
-                color: "#334155",
+                color: "var(--ink-soft)",
                 marginBottom: "14px",
               }}
             />
 
-            <label htmlFor="rewrite-rationale-input" style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#142D4E", marginBottom: "4px" }}>
+            <label htmlFor="rewrite-rationale-input" style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "var(--forest)", marginBottom: "4px" }}>
               Explain key changes in tone, structure, and audience accommodation:
             </label>
             <textarea
@@ -652,9 +652,9 @@ export default function TestQuestionView({
                 width: "100%",
                 padding: "10px",
                 borderRadius: "6px",
-                border: "1px solid #D9E8F3",
+                border: "1px solid var(--mint-deep)",
                 fontSize: "13px",
-                color: "#334155",
+                color: "var(--ink-soft)",
               }}
             />
           </div>
@@ -669,8 +669,8 @@ export default function TestQuestionView({
               padding: "12px 28px",
               borderRadius: "8px",
               border: "none",
-              backgroundColor: busy ? "#D9E8F3" : "#06C6E6",
-              color: "#142D4E",
+              backgroundColor: busy ? "var(--mint-deep)" : "var(--forest)",
+              color: "var(--forest)",
               fontSize: "14px",
               fontWeight: 700,
               cursor: busy ? "wait" : "pointer",

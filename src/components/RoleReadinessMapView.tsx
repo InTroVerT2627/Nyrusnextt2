@@ -141,7 +141,7 @@ export default function RoleReadinessMapView({
       <div className="readiness-container error-state">
         <div className="notice error">
           <span>{error}</span>
-          <button onClick={() => void fetchReadiness()}>Retry</button>
+          <button className="secondary" style={{ marginLeft: "auto", padding: "4px 10px", fontSize: "12px", height: "auto" }} onClick={() => void fetchReadiness()}>Retry</button>
         </div>
       </div>
     );

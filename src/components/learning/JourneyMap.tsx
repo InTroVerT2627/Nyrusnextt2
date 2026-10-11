@@ -39,36 +39,36 @@ export default function JourneyMap({
   };
 
   return (
-    <div className="journey-map-wrapper" style={{ margin: "24px 0", background: "#FFFFFF", borderRadius: "12px", border: "1px solid #D9E8F3", padding: "24px", boxShadow: "0 2px 12px rgba(20, 45, 78, 0.03)" }}>
+    <div className="journey-map-wrapper" style={{ margin: "24px 0", background: "#FFFFFF", borderRadius: "12px", border: "1px solid var(--mint-deep)", padding: "24px", boxShadow: "0 2px 12px rgba(20, 45, 78, 0.03)" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexWrap: "wrap", gap: "10px" }}>
         <div>
-          <span style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "0.06em", color: "#06C6E6", background: "#142D4E", padding: "2px 8px", borderRadius: "4px", textTransform: "uppercase" }}>
+          <span style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "0.06em", color: "var(--forest)", background: "var(--forest)", padding: "2px 8px", borderRadius: "4px", textTransform: "uppercase" }}>
             FLIGHT PATH · MISSION MAP
           </span>
-          <h3 style={{ margin: "6px 0 2px 0", fontSize: "18px", color: "#142D4E", fontWeight: "700" }}>
+          <h3 style={{ margin: "6px 0 2px 0", fontSize: "18px", color: "var(--forest)", fontWeight: "700" }}>
             {pathTitle} Journey Track
           </h3>
-          <p style={{ margin: 0, fontSize: "12.5px", color: "#64748B" }}>
+          <p style={{ margin: 0, fontSize: "12.5px", color: "var(--muted)" }}>
             Follow the 10 sequential stations. Nodes unlock only through proven understanding.
           </p>
         </div>
 
         {/* Legend */}
-        <div style={{ display: "flex", alignItems: "center", gap: "16px", fontSize: "12px", color: "#334155" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "16px", fontSize: "12px", color: "var(--ink-soft)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
             <CheckCircle2 size={14} color="#059669" />
             <span>Passed</span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-            <PlayCircle size={14} color="#06C6E6" />
+            <PlayCircle size={14} color="var(--forest)" />
             <span>Ready</span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-            <Lock size={14} color="#64748B" />
+            <Lock size={14} color="var(--muted)" />
             <span>Locked</span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-            <Sparkles size={14} color="#142D4E" />
+            <Sparkles size={14} color="var(--forest)" />
             <span>Reflection</span>
           </div>
         </div>
@@ -105,7 +105,7 @@ export default function JourneyMap({
                 }}
                 style={{
                   background: isPassed ? "rgba(5, 150, 105, 0.04)" : isReady ? "rgba(6, 198, 230, 0.06)" : "#F8FAFC",
-                  border: `1px solid ${isPassed ? "#059669" : isReady ? "#06C6E6" : "#E2E8F0"}`,
+                  border: `1px solid ${isPassed ? "#059669" : isReady ? "var(--forest)" : "#E2E8F0"}`,
                   borderRadius: "10px",
                   padding: "14px",
                   cursor: isLocked ? "not-allowed" : "pointer",
@@ -127,24 +127,24 @@ export default function JourneyMap({
               >
                 <div>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
-                    <span style={{ fontSize: "11px", fontWeight: "700", color: "#64748B" }}>
+                    <span style={{ fontSize: "11px", fontWeight: "700", color: "var(--muted)" }}>
                       STATION {String(idx + 1).padStart(2, "0")}
                     </span>
-                    <span style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "11px", fontWeight: "600", color: isPassed ? "#059669" : isReady ? "#142D4E" : "#64748B" }}>
+                    <span style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "11px", fontWeight: "600", color: isPassed ? "#059669" : isReady ? "var(--forest)" : "var(--muted)" }}>
                       {isPassed && <CheckCircle2 size={13} color="#059669" />}
-                      {isReady && <PlayCircle size={13} color="#06C6E6" />}
-                      {isLocked && <Lock size={13} color="#64748B" />}
+                      {isReady && <PlayCircle size={13} color="var(--forest)" />}
+                      {isLocked && <Lock size={13} color="var(--muted)" />}
                       <span>{node.state}</span>
                     </span>
                   </div>
-                  <strong style={{ fontSize: "13.5px", color: "#142D4E", display: "block", lineHeight: "1.3" }}>
+                  <strong style={{ fontSize: "13.5px", color: "var(--forest)", display: "block", lineHeight: "1.3" }}>
                     {node.title}
                   </strong>
                 </div>
 
-                <div style={{ marginTop: "10px", display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "11px", color: "#64748B" }}>
+                <div style={{ marginTop: "10px", display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "11px", color: "var(--muted)" }}>
                   <span>{node.attempts ? `${node.attempts} ${node.attempts === 1 ? "attempt" : "attempts"}` : "Unattempted"}</span>
-                  <span style={{ color: isLocked ? "transparent" : "#06C6E6", fontWeight: "700" }}>Inspect →</span>
+                  <span style={{ color: isLocked ? "transparent" : "var(--forest)", fontWeight: "700" }}>Inspect →</span>
                 </div>
               </div>
 
@@ -157,11 +157,11 @@ export default function JourneyMap({
                     }
                   }}
                   style={{
-                    background: cpState === "Ready" ? "#142D4E" : "#F1F5F9",
-                    color: cpState === "Ready" ? "#FFFFFF" : "#64748B",
+                    background: cpState === "Ready" ? "var(--forest)" : "#F1F5F9",
+                    color: cpState === "Ready" ? "#FFFFFF" : "var(--muted)",
                     borderRadius: "10px",
                     padding: "14px",
-                    border: `1px dashed ${cpState === "Ready" ? "#06C6E6" : "#CBD5E1"}`,
+                    border: `1px dashed ${cpState === "Ready" ? "var(--forest)" : "#CBD5E1"}`,
                     cursor: cpState === "Ready" ? "pointer" : "not-allowed",
                     display: "flex",
                     flexDirection: "column",
@@ -175,7 +175,7 @@ export default function JourneyMap({
                 >
                   <div>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
-                      <span style={{ fontSize: "10px", fontWeight: "700", color: cpState === "Ready" ? "#06C6E6" : "#94A3B8", textTransform: "uppercase" }}>
+                      <span style={{ fontSize: "10px", fontWeight: "700", color: cpState === "Ready" ? "var(--forest)" : "#94A3B8", textTransform: "uppercase" }}>
                         ✦ MILESTONE
                       </span>
                       <span style={{ fontSize: "11px", fontWeight: "600" }}>
@@ -186,7 +186,7 @@ export default function JourneyMap({
                       {cpNum === 4 ? "Capstone Reflection" : `Milestone Reflection ${cpNum}`}
                     </strong>
                   </div>
-                  <div style={{ marginTop: "10px", fontSize: "11px", color: cpState === "Ready" ? "#06C6E6" : "#94A3B8", display: "flex", justifyContent: "space-between" }}>
+                  <div style={{ marginTop: "10px", fontSize: "11px", color: cpState === "Ready" ? "var(--forest)" : "#94A3B8", display: "flex", justifyContent: "space-between" }}>
                     <span>{cpNum === 4 ? "M1–10 Synthesis" : `Modules ${cpNum * 3 - 2}–${cpNum * 3}`}</span>
                     <span>Reflect ↗</span>
                   </div>
@@ -222,41 +222,41 @@ export default function JourneyMap({
               width: "100%",
               padding: "28px",
               boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
-              border: "1px solid #D9E8F3",
+              border: "1px solid var(--mint-deep)",
             }}
             onClick={(e) => e.stopPropagation()}
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "14px" }}>
               <div>
-                <span style={{ fontSize: "11px", fontWeight: "700", color: "#06C6E6", background: "#142D4E", padding: "2px 8px", borderRadius: "4px" }}>
+                <span style={{ fontSize: "11px", fontWeight: "700", color: "var(--forest)", background: "var(--forest)", padding: "2px 8px", borderRadius: "4px" }}>
                   STATION {selectedNode.order}
                 </span>
-                <h3 style={{ margin: "8px 0 4px 0", fontSize: "18px", color: "#142D4E" }}>
+                <h3 style={{ margin: "8px 0 4px 0", fontSize: "18px", color: "var(--forest)" }}>
                   {selectedNode.title}
                 </h3>
-                <span style={{ fontSize: "12px", color: selectedNode.state === "Passed" ? "#059669" : "#06C6E6", fontWeight: "600" }}>
+                <span style={{ fontSize: "12px", color: selectedNode.state === "Passed" ? "#059669" : "var(--forest)", fontWeight: "600" }}>
                   Status: {selectedNode.state}
                 </span>
               </div>
               <button
                 type="button"
                 onClick={() => setSelectedNode(null)}
-                style={{ background: "transparent", border: "none", cursor: "pointer", color: "#64748B" }}
+                style={{ background: "transparent", border: "none", cursor: "pointer", color: "var(--muted)" }}
                 aria-label="Close station preview"
               >
                 <X size={18} />
               </button>
             </div>
 
-            <p style={{ fontSize: "13.5px", color: "#334155", lineHeight: "1.5", margin: "10px 0 16px 0" }}>
+            <p style={{ fontSize: "13.5px", color: "var(--ink-soft)", lineHeight: "1.5", margin: "10px 0 16px 0" }}>
               {selectedNode.summary}
             </p>
 
             <div style={{ marginBottom: "20px" }}>
-              <strong style={{ fontSize: "12px", color: "#142D4E", textTransform: "uppercase", display: "block", marginBottom: "6px" }}>
+              <strong style={{ fontSize: "12px", color: "var(--forest)", textTransform: "uppercase", display: "block", marginBottom: "6px" }}>
                 Key Learning Objectives:
               </strong>
-              <ul style={{ margin: 0, paddingLeft: "18px", fontSize: "13px", color: "#64748B", lineHeight: "1.5" }}>
+              <ul style={{ margin: 0, paddingLeft: "18px", fontSize: "13px", color: "var(--muted)", lineHeight: "1.5" }}>
                 {selectedNode.objectives.map((obj, i) => (
                   <li key={i}>{obj}</li>
                 ))}
@@ -272,8 +272,8 @@ export default function JourneyMap({
                 }}
                 style={{
                   background: "transparent",
-                  border: "1px solid #D9E8F3",
-                  color: "#142D4E",
+                  border: "1px solid var(--mint-deep)",
+                  color: "var(--forest)",
                   padding: "8px 16px",
                   borderRadius: "6px",
                   fontSize: "13px",
@@ -291,7 +291,7 @@ export default function JourneyMap({
                   setSelectedNode(null);
                 }}
                 style={{
-                  background: "#142D4E",
+                  background: "var(--forest)",
                   color: "#FFFFFF",
                   padding: "8px 18px",
                   borderRadius: "6px",

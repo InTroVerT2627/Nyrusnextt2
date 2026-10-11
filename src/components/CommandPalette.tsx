@@ -18,6 +18,8 @@ import {
   ArrowRight,
   Briefcase,
   Scale,
+  Shield,
+  GraduationCap,
 } from "lucide-react";
 
 export interface CommandItem {
@@ -42,6 +44,28 @@ export default function CommandPalette({ onNavigate }: CommandPaletteProps) {
 
   const commands: CommandItem[] = useMemo(
     () => [
+      {
+        id: "overview",
+        title: "Overview (Mission Control)",
+        category: "Navigation",
+        icon: <Shield size={16} strokeWidth={1.8} />,
+        action: () => {
+          onNavigate("Overview");
+          setIsOpen(false);
+        },
+        shortcut: "G O",
+      },
+      {
+        id: "nyeras-lms",
+        title: "Nyeras LMS Simulation & Handoff",
+        category: "Navigation",
+        icon: <GraduationCap size={16} strokeWidth={1.8} />,
+        action: () => {
+          onNavigate("Nyeras LMS");
+          setIsOpen(false);
+        },
+        shortcut: "G N",
+      },
       {
         id: "missions",
         title: "Incident Missions",

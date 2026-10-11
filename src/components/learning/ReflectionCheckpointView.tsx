@@ -155,7 +155,7 @@ export default function ReflectionCheckpointView({
   };
 
   return (
-    <div className="reflection-checkpoint-container" style={{ minHeight: "100vh", background: "#EAF6FC", padding: "40px 20px" }}>
+    <div className="reflection-checkpoint-container" style={{ minHeight: "100vh", background: "var(--lime-light)", padding: "40px 20px" }}>
       <div
         className="reflection-card"
         style={{
@@ -163,7 +163,7 @@ export default function ReflectionCheckpointView({
           margin: "0 auto",
           background: "#FFFFFF",
           borderRadius: "16px",
-          border: "1px solid #D9E8F3",
+          border: "1px solid var(--mint-deep)",
           padding: "36px",
           boxShadow: "0 4px 20px rgba(20, 45, 78, 0.05)",
         }}
@@ -177,23 +177,23 @@ export default function ReflectionCheckpointView({
                   fontSize: "11px",
                   fontWeight: "700",
                   letterSpacing: "0.08em",
-                  color: "#06C6E6",
+                  color: "var(--forest)",
                   textTransform: "uppercase",
-                  background: "#142D4E",
+                  background: "var(--forest)",
                   padding: "3px 8px",
                   borderRadius: "4px",
                 }}
               >
                 MILESTONE REFLECTION
               </span>
-              <span style={{ fontSize: "12px", color: "#64748B", fontWeight: "600" }}>
+              <span style={{ fontSize: "12px", color: "var(--muted)", fontWeight: "600" }}>
                 {pathTitle}
               </span>
             </div>
-            <h1 style={{ fontSize: "24px", fontWeight: "700", color: "#142D4E", margin: "4px 0 6px 0" }}>
+            <h1 style={{ fontSize: "24px", fontWeight: "700", color: "var(--forest)", margin: "4px 0 6px 0" }}>
               {config.title}
             </h1>
-            <p style={{ fontSize: "14px", color: "#64748B", margin: 0 }}>
+            <p style={{ fontSize: "14px", color: "var(--muted)", margin: 0 }}>
               {config.subtitle}
             </p>
           </div>
@@ -203,11 +203,11 @@ export default function ReflectionCheckpointView({
               onClick={onExit}
               style={{
                 background: "transparent",
-                border: "1px solid #D9E8F3",
+                border: "1px solid var(--mint-deep)",
                 borderRadius: "6px",
                 padding: "6px 12px",
                 fontSize: "13px",
-                color: "#64748B",
+                color: "var(--muted)",
                 cursor: "pointer",
               }}
             >
@@ -219,8 +219,8 @@ export default function ReflectionCheckpointView({
         {/* Privacy Note */}
         <div
           style={{
-            background: "#EAF6FC",
-            border: "1px solid #D9E8F3",
+            background: "var(--lime-light)",
+            border: "1px solid var(--mint-deep)",
             borderRadius: "8px",
             padding: "12px 16px",
             display: "flex",
@@ -229,8 +229,8 @@ export default function ReflectionCheckpointView({
             marginBottom: "28px",
           }}
         >
-          <ShieldCheck size={18} color="#142D4E" />
-          <p style={{ margin: 0, fontSize: "12.5px", color: "#142D4E" }}>
+          <ShieldCheck size={18} color="var(--forest)" />
+          <p style={{ margin: 0, fontSize: "12.5px", color: "var(--forest)" }}>
             <strong>Private Learning Practice:</strong> Reflections are personal formative notes. They are never shared with recruiters, scored for hiring, or visible on evidence profiles.
           </p>
         </div>
@@ -272,8 +272,8 @@ export default function ReflectionCheckpointView({
           <div
             className="feedback-result-panel"
             style={{
-              background: feedback.depth_level === "Solid" ? "rgba(5, 150, 105, 0.06)" : "#EAF6FC",
-              border: `1px solid ${feedback.depth_level === "Solid" ? "#059669" : "#06C6E6"}`,
+              background: feedback.depth_level === "Solid" ? "rgba(5, 150, 105, 0.06)" : "var(--lime-light)",
+              border: `1px solid ${feedback.depth_level === "Solid" ? "#059669" : "var(--forest)"}`,
               borderRadius: "12px",
               padding: "24px",
               marginBottom: "32px",
@@ -283,8 +283,8 @@ export default function ReflectionCheckpointView({
           >
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <Sparkles size={18} color="#06C6E6" />
-                <h3 style={{ margin: 0, fontSize: "16px", fontWeight: "700", color: "#142D4E" }}>
+                <Sparkles size={18} color="var(--forest)" />
+                <h3 style={{ margin: 0, fontSize: "16px", fontWeight: "700", color: "var(--forest)" }}>
                   Formative AI Coaching
                 </h3>
               </div>
@@ -298,7 +298,7 @@ export default function ReflectionCheckpointView({
                     feedback.depth_level === "Solid"
                       ? "#059669"
                       : feedback.depth_level === "Getting there"
-                      ? "#142D4E"
+                      ? "var(--forest)"
                       : "#D97706",
                   color: "#FFFFFF",
                 }}
@@ -311,16 +311,16 @@ export default function ReflectionCheckpointView({
               <strong style={{ fontSize: "13px", color: "#059669", display: "block", marginBottom: "4px" }}>
                 ✓ What was understood well:
               </strong>
-              <p style={{ margin: 0, fontSize: "13.5px", color: "#334155" }}>
+              <p style={{ margin: 0, fontSize: "13.5px", color: "var(--ink-soft)" }}>
                 {feedback.strength}
               </p>
             </div>
 
             <div style={{ marginBottom: "16px" }}>
-              <strong style={{ fontSize: "13px", color: "#142D4E", display: "block", marginBottom: "4px" }}>
+              <strong style={{ fontSize: "13px", color: "var(--forest)", display: "block", marginBottom: "4px" }}>
                 ✦ Nuance or growth opportunity:
               </strong>
-              <p style={{ margin: 0, fontSize: "13.5px", color: "#334155" }}>
+              <p style={{ margin: 0, fontSize: "13.5px", color: "var(--ink-soft)" }}>
                 {feedback.growth_opportunity}
               </p>
             </div>
@@ -331,7 +331,7 @@ export default function ReflectionCheckpointView({
                 className="primary-btn"
                 onClick={onCompleted}
                 style={{
-                  background: "#142D4E",
+                  background: "var(--forest)",
                   color: "#FFFFFF",
                   padding: "10px 20px",
                   borderRadius: "8px",
@@ -351,8 +351,8 @@ export default function ReflectionCheckpointView({
                 onClick={() => setFeedback(null)}
                 style={{
                   background: "transparent",
-                  border: "1px solid #D9E8F3",
-                  color: "#142D4E",
+                  border: "1px solid var(--mint-deep)",
+                  color: "var(--forest)",
                   padding: "10px 16px",
                   borderRadius: "8px",
                   fontSize: "13px",
@@ -373,10 +373,10 @@ export default function ReflectionCheckpointView({
         {/* Prompt 1: Synthesise */}
         <div style={{ marginBottom: "28px" }}>
           <label style={{ display: "block", marginBottom: "8px" }}>
-            <span style={{ fontSize: "11px", fontWeight: "700", color: "#64748B", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+            <span style={{ fontSize: "11px", fontWeight: "700", color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
               PART 1 · SYNTHESISE
             </span>
-            <span style={{ display: "block", fontSize: "15px", fontWeight: "600", color: "#142D4E", marginTop: "4px" }}>
+            <span style={{ display: "block", fontSize: "15px", fontWeight: "600", color: "var(--forest)", marginTop: "4px" }}>
               {config.promptSynthesise}
             </span>
           </label>
@@ -389,20 +389,20 @@ export default function ReflectionCheckpointView({
               width: "100%",
               padding: "14px",
               borderRadius: "8px",
-              border: "1px solid #D9E8F3",
+              border: "1px solid var(--mint-deep)",
               fontSize: "14px",
               lineHeight: "1.5",
-              color: "#334155",
+              color: "var(--ink-soft)",
               resize: "vertical",
               outline: "none",
               boxSizing: "border-box",
             }}
           />
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "6px" }}>
-            <span style={{ fontSize: "12px", color: wordsSynthesise >= 25 ? "#059669" : "#64748B", fontWeight: wordsSynthesise >= 25 ? "600" : "400" }}>
+            <span style={{ fontSize: "12px", color: wordsSynthesise >= 25 ? "#059669" : "var(--muted)", fontWeight: wordsSynthesise >= 25 ? "600" : "400" }}>
               {wordsSynthesise >= 25 ? "✓ " : ""}{wordsSynthesise} / 25 words ({sentencesSynthesise} {sentencesSynthesise === 1 ? "sentence" : "sentences"})
             </span>
-            <span style={{ fontSize: "11px", color: "#64748B" }}>
+            <span style={{ fontSize: "11px", color: "var(--muted)" }}>
               Multi-lingual punctuation supported
             </span>
           </div>
@@ -411,10 +411,10 @@ export default function ReflectionCheckpointView({
         {/* Prompt 2: Apply */}
         <div style={{ marginBottom: "32px" }}>
           <label style={{ display: "block", marginBottom: "8px" }}>
-            <span style={{ fontSize: "11px", fontWeight: "700", color: "#64748B", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+            <span style={{ fontSize: "11px", fontWeight: "700", color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
               PART 2 · APPLY TO YOUR CONTEXT
             </span>
-            <span style={{ display: "block", fontSize: "15px", fontWeight: "600", color: "#142D4E", marginTop: "4px" }}>
+            <span style={{ display: "block", fontSize: "15px", fontWeight: "600", color: "var(--forest)", marginTop: "4px" }}>
               {config.promptApply}
             </span>
           </label>
@@ -427,20 +427,20 @@ export default function ReflectionCheckpointView({
               width: "100%",
               padding: "14px",
               borderRadius: "8px",
-              border: "1px solid #D9E8F3",
+              border: "1px solid var(--mint-deep)",
               fontSize: "14px",
               lineHeight: "1.5",
-              color: "#334155",
+              color: "var(--ink-soft)",
               resize: "vertical",
               outline: "none",
               boxSizing: "border-box",
             }}
           />
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "6px" }}>
-            <span style={{ fontSize: "12px", color: wordsApply >= 25 ? "#059669" : "#64748B", fontWeight: wordsApply >= 25 ? "600" : "400" }}>
+            <span style={{ fontSize: "12px", color: wordsApply >= 25 ? "#059669" : "var(--muted)", fontWeight: wordsApply >= 25 ? "600" : "400" }}>
               {wordsApply >= 25 ? "✓ " : ""}{wordsApply} / 25 words ({sentencesApply} {sentencesApply === 1 ? "sentence" : "sentences"})
             </span>
-            <span style={{ fontSize: "11px", color: "#64748B" }}>
+            <span style={{ fontSize: "11px", color: "var(--muted)" }}>
               Focus on concrete actions and reasoning
             </span>
           </div>
@@ -448,8 +448,8 @@ export default function ReflectionCheckpointView({
 
         {/* Action Button */}
         {!feedback && (
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid #D9E8F3", paddingTop: "20px" }}>
-            <p style={{ margin: 0, fontSize: "12.5px", color: "#64748B" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid var(--mint-deep)", paddingTop: "20px" }}>
+            <p style={{ margin: 0, fontSize: "12.5px", color: "var(--muted)" }}>
               Write at least 25 words in each section to unlock formative feedback and the next module.
             </p>
             <div style={{ display: "flex", gap: "10px" }}>
@@ -459,8 +459,8 @@ export default function ReflectionCheckpointView({
                   onClick={onCompleted}
                   style={{
                     background: "transparent",
-                    border: "1px solid #D9E8F3",
-                    color: "#64748B",
+                    border: "1px solid var(--mint-deep)",
+                    color: "var(--muted)",
                     padding: "10px 16px",
                     borderRadius: "8px",
                     fontSize: "13px",
@@ -475,7 +475,7 @@ export default function ReflectionCheckpointView({
                 disabled={!meetsWordCount || busy}
                 onClick={handleSubmit}
                 style={{
-                  background: meetsWordCount ? "#142D4E" : "#64748B",
+                  background: meetsWordCount ? "var(--forest)" : "var(--muted)",
                   color: "#FFFFFF",
                   padding: "10px 24px",
                   borderRadius: "8px",

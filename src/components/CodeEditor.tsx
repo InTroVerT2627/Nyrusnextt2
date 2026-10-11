@@ -29,7 +29,7 @@ export default function CodeEditor({
   language,
   readOnly = false,
   minHeight = "260px",
-  theme = "proofloop-midnight",
+  theme = "proofloop-forest",
 }: CodeEditorProps) {
   const [mounted, setMounted] = useState(false);
 
@@ -37,32 +37,34 @@ export default function CodeEditor({
     setMounted(true);
   }, []);
 
-  const defineMidnightTheme = useCallback((monaco: MonacoType) => {
-    monaco.editor.defineTheme("proofloop-midnight", {
-      base: "vs-dark",
+  const defineForestTheme = useCallback((monaco: MonacoType) => {
+    const forestThemeConfig = {
+      base: "vs-dark" as const,
       inherit: true,
       rules: [
-        { token: "", background: "142D4E", foreground: "EAF6FC" },
-        { token: "comment", foreground: "64748B", fontStyle: "italic" },
-        { token: "keyword", foreground: "06C6E6", fontStyle: "bold" },
-        { token: "string", foreground: "059669" },
-        { token: "number", foreground: "D97706" },
-        { token: "identifier", foreground: "EAF6FC" },
-        { token: "type", foreground: "06C6E6" },
-        { token: "delimiter", foreground: "D9E8F3" },
+        { token: "", background: "0F3D2A", foreground: "FFFFFF" },
+        { token: "comment", foreground: "9BC97A", fontStyle: "italic" },
+        { token: "keyword", foreground: "DFF9A2", fontStyle: "bold" },
+        { token: "string", foreground: "EFFCCF" },
+        { token: "number", foreground: "F7FDE8" },
+        { token: "identifier", foreground: "FFFFFF" },
+        { token: "type", foreground: "DFF9A2" },
+        { token: "delimiter", foreground: "BBE698" },
       ],
       colors: {
-        "editor.background": "#142D4E",
-        "editor.foreground": "#EAF6FC",
-        "editorCursor.foreground": "#06C6E6",
-        "editor.lineHighlightBackground": "#1B3A63",
-        "editorLineNumber.foreground": "#64748B",
-        "editorLineNumber.activeForeground": "#06C6E6",
-        "editor.selectionBackground": "#1E477A",
-        "editor.inactiveSelectionBackground": "#17375E",
-        "editorGutter.background": "#142D4E",
+        "editor.background": "#0F3D2A",
+        "editor.foreground": "#FFFFFF",
+        "editorCursor.foreground": "#DFF9A2",
+        "editor.lineHighlightBackground": "#154D36",
+        "editorLineNumber.foreground": "#31945E",
+        "editorLineNumber.activeForeground": "#DFF9A2",
+        "editor.selectionBackground": "#1D5C40",
+        "editor.inactiveSelectionBackground": "#144630",
+        "editorGutter.background": "#0F3D2A",
       },
-    });
+    };
+    monaco.editor.defineTheme("proofloop-forest", forestThemeConfig);
+    monaco.editor.defineTheme("proofloop-midnight", forestThemeConfig);
   }, []);
 
   const monacoLang = language.toLowerCase() === "java" ? "java" : "javascript";
@@ -87,7 +89,7 @@ export default function CodeEditor({
         height={minHeight}
         language={monacoLang}
         theme={theme}
-        beforeMount={defineMidnightTheme}
+        beforeMount={defineForestTheme}
         value={value}
         onChange={(val) => onChange(val || "")}
         options={{

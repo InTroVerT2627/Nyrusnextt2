@@ -106,7 +106,7 @@ export default function FairnessLabView() {
       <div className="fairness-container error-state">
         <div className="notice error">
           <span>{error || "Could not load fairness benchmark data."}</span>
-          <button onClick={() => void loadData()}>Retry</button>
+          <button className="secondary" style={{ marginLeft: "auto", padding: "4px 10px", fontSize: "12px", height: "auto" }} onClick={() => void loadData()}>Retry</button>
         </div>
       </div>
     );
@@ -169,12 +169,12 @@ export default function FairnessLabView() {
       </div>
 
       {/* Tabs Bar */}
-      <div className="fairness-tabs-bar" role="tablist">
+      <div className="pill-tabs-track" role="tablist" style={{ marginBottom: "20px" }}>
         <button
           type="button"
           role="tab"
           aria-selected={activeTab === "matrix"}
-          className={`tab-btn ${activeTab === "matrix" ? "active" : ""}`}
+          className={`pill-tab-item ${activeTab === "matrix" ? "active" : ""}`}
           onClick={() => setActiveTab("matrix")}
         >
           <Layers size={14} />
@@ -184,7 +184,7 @@ export default function FairnessLabView() {
           type="button"
           role="tab"
           aria-selected={activeTab === "summary"}
-          className={`tab-btn ${activeTab === "summary" ? "active" : ""}`}
+          className={`pill-tab-item ${activeTab === "summary" ? "active" : ""}`}
           onClick={() => setActiveTab("summary")}
         >
           <Scale size={14} />
@@ -194,7 +194,7 @@ export default function FairnessLabView() {
           type="button"
           role="tab"
           aria-selected={activeTab === "changelog"}
-          className={`tab-btn ${activeTab === "changelog" ? "active" : ""}`}
+          className={`pill-tab-item ${activeTab === "changelog" ? "active" : ""}`}
           onClick={() => setActiveTab("changelog")}
         >
           <FileText size={14} />
@@ -207,37 +207,39 @@ export default function FairnessLabView() {
         <section className="fairness-matrix-section">
           {/* Filter Bar */}
           <div className="matrix-filter-bar">
-            <div className="filter-group">
-              <Filter size={14} />
-              <span className="filter-label">Filter Learning Path:</span>
-              <button
-                type="button"
-                className={`filter-chip ${selectedPath === "all" ? "active" : ""}`}
-                onClick={() => setSelectedPath("all")}
-              >
-                All Paths ({data.matrixRows.length})
-              </button>
-              <button
-                type="button"
-                className={`filter-chip ${selectedPath === "data-analytics" ? "active" : ""}`}
-                onClick={() => setSelectedPath("data-analytics")}
-              >
-                Data Analytics (4)
-              </button>
-              <button
-                type="button"
-                className={`filter-chip ${selectedPath === "business-analytics" ? "active" : ""}`}
-                onClick={() => setSelectedPath("business-analytics")}
-              >
-                Business Analytics (4)
-              </button>
-              <button
-                type="button"
-                className={`filter-chip ${selectedPath === "communication" ? "active" : ""}`}
-                onClick={() => setSelectedPath("communication")}
-              >
-                Communication (4)
-              </button>
+            <div className="filter-group" style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+              <Filter size={14} style={{ color: "var(--forest)" }} />
+              <span className="filter-label" style={{ fontWeight: 700, color: "var(--muted)", fontSize: "12px" }}>Filter Learning Path:</span>
+              <div className="pill-tabs-track">
+                <button
+                  type="button"
+                  className={`pill-tab-item ${selectedPath === "all" ? "active" : ""}`}
+                  onClick={() => setSelectedPath("all")}
+                >
+                  All Paths ({data.matrixRows.length})
+                </button>
+                <button
+                  type="button"
+                  className={`pill-tab-item ${selectedPath === "data-analytics" ? "active" : ""}`}
+                  onClick={() => setSelectedPath("data-analytics")}
+                >
+                  Data Analytics (4)
+                </button>
+                <button
+                  type="button"
+                  className={`pill-tab-item ${selectedPath === "business-analytics" ? "active" : ""}`}
+                  onClick={() => setSelectedPath("business-analytics")}
+                >
+                  Business Analytics (4)
+                </button>
+                <button
+                  type="button"
+                  className={`pill-tab-item ${selectedPath === "communication" ? "active" : ""}`}
+                  onClick={() => setSelectedPath("communication")}
+                >
+                  Communication (4)
+                </button>
+              </div>
             </div>
 
             <div className="threshold-legend">

@@ -59,13 +59,13 @@ export default function MyReflectionsDrawer({
       >
         <div className="notes-drawer-header">
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <BookOpen size={18} color="#06C6E6" />
+            <BookOpen size={18} color="var(--forest)" />
             <div>
-              <h2 style={{ fontSize: "16px", margin: 0, fontWeight: "700", color: "#142D4E" }}>
+              <h2 style={{ fontSize: "16px", margin: 0, fontWeight: "700", color: "var(--forest)" }}>
                 My Milestone Reflections
               </h2>
               {pathTitle && (
-                <span style={{ fontSize: "12px", color: "#64748B" }}>{pathTitle}</span>
+                <span style={{ fontSize: "12px", color: "var(--muted)" }}>{pathTitle}</span>
               )}
             </div>
           </div>
@@ -79,16 +79,16 @@ export default function MyReflectionsDrawer({
           </button>
         </div>
 
-        <div style={{ padding: "14px 20px", background: "#EAF6FC", borderBottom: "1px solid #D9E8F3", display: "flex", alignItems: "center", gap: "8px" }}>
-          <ShieldCheck size={16} color="#142D4E" />
-          <span style={{ fontSize: "12px", color: "#142D4E" }}>
+        <div style={{ padding: "14px 20px", background: "var(--lime-light)", borderBottom: "1px solid var(--mint-deep)", display: "flex", alignItems: "center", gap: "8px" }}>
+          <ShieldCheck size={16} color="var(--forest)" />
+          <span style={{ fontSize: "12px", color: "var(--forest)" }}>
             Private learning notes · Never shared with recruiters or visible on evidence cards.
           </span>
         </div>
 
         <div className="notes-drawer-body" style={{ padding: "20px" }}>
           {loading && (
-            <div style={{ textAlign: "center", padding: "40px 0", color: "#64748B" }}>
+            <div style={{ textAlign: "center", padding: "40px 0", color: "var(--muted)" }}>
               <p>Loading your milestone reflections…</p>
             </div>
           )}
@@ -100,8 +100,8 @@ export default function MyReflectionsDrawer({
           )}
 
           {!loading && reflections.length === 0 && (
-            <div style={{ textAlign: "center", padding: "40px 20px", color: "#64748B" }}>
-              <p style={{ fontSize: "14px", fontWeight: "600", color: "#142D4E" }}>
+            <div style={{ textAlign: "center", padding: "40px 20px", color: "var(--muted)" }}>
+              <p style={{ fontSize: "14px", fontWeight: "600", color: "var(--forest)" }}>
                 No milestone reflections yet.
               </p>
               <p style={{ fontSize: "13px", margin: "6px 0 0 0" }}>
@@ -115,7 +115,7 @@ export default function MyReflectionsDrawer({
               key={ref.id}
               style={{
                 background: "#FFFFFF",
-                border: "1px solid #D9E8F3",
+                border: "1px solid var(--mint-deep)",
                 borderRadius: "10px",
                 padding: "16px",
                 marginBottom: "16px",
@@ -127,7 +127,7 @@ export default function MyReflectionsDrawer({
                   style={{
                     fontSize: "11px",
                     fontWeight: "700",
-                    background: "#142D4E",
+                    background: "var(--forest)",
                     color: "#FFFFFF",
                     padding: "2px 8px",
                     borderRadius: "4px",
@@ -136,7 +136,7 @@ export default function MyReflectionsDrawer({
                 >
                   Checkpoint {ref.checkpointNumber}
                 </span>
-                <span style={{ fontSize: "11px", color: "#64748B", display: "flex", alignItems: "center", gap: "4px" }}>
+                <span style={{ fontSize: "11px", color: "var(--muted)", display: "flex", alignItems: "center", gap: "4px" }}>
                   <Clock size={12} />
                   {new Date(ref.submittedAt).toLocaleDateString()}
                 </span>
@@ -146,39 +146,39 @@ export default function MyReflectionsDrawer({
               {ref.formativeFeedback && (
                 <div
                   style={{
-                    background: ref.formativeFeedback.depth_level === "Solid" ? "rgba(5, 150, 105, 0.08)" : "#EAF6FC",
-                    border: `1px solid ${ref.formativeFeedback.depth_level === "Solid" ? "#059669" : "#06C6E6"}`,
+                    background: ref.formativeFeedback.depth_level === "Solid" ? "rgba(5, 150, 105, 0.08)" : "var(--lime-light)",
+                    border: `1px solid ${ref.formativeFeedback.depth_level === "Solid" ? "#059669" : "var(--forest)"}`,
                     borderRadius: "6px",
                     padding: "10px 12px",
                     marginBottom: "12px",
                   }}
                 >
                   <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
-                    <Sparkles size={13} color="#06C6E6" />
-                    <strong style={{ fontSize: "12px", color: "#142D4E" }}>
+                    <Sparkles size={13} color="var(--forest)" />
+                    <strong style={{ fontSize: "12px", color: "var(--forest)" }}>
                       Coaching: {ref.formativeFeedback.depth_level}
                     </strong>
                   </div>
-                  <p style={{ margin: "2px 0 0 0", fontSize: "12.5px", color: "#334155" }}>
+                  <p style={{ margin: "2px 0 0 0", fontSize: "12.5px", color: "var(--ink-soft)" }}>
                     {ref.formativeFeedback.strength}
                   </p>
                 </div>
               )}
 
               <div style={{ marginBottom: "8px" }}>
-                <strong style={{ fontSize: "12px", color: "#64748B", display: "block" }}>
+                <strong style={{ fontSize: "12px", color: "var(--muted)", display: "block" }}>
                   Part 1 · Synthesise:
                 </strong>
-                <p style={{ margin: "3px 0 0 0", fontSize: "13px", color: "#142D4E", whiteSpace: "pre-wrap" }}>
+                <p style={{ margin: "3px 0 0 0", fontSize: "13px", color: "var(--forest)", whiteSpace: "pre-wrap" }}>
                   {ref.responseSynthesise}
                 </p>
               </div>
 
               <div>
-                <strong style={{ fontSize: "12px", color: "#64748B", display: "block" }}>
+                <strong style={{ fontSize: "12px", color: "var(--muted)", display: "block" }}>
                   Part 2 · Apply to Context:
                 </strong>
-                <p style={{ margin: "3px 0 0 0", fontSize: "13px", color: "#142D4E", whiteSpace: "pre-wrap" }}>
+                <p style={{ margin: "3px 0 0 0", fontSize: "13px", color: "var(--forest)", whiteSpace: "pre-wrap" }}>
                   {ref.responseApply}
                 </p>
               </div>

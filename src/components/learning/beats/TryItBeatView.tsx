@@ -51,7 +51,7 @@ export default function TryItBeatView({
         <div
           className="tryit-symptom-card"
           style={{
-            backgroundColor: "#142D4E",
+            backgroundColor: "var(--forest)",
             color: "#FFFFFF",
             borderRadius: "8px",
             padding: "14px 18px",
@@ -64,7 +64,7 @@ export default function TryItBeatView({
               PRODUCTION SYMPTOM REPORT
             </span>
           </div>
-          <p style={{ margin: 0, fontSize: "14px", fontWeight: 600, color: "#EAF6FC" }}>{content.symptom}</p>
+          <p style={{ margin: 0, fontSize: "14px", fontWeight: 600, color: "var(--lime-light)" }}>{content.symptom}</p>
         </div>
       )}
 
@@ -72,17 +72,17 @@ export default function TryItBeatView({
         <div
           className="tryit-clues-card"
           style={{
-            backgroundColor: "#EAF6FC",
-            border: "1px solid #D9E8F3",
+            backgroundColor: "var(--lime-light)",
+            border: "1px solid var(--mint-deep)",
             borderRadius: "8px",
             padding: "12px 16px",
             marginBottom: "16px",
           }}
         >
-          <div style={{ fontSize: "12px", fontWeight: 700, color: "#142D4E", marginBottom: "6px" }}>
+          <div style={{ fontSize: "12px", fontWeight: 700, color: "var(--forest)", marginBottom: "6px" }}>
             🔍 UNFOLDING INVESTIGATION CLUES:
           </div>
-          <ul style={{ margin: 0, paddingLeft: "18px", fontSize: "13px", color: "#334155", lineHeight: 1.5 }}>
+          <ul style={{ margin: 0, paddingLeft: "18px", fontSize: "13px", color: "var(--ink-soft)", lineHeight: 1.5 }}>
             {content.clues.map((clue, idx) => (
               <li key={idx} style={{ marginBottom: "4px" }}>{clue}</li>
             ))}
@@ -94,8 +94,8 @@ export default function TryItBeatView({
         <div
           className="tryit-code-inspection"
           style={{
-            backgroundColor: "#0d1b2a",
-            border: "1px solid #142D4E",
+            backgroundColor: "var(--forest)",
+            border: "1px solid var(--forest)",
             borderRadius: "8px",
             padding: "14px 16px",
             marginBottom: "18px",
@@ -112,12 +112,12 @@ export default function TryItBeatView({
               paddingBottom: "6px",
             }}
           >
-            <span style={{ fontSize: "11px", fontWeight: 700, color: "#06C6E6", letterSpacing: "0.05em", textTransform: "uppercase" }}>
+            <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--forest)", letterSpacing: "0.05em", textTransform: "uppercase" }}>
               CODE INSPECTION: FLAGGED FUNCTION
             </span>
-            <span style={{ fontSize: "11px", color: "#64748B" }}>JavaScript</span>
+            <span style={{ fontSize: "11px", color: "var(--muted)" }}>JavaScript</span>
           </div>
-          <pre style={{ margin: 0, color: "#EAF6FC", fontSize: "13px", lineHeight: 1.5, overflowX: "auto" }}>
+          <pre style={{ margin: 0, color: "var(--lime-light)", fontSize: "13px", lineHeight: 1.5, overflowX: "auto" }}>
             <code>{content.codeSnippet}</code>
           </pre>
         </div>

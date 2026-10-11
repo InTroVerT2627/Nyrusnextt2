@@ -255,7 +255,7 @@ export default function DebuggingWorkbench() {
           flexWrap: "wrap",
           gap: "12px",
           marginBottom: "20px",
-          borderBottom: "1px solid #D9E8F3",
+          borderBottom: "1px solid var(--mint-deep)",
           paddingBottom: "16px",
         }}
       >
@@ -265,8 +265,8 @@ export default function DebuggingWorkbench() {
               style={{
                 fontSize: "11px",
                 fontWeight: 700,
-                color: "#142D4E",
-                backgroundColor: "#EAF6FC",
+                color: "var(--forest)",
+                backgroundColor: "var(--lime-light)",
                 padding: "2px 8px",
                 borderRadius: "4px",
                 letterSpacing: "0.06em",
@@ -275,9 +275,9 @@ export default function DebuggingWorkbench() {
             >
               AUTHENTIC WORK-SAMPLE · INCIDENT INVESTIGATION
             </span>
-            <span style={{ fontSize: "12px", color: "#64748B" }}>FinFlow Production War Room</span>
+            <span style={{ fontSize: "12px", color: "var(--muted)" }}>FinFlow Production War Room</span>
           </div>
-          <h2 style={{ margin: 0, fontSize: "22px", color: "#142D4E", fontWeight: 700 }}>
+          <h2 style={{ margin: 0, fontSize: "22px", color: "var(--forest)", fontWeight: 700 }}>
             Incident Debugging Workbench
           </h2>
         </div>
@@ -286,17 +286,17 @@ export default function DebuggingWorkbench() {
         <div
           style={{
             backgroundColor: "#FFFFFF",
-            border: "1px solid #D9E8F3",
+            border: "1px solid var(--mint-deep)",
             borderRadius: "6px",
             padding: "6px 12px",
             fontSize: "12px",
-            color: "#64748B",
+            color: "var(--muted)",
             display: "inline-flex",
             alignItems: "center",
             gap: "6px",
           }}
         >
-          <Shield size={14} style={{ color: "#06C6E6" }} />
+          <Shield size={14} style={{ color: "var(--accent-debug)" }} />
           <span>Follow-ups calibrate confidence only; base score is never reduced</span>
         </div>
       </div>
@@ -320,8 +320,8 @@ export default function DebuggingWorkbench() {
                 textAlign: "left",
                 padding: "12px 14px",
                 borderRadius: "8px",
-                border: isSelected ? "2px solid #06C6E6" : "1px solid #D9E8F3",
-                backgroundColor: isSelected ? "#EAF6FC" : "#FFFFFF",
+                border: isSelected ? "2px solid var(--accent-debug)" : "1px solid var(--mint-deep)",
+                backgroundColor: isSelected ? "var(--lime-light)" : "#FFFFFF",
                 cursor: "pointer",
                 transition: "all 150ms ease-out",
               }}
@@ -330,9 +330,9 @@ export default function DebuggingWorkbench() {
                 <span style={{ fontSize: "11px", fontWeight: 700, color: sc.severity.includes("S1") ? "#DC2626" : "#D97706" }}>
                   {sc.severity}
                 </span>
-                <span style={{ fontSize: "11px", color: "#64748B" }}>Incident #{idx + 1}</span>
+                <span style={{ fontSize: "11px", color: "var(--muted)" }}>Incident #{idx + 1}</span>
               </div>
-              <strong style={{ display: "block", fontSize: "13px", color: "#142D4E", lineHeight: 1.3 }}>
+              <strong style={{ display: "block", fontSize: "13px", color: "var(--forest)", lineHeight: 1.3 }}>
                 {sc.title}
               </strong>
             </button>
@@ -343,7 +343,7 @@ export default function DebuggingWorkbench() {
       {/* Incident Narrative & Clues Box */}
       <div
         style={{
-          backgroundColor: "#142D4E",
+          backgroundColor: "var(--forest)",
           color: "#FFFFFF",
           borderRadius: "10px",
           padding: "20px",
@@ -352,24 +352,24 @@ export default function DebuggingWorkbench() {
         }}
       >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
-          <span style={{ fontSize: "11px", fontWeight: 700, color: "#06C6E6", letterSpacing: "0.06em", textTransform: "uppercase" }}>
+          <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--accent-debug)", letterSpacing: "0.06em", textTransform: "uppercase" }}>
             LIVE PRODUCTION TELEMETRY · {scenario.character}
           </span>
-          <span style={{ fontSize: "11px", color: "#EAF6FC", backgroundColor: "rgba(6, 198, 230, 0.15)", padding: "2px 8px", borderRadius: "4px" }}>
+          <span style={{ fontSize: "11px", color: "var(--lime-light)", backgroundColor: "rgba(6, 198, 230, 0.15)", padding: "2px 8px", borderRadius: "4px" }}>
             Status: Active Investigation
           </span>
         </div>
         <h3 style={{ margin: "4px 0 10px", fontSize: "17px", color: "#FFFFFF" }}>{scenario.title}</h3>
-        <p style={{ margin: "0 0 14px", fontSize: "14px", color: "#EAF6FC", lineHeight: 1.5 }}>
+        <p style={{ margin: "0 0 14px", fontSize: "14px", color: "var(--lime-light)", lineHeight: 1.5 }}>
           <strong>Reported Symptom:</strong> {scenario.symptom}
         </p>
 
         {/* Unfolding Clues */}
-        <div style={{ backgroundColor: "#0c1d33", borderRadius: "6px", padding: "12px 16px", border: "1px solid rgba(6, 198, 230, 0.25)" }}>
-          <strong style={{ fontSize: "12px", color: "#06C6E6", display: "block", marginBottom: "6px" }}>
+        <div style={{ backgroundColor: "var(--forest)", borderRadius: "6px", padding: "12px 16px", border: "1px solid rgba(6, 198, 230, 0.25)" }}>
+          <strong style={{ fontSize: "12px", color: "var(--accent-debug)", display: "block", marginBottom: "6px" }}>
             🔍 INVESTIGATION CLUES:
           </strong>
-          <ul style={{ margin: 0, paddingLeft: "18px", fontSize: "13px", color: "#D9E8F3", lineHeight: 1.6 }}>
+          <ul style={{ margin: 0, paddingLeft: "18px", fontSize: "13px", color: "var(--mint-deep)", lineHeight: 1.6 }}>
             {scenario.clues.map((clue, idx) => (
               <li key={idx}>{clue}</li>
             ))}
@@ -383,7 +383,7 @@ export default function DebuggingWorkbench() {
         <div
           style={{
             backgroundColor: "#FFFFFF",
-            border: "1px solid #D9E8F3",
+            border: "1px solid var(--mint-deep)",
             borderRadius: "10px",
             padding: "18px",
             display: "flex",
@@ -391,7 +391,7 @@ export default function DebuggingWorkbench() {
           }}
         >
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-            <span style={{ fontSize: "12px", fontWeight: 700, color: "#142D4E", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+            <span style={{ fontSize: "12px", fontWeight: 700, color: "var(--forest)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
               CODE INSPECTION & REMEDIATION
             </span>
             <div style={{ display: "flex", gap: "8px" }}>
@@ -401,7 +401,7 @@ export default function DebuggingWorkbench() {
                 style={{
                   fontSize: "12px",
                   padding: "4px 8px",
-                  border: "1px solid #D9E8F3",
+                  border: "1px solid var(--mint-deep)",
                   borderRadius: "4px",
                   background: "#FFFFFF",
                   cursor: "pointer",
@@ -419,10 +419,10 @@ export default function DebuggingWorkbench() {
                 style={{
                   fontSize: "12px",
                   padding: "4px 8px",
-                  border: "1px solid #06C6E6",
+                  border: "1px solid var(--accent-debug)",
                   borderRadius: "4px",
-                  background: "#EAF6FC",
-                  color: "#142D4E",
+                  background: "var(--lime-light)",
+                  color: "var(--forest)",
                   cursor: "pointer",
                   fontWeight: 600,
                 }}
@@ -443,9 +443,9 @@ export default function DebuggingWorkbench() {
               fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)",
               fontSize: "13px",
               lineHeight: 1.5,
-              backgroundColor: "#0d1b2a",
-              color: "#EAF6FC",
-              border: "1px solid #142D4E",
+              backgroundColor: "var(--forest)",
+              color: "var(--lime-light)",
+              border: "1px solid var(--forest)",
               borderRadius: "6px",
               padding: "12px",
               marginBottom: "14px",
@@ -459,7 +459,7 @@ export default function DebuggingWorkbench() {
               disabled={testing}
               onClick={handleRunTests}
               style={{
-                backgroundColor: "#142D4E",
+                backgroundColor: "var(--forest)",
                 color: "#FFFFFF",
                 border: "none",
                 borderRadius: "6px",
@@ -472,7 +472,7 @@ export default function DebuggingWorkbench() {
                 gap: "8px",
               }}
             >
-              <Play size={14} style={{ color: "#06C6E6" }} />
+              <Play size={14} style={{ color: "var(--accent-debug)" }} />
               <span>{testing ? "Executing in Isolated Sandbox…" : "Run Deterministic Tests"}</span>
             </button>
 
@@ -499,8 +499,8 @@ export default function DebuggingWorkbench() {
 
           {/* Verification Checks List */}
           {testResult && (
-            <div style={{ marginTop: "16px", borderTop: "1px solid #D9E8F3", paddingTop: "12px" }}>
-              <span style={{ fontSize: "11px", fontWeight: 700, color: "#64748B", textTransform: "uppercase", display: "block", marginBottom: "6px" }}>
+            <div style={{ marginTop: "16px", borderTop: "1px solid var(--mint-deep)", paddingTop: "12px" }}>
+              <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--muted)", textTransform: "uppercase", display: "block", marginBottom: "6px" }}>
                 DETERMINISTIC VERIFICATION SUITE:
               </span>
               <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
@@ -521,7 +521,7 @@ export default function DebuggingWorkbench() {
                     {c.passed ? <CheckCircle2 size={14} /> : <AlertCircle size={14} />}
                     <div>
                       <strong>{c.title}</strong>
-                      {c.message && <p style={{ margin: "2px 0 0", color: "#334155" }}>{c.message}</p>}
+                      {c.message && <p style={{ margin: "2px 0 0", color: "var(--ink-soft)" }}>{c.message}</p>}
                     </div>
                   </div>
                 ))}
@@ -534,7 +534,7 @@ export default function DebuggingWorkbench() {
         <div
           style={{
             backgroundColor: "#FFFFFF",
-            border: "1px solid #D9E8F3",
+            border: "1px solid var(--mint-deep)",
             borderRadius: "10px",
             padding: "18px",
             display: "flex",
@@ -542,13 +542,13 @@ export default function DebuggingWorkbench() {
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "12px" }}>
-            <Sparkles size={16} style={{ color: "#06C6E6" }} />
-            <strong style={{ fontSize: "13px", color: "#142D4E", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+            <Sparkles size={16} style={{ color: "var(--accent-debug)" }} />
+            <strong style={{ fontSize: "13px", color: "var(--forest)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
               INCIDENT ROOT-CAUSE ANALYSIS
             </strong>
           </div>
 
-          <label style={{ fontSize: "12px", fontWeight: 700, color: "#142D4E", marginBottom: "4px" }}>
+          <label style={{ fontSize: "12px", fontWeight: 700, color: "var(--forest)", marginBottom: "4px" }}>
             1. Root Cause Explanation (What mechanism caused the failure?):
           </label>
           <textarea
@@ -561,14 +561,14 @@ export default function DebuggingWorkbench() {
               boxSizing: "border-box",
               padding: "10px",
               borderRadius: "6px",
-              border: "1px solid #D9E8F3",
+              border: "1px solid var(--mint-deep)",
               fontSize: "13px",
               marginBottom: "12px",
               lineHeight: 1.4,
             }}
           />
 
-          <label style={{ fontSize: "12px", fontWeight: 700, color: "#142D4E", marginBottom: "4px" }}>
+          <label style={{ fontSize: "12px", fontWeight: 700, color: "var(--forest)", marginBottom: "4px" }}>
             2. Fix Rationale & Preventative Invariants (Why is this patch safe?):
           </label>
           <textarea
@@ -581,7 +581,7 @@ export default function DebuggingWorkbench() {
               boxSizing: "border-box",
               padding: "10px",
               borderRadius: "6px",
-              border: "1px solid #D9E8F3",
+              border: "1px solid var(--mint-deep)",
               fontSize: "13px",
               marginBottom: "14px",
               lineHeight: 1.4,
@@ -590,12 +590,12 @@ export default function DebuggingWorkbench() {
 
           <div
             style={{
-              backgroundColor: "#EAF6FC",
-              border: "1px solid #D9E8F3",
+              backgroundColor: "var(--lime-light)",
+              border: "1px solid var(--mint-deep)",
               borderRadius: "6px",
               padding: "10px 12px",
               fontSize: "12px",
-              color: "#334155",
+              color: "var(--ink-soft)",
             }}
           >
             <strong>Note on Evaluation:</strong> Code correctness is evaluated deterministically by the unit test runner.
@@ -608,7 +608,7 @@ export default function DebuggingWorkbench() {
       <div
         style={{
           backgroundColor: "#FFFFFF",
-          border: "1px solid #D9E8F3",
+          border: "1px solid var(--mint-deep)",
           borderRadius: "10px",
           padding: "20px",
           boxShadow: "0 1px 3px rgba(20, 45, 78, 0.05)",
@@ -620,8 +620,8 @@ export default function DebuggingWorkbench() {
               style={{
                 fontSize: "11px",
                 fontWeight: 700,
-                color: "#06C6E6",
-                backgroundColor: "#142D4E",
+                color: "var(--accent-debug)",
+                backgroundColor: "var(--forest)",
                 padding: "3px 8px",
                 borderRadius: "4px",
                 letterSpacing: "0.06em",
@@ -630,25 +630,25 @@ export default function DebuggingWorkbench() {
             >
               ADAPTIVE REASONING PROBE #{answeredCount + 1}
             </span>
-            <span style={{ fontSize: "12px", color: "#64748B" }}>
+            <span style={{ fontSize: "12px", color: "var(--muted)" }}>
               Focus: {activeFollowup.concept}
             </span>
           </div>
 
-          <span style={{ fontSize: "12px", color: "#64748B" }}>
+          <span style={{ fontSize: "12px", color: "var(--muted)" }}>
             No point penalty for follow-ups
           </span>
         </div>
 
         <div
           style={{
-            backgroundColor: "#EAF6FC",
-            borderLeft: "3px solid #06C6E6",
+            backgroundColor: "var(--lime-light)",
+            borderLeft: "3px solid var(--accent-debug)",
             padding: "12px 16px",
             borderRadius: "0 6px 6px 0",
             marginBottom: "14px",
             fontSize: "14px",
-            color: "#142D4E",
+            color: "var(--forest)",
             fontWeight: 600,
             lineHeight: 1.5,
           }}
@@ -658,7 +658,7 @@ export default function DebuggingWorkbench() {
 
         {!followupResult?.stopQuestioning ? (
           <form onSubmit={handleSubmitFollowup}>
-            <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "#142D4E", marginBottom: "6px" }}>
+            <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "var(--forest)", marginBottom: "6px" }}>
               Your Reasoning Defense:
             </label>
             <textarea
@@ -671,7 +671,7 @@ export default function DebuggingWorkbench() {
                 boxSizing: "border-box",
                 padding: "10px",
                 borderRadius: "6px",
-                border: "1px solid #D9E8F3",
+                border: "1px solid var(--mint-deep)",
                 fontSize: "13px",
                 marginBottom: "12px",
                 lineHeight: 1.4,
@@ -681,7 +681,7 @@ export default function DebuggingWorkbench() {
               type="submit"
               disabled={!followupAnswer.trim() || evaluatingFollowup}
               style={{
-                backgroundColor: "#142D4E",
+                backgroundColor: "var(--forest)",
                 color: "#FFFFFF",
                 border: "none",
                 borderRadius: "6px",
@@ -712,7 +712,7 @@ export default function DebuggingWorkbench() {
               <CheckCircle2 size={18} />
               <strong style={{ fontSize: "14px" }}>Understanding Demonstrated · Stop Rule Triggered</strong>
             </div>
-            <p style={{ margin: 0, fontSize: "13px", color: "#334155" }}>
+            <p style={{ margin: 0, fontSize: "13px", color: "var(--ink-soft)" }}>
               You have demonstrated sufficient understanding of the core invariants. Per adaptive testing principles, no further questions are necessary.
             </p>
           </div>
@@ -725,21 +725,21 @@ export default function DebuggingWorkbench() {
               marginTop: "16px",
               padding: "12px 14px",
               borderRadius: "6px",
-              backgroundColor: followupResult.confidence === "High" ? "rgba(5, 150, 105, 0.08)" : "#EAF6FC",
-              border: `1px solid ${followupResult.confidence === "High" ? "#059669" : "#D9E8F3"}`,
+              backgroundColor: followupResult.confidence === "High" ? "rgba(5, 150, 105, 0.08)" : "var(--lime-light)",
+              border: `1px solid ${followupResult.confidence === "High" ? "#059669" : "var(--mint-deep)"}`,
             }}
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-              <strong style={{ fontSize: "13px", color: "#142D4E" }}>
+              <strong style={{ fontSize: "13px", color: "var(--forest)" }}>
                 Defense Evaluation: {followupResult.confidence} Confidence
               </strong>
-              <span style={{ fontSize: "11px", color: "#64748B" }}>
+              <span style={{ fontSize: "11px", color: "var(--muted)" }}>
                 Demonstrated: {followupResult.demonstratedConcepts.join(", ") || "Formative concepts"}
               </span>
             </div>
-            <p style={{ margin: "4px 0", fontSize: "13px", color: "#334155" }}>{followupResult.reason}</p>
+            <p style={{ margin: "4px 0", fontSize: "13px", color: "var(--ink-soft)" }}>{followupResult.reason}</p>
             {followupResult.evidenceQuote && (
-              <small style={{ color: "#64748B", display: "block", fontStyle: "italic" }}>
+              <small style={{ color: "var(--muted)", display: "block", fontStyle: "italic" }}>
                 Supporting evidence: &quot;{followupResult.evidenceQuote}&quot;
               </small>
             )}

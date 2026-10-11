@@ -19,17 +19,37 @@ describe("Accessibility & WCAG AA Compliance (Quality Gate: Accessibility Check)
       return (lighter + 0.05) / (darker + 0.05);
     };
 
-    // Dark Mode: bg #080C14 (8, 12, 20), text #E2E8F0 (226, 232, 240)
-    const bgDarkLum = getLuminance(8, 12, 20);
-    const textDarkLum = getLuminance(226, 232, 240);
+    // Dark Mode / Sidebar: bg Forest #0F3D2A (15, 61, 42), text On-Forest #DFF9A2 (223, 249, 162)
+    const bgDarkLum = getLuminance(15, 61, 42);
+    const textDarkLum = getLuminance(223, 249, 162);
     const darkContrast = getContrastRatio(bgDarkLum, textDarkLum);
-    expect(darkContrast).toBeGreaterThan(4.5); // WCAG AA minimum for normal text is 4.5
+    expect(darkContrast).toBeGreaterThan(4.5); // 10.58:1 exceeds WCAG AA
 
-    // Light Mode: bg #F8FAFC (248, 250, 252), text #0F172A (15, 23, 42)
-    const bgLightLum = getLuminance(248, 250, 252);
-    const textLightLum = getLuminance(15, 23, 42);
+    // Lightened Dark Canvas Mode: bg Page-Dark #1E6B47 (30, 107, 71), text White (255, 255, 255)
+    const bgPageDarkLum = getLuminance(30, 107, 71);
+    const whiteLum = getLuminance(255, 255, 255);
+    const pageDarkWhiteContrast = getContrastRatio(bgPageDarkLum, whiteLum);
+    expect(pageDarkWhiteContrast).toBeGreaterThan(4.5); // 6.46:1 exceeds WCAG AA
+
+    // Secondary text on Page-Dark: text On-Dark-Soft #E3F0E8 (227, 240, 232)
+    const onDarkSoftLum = getLuminance(227, 240, 232);
+    const pageDarkSoftContrast = getContrastRatio(bgPageDarkLum, onDarkSoftLum);
+    expect(pageDarkSoftContrast).toBeGreaterThan(4.5); // 5.51:1 exceeds WCAG AA
+
+    // Header-Dark #17573A (23, 87, 58) with White text
+    const headerDarkLum = getLuminance(23, 87, 58);
+    const headerDarkWhiteContrast = getContrastRatio(headerDarkLum, whiteLum);
+    expect(headerDarkWhiteContrast).toBeGreaterThan(4.5); // 8.53:1 exceeds WCAG AA
+
+    // Mint Canvas Mode: bg Mint #3EC17B (62, 193, 123), text Ink #13261C (19, 38, 28)
+    const bgLightLum = getLuminance(62, 193, 123);
+    const textLightLum = getLuminance(19, 38, 28);
     const lightContrast = getContrastRatio(bgLightLum, textLightLum);
-    expect(lightContrast).toBeGreaterThan(4.5);
+    expect(lightContrast).toBeGreaterThan(4.5); // 6.90:1 exceeds WCAG AA
+
+    // Prohibit white text on mint (luminance contrast is only 2.3:1)
+    const whiteOnMint = getContrastRatio(getLuminance(255, 255, 255), bgLightLum);
+    expect(whiteOnMint).toBeLessThan(4.5);
   });
 
   it("verifies styles include visible focus rings and prefers-reduced-motion media query", () => {
@@ -55,21 +75,40 @@ describe("Accessibility & WCAG AA Compliance (Quality Gate: Accessibility Check)
     expect(source).toContain('<span className="state-label">');
   });
 
-  it("verifies the exact 10 colour tokens are declared in globals.css", () => {
+  it("verifies the Mint & Lime design tokens are declared in globals.css", () => {
     const cssPath = path.resolve(process.cwd(), "src/app/globals.css");
     const css = fs.readFileSync(cssPath, "utf8");
 
     const tokens = [
+      "--mint",
+      "--mint-deep",
+      "--lime",
+      "--lime-light",
+      "--lime-mid",
+      "--paper",
       "--white",
-      "--midnight",
-      "--cyan",
-      "--ice",
-      "--text",
+      "--forest",
+      "--page-dark",
+      "--header-dark",
+      "--forest-deep",
+      "--ink",
+      "--ink-soft",
       "--muted",
-      "--border",
+      "--on-forest",
+      "--on-dark",
+      "--on-dark-soft",
       "--success",
       "--warning",
       "--error",
+      "--info",
+      "--accent-debug",
+      "--tint-debug",
+      "--accent-data",
+      "--tint-data",
+      "--accent-biz",
+      "--tint-biz",
+      "--accent-comm",
+      "--tint-comm",
     ];
 
     for (const token of tokens) {

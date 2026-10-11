@@ -4,11 +4,11 @@ import React, { useEffect, useState } from "react";
 import { SunIcon, MoonIcon } from "@/components/Icons";
 
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
+  const [theme, setTheme] = useState<"dark" | "light">("light");
 
   useEffect(() => {
     const saved = localStorage.getItem("nextlearn.theme") as "dark" | "light" | null;
-    const initial = saved || (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+    const initial = saved || "light";
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setTheme(initial);
     document.documentElement.setAttribute("data-theme", initial);

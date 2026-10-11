@@ -317,6 +317,23 @@ export default function RemoteHome() {
   }, []);
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const urlRole = params.get("role");
+      const urlSection = params.get("section");
+      if (urlSection) {
+        setSection(urlSection as Section);
+      }
+      if (urlRole && ["learner", "recruiter", "reviewer"].includes(urlRole)) {
+        localStorage.setItem("nextlearn.demo_role", urlRole);
+        void fetch("/api/auth/demo-switch", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ role: urlRole }),
+        }).then(() => void refresh());
+        return;
+      }
+    }
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void refresh();
   }, [refresh]);
@@ -607,15 +624,6 @@ export default function RemoteHome() {
               </button>
             </div>
           </header>
-
-        {/* Mobile Navigation */}
-        <nav className="remote-mobile-nav" aria-label="Mobile navigation">
-          {nav.slice(0, 4).map((item) => (
-            <button key={item} className={section === item ? "active" : ""} onClick={() => selectSection(item)}>
-              {item}
-            </button>
-          ))}
-        </nav>
 
         <div className="content">
           {error && (

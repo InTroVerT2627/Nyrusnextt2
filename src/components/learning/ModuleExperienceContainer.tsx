@@ -128,7 +128,8 @@ export default function ModuleExperienceContainer({
 
   // Onboard modal check: first time user sees the card
   useEffect(() => {
-    const hasSeen = localStorage.getItem("nextlearn.has_seen_learning_rules");
+    const isBypassed = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("intro") === "0";
+    const hasSeen = isBypassed || localStorage.getItem("nextlearn.has_seen_learning_rules");
     if (!hasSeen) {
       setShowHowItWorks(true);
     } else {

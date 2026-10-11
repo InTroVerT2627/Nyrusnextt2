@@ -46,7 +46,7 @@ export default function TestResultView({ data, onExit }: TestResultViewProps) {
     data.overallLevel === "advanced"
       ? "#059669"
       : data.overallLevel === "proficient"
-      ? "#06C6E6"
+      ? "var(--forest)"
       : data.overallLevel === "developing"
       ? "#D97706"
       : "#DC2626";
@@ -72,7 +72,7 @@ export default function TestResultView({ data, onExit }: TestResultViewProps) {
       {/* Header Banner */}
       <div
         style={{
-          backgroundColor: "#142D4E",
+          backgroundColor: "var(--forest)",
           color: "#FFFFFF",
           borderRadius: "14px",
           padding: "28px",
@@ -86,7 +86,7 @@ export default function TestResultView({ data, onExit }: TestResultViewProps) {
               style={{
                 fontSize: "11px",
                 fontWeight: 700,
-                color: "#06C6E6",
+                color: "var(--forest)",
                 letterSpacing: "0.06em",
                 textTransform: "uppercase",
               }}
@@ -96,7 +96,7 @@ export default function TestResultView({ data, onExit }: TestResultViewProps) {
             <h1 style={{ margin: "6px 0 0", fontSize: "24px", fontWeight: 800 }}>
               Proof of Skill Assessment Result
             </h1>
-            <p style={{ margin: "4px 0 0", fontSize: "13px", color: "#EAF6FC" }}>
+            <p style={{ margin: "4px 0 0", fontSize: "13px", color: "var(--lime-light)" }}>
               Mode: {data.proctorMode === "device_checked" ? "Device Verified" : "Unproctored"} · Server Clock Authenticated
             </p>
           </div>
@@ -109,7 +109,7 @@ export default function TestResultView({ data, onExit }: TestResultViewProps) {
                 padding: "6px 14px",
                 borderRadius: "20px",
                 backgroundColor: levelColor,
-                color: "#142D4E",
+                color: "var(--forest)",
                 fontWeight: 800,
                 fontSize: "14px",
                 textTransform: "uppercase",
@@ -121,9 +121,9 @@ export default function TestResultView({ data, onExit }: TestResultViewProps) {
             </div>
             <div style={{ fontSize: "28px", fontWeight: 800, color: "#FFFFFF" }}>
               {Math.round(data.totalScore)}
-              <span style={{ fontSize: "16px", color: "#EAF6FC", fontWeight: 500 }}> / 100</span>
+              <span style={{ fontSize: "16px", color: "var(--lime-light)", fontWeight: 500 }}> / 100</span>
             </div>
-            <span style={{ fontSize: "12px", color: "#EAF6FC" }}>
+            <span style={{ fontSize: "12px", color: "var(--lime-light)" }}>
               Confidence: <strong>{data.confidence.toUpperCase()}</strong>
             </span>
           </div>
@@ -138,7 +138,7 @@ export default function TestResultView({ data, onExit }: TestResultViewProps) {
             backgroundColor: "rgba(234, 246, 252, 0.1)",
             border: "1px solid rgba(234, 246, 252, 0.2)",
             fontSize: "12px",
-            color: "#EAF6FC",
+            color: "var(--lime-light)",
           }}
         >
           <strong>Notice:</strong> Experimental proof-of-skill sandbox evidence. Not a validated hiring predictor.
@@ -147,7 +147,7 @@ export default function TestResultView({ data, onExit }: TestResultViewProps) {
       </div>
 
       {/* Breakdown per Question */}
-      <h2 style={{ fontSize: "18px", color: "#142D4E", fontWeight: 700, marginBottom: "16px" }}>
+      <h2 style={{ fontSize: "18px", color: "var(--forest)", fontWeight: 700, marginBottom: "16px" }}>
         Question-by-Question Diagnostic Breakdown
       </h2>
 
@@ -157,7 +157,7 @@ export default function TestResultView({ data, onExit }: TestResultViewProps) {
             key={q.questionId}
             style={{
               backgroundColor: "#FFFFFF",
-              border: "1px solid #D9E8F3",
+              border: "1px solid var(--mint-deep)",
               borderRadius: "10px",
               padding: "20px",
               boxShadow: "0 1px 3px rgba(20, 45, 78, 0.04)",
@@ -165,17 +165,17 @@ export default function TestResultView({ data, onExit }: TestResultViewProps) {
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "8px" }}>
               <div>
-                <span style={{ fontSize: "11px", fontWeight: 700, color: "#64748B", textTransform: "uppercase" }}>
+                <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--muted)", textTransform: "uppercase" }}>
                   Question #{q.order} · {q.type.replace("_", " ")}
                 </span>
-                <h3 style={{ margin: "2px 0 0", fontSize: "16px", color: "#142D4E", fontWeight: 700 }}>
+                <h3 style={{ margin: "2px 0 0", fontSize: "16px", color: "var(--forest)", fontWeight: 700 }}>
                   {q.title}
                 </h3>
               </div>
               <div style={{ textAlign: "right" }}>
-                <span style={{ fontSize: "18px", fontWeight: 800, color: "#142D4E" }}>
+                <span style={{ fontSize: "18px", fontWeight: 800, color: "var(--forest)" }}>
                   {Math.round(q.finalScore)}
-                  <small style={{ fontSize: "12px", color: "#64748B" }}>/100</small>
+                  <small style={{ fontSize: "12px", color: "var(--muted)" }}>/100</small>
                 </span>
               </div>
             </div>
@@ -187,11 +187,11 @@ export default function TestResultView({ data, onExit }: TestResultViewProps) {
                 flexWrap: "wrap",
                 gap: "12px",
                 padding: "8px 12px",
-                backgroundColor: "#EAF6FC",
+                backgroundColor: "var(--lime-light)",
                 borderRadius: "6px",
                 marginBottom: "12px",
                 fontSize: "12px",
-                color: "#334155",
+                color: "var(--ink-soft)",
               }}
             >
               <span>Base correctness: <strong>{q.baseScore} pts</strong></span>
@@ -206,24 +206,24 @@ export default function TestResultView({ data, onExit }: TestResultViewProps) {
             </div>
 
             {/* Feedback & Quotes */}
-            <p style={{ margin: "0 0 8px", fontSize: "13px", color: "#334155", lineHeight: 1.5 }}>
+            <p style={{ margin: "0 0 8px", fontSize: "13px", color: "var(--ink-soft)", lineHeight: 1.5 }}>
               {q.feedback}
             </p>
 
             {q.evidenceQuotes.length > 0 && (
               <div style={{ marginTop: "6px" }}>
-                <span style={{ fontSize: "11px", fontWeight: 700, color: "#64748B" }}>Demonstrated Evidence Quote:</span>
+                <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--muted)" }}>Demonstrated Evidence Quote:</span>
                 <blockquote
                   style={{
                     margin: "4px 0 0",
                     paddingLeft: "10px",
-                    borderLeft: "2px solid #06C6E6",
+                    borderLeft: "2px solid var(--forest)",
                     fontSize: "12px",
                     fontStyle: "italic",
-                    color: "#334155",
+                    color: "var(--ink-soft)",
                   }}
                 >
-                  "{q.evidenceQuotes[0]}"
+                  &ldquo;{q.evidenceQuotes[0]}&rdquo;
                 </blockquote>
               </div>
             )}
@@ -237,7 +237,7 @@ export default function TestResultView({ data, onExit }: TestResultViewProps) {
                   background: "transparent",
                   border: "none",
                   fontSize: "11px",
-                  color: "#64748B",
+                  color: "var(--muted)",
                   textDecoration: "underline",
                   cursor: "pointer",
                 }}
@@ -253,7 +253,7 @@ export default function TestResultView({ data, onExit }: TestResultViewProps) {
       <div
         style={{
           backgroundColor: "#FFFFFF",
-          border: "1px solid #D9E8F3",
+          border: "1px solid var(--mint-deep)",
           borderRadius: "10px",
           padding: "20px",
           marginBottom: "24px",
@@ -265,10 +265,10 @@ export default function TestResultView({ data, onExit }: TestResultViewProps) {
         }}
       >
         <div>
-          <h4 style={{ margin: 0, fontSize: "15px", color: "#142D4E", fontWeight: 700 }}>
+          <h4 style={{ margin: 0, fontSize: "15px", color: "var(--forest)", fontWeight: 700 }}>
             Disagree with the evaluation?
           </h4>
-          <p style={{ margin: "2px 0 0", fontSize: "12px", color: "#64748B" }}>
+          <p style={{ margin: "2px 0 0", fontSize: "12px", color: "var(--muted)" }}>
             Submit an appeal. Your attempt will be routed to the Human Reviewer Queue with an anonymized diff.
           </p>
         </div>
@@ -279,9 +279,9 @@ export default function TestResultView({ data, onExit }: TestResultViewProps) {
           style={{
             padding: "8px 16px",
             borderRadius: "6px",
-            border: "1px solid #142D4E",
+            border: "1px solid var(--forest)",
             backgroundColor: "#FFFFFF",
-            color: "#142D4E",
+            color: "var(--forest)",
             fontSize: "13px",
             fontWeight: 600,
             cursor: "pointer",
@@ -312,13 +312,13 @@ export default function TestResultView({ data, onExit }: TestResultViewProps) {
             style={{
               backgroundColor: "#FFFFFF",
               borderRadius: "12px",
-              border: "1px solid #D9E8F3",
+              border: "1px solid var(--mint-deep)",
               maxWidth: "500px",
               width: "100%",
               padding: "24px",
             }}
           >
-            <h3 style={{ margin: "0 0 10px", fontSize: "18px", color: "#142D4E", fontWeight: 700 }}>
+            <h3 style={{ margin: "0 0 10px", fontSize: "18px", color: "var(--forest)", fontWeight: 700 }}>
               Submit an Appeal to Human Reviewers
             </h3>
             {challengeSubmitted ? (
@@ -336,7 +336,7 @@ export default function TestResultView({ data, onExit }: TestResultViewProps) {
                     padding: "8px 14px",
                     borderRadius: "6px",
                     border: "none",
-                    backgroundColor: "#142D4E",
+                    backgroundColor: "var(--forest)",
                     color: "#FFFFFF",
                     fontSize: "13px",
                     cursor: "pointer",
@@ -347,7 +347,7 @@ export default function TestResultView({ data, onExit }: TestResultViewProps) {
               </div>
             ) : (
               <form onSubmit={handleChallengeSubmit}>
-                <p style={{ fontSize: "12px", color: "#64748B", margin: "0 0 12px" }}>
+                <p style={{ fontSize: "12px", color: "var(--muted)", margin: "0 0 12px" }}>
                   Please explain why you believe the assessment under-scored your demonstrated competence:
                 </p>
                 <textarea
@@ -360,7 +360,7 @@ export default function TestResultView({ data, onExit }: TestResultViewProps) {
                     width: "100%",
                     padding: "10px",
                     borderRadius: "6px",
-                    border: "1px solid #D9E8F3",
+                    border: "1px solid var(--mint-deep)",
                     fontSize: "13px",
                     marginBottom: "14px",
                   }}
@@ -372,9 +372,9 @@ export default function TestResultView({ data, onExit }: TestResultViewProps) {
                     style={{
                       padding: "8px 14px",
                       borderRadius: "6px",
-                      border: "1px solid #D9E8F3",
+                      border: "1px solid var(--mint-deep)",
                       backgroundColor: "#FFFFFF",
-                      color: "#64748B",
+                      color: "var(--muted)",
                       fontSize: "13px",
                       cursor: "pointer",
                     }}
@@ -387,7 +387,7 @@ export default function TestResultView({ data, onExit }: TestResultViewProps) {
                       padding: "8px 16px",
                       borderRadius: "6px",
                       border: "none",
-                      backgroundColor: "#142D4E",
+                      backgroundColor: "var(--forest)",
                       color: "#FFFFFF",
                       fontSize: "13px",
                       fontWeight: 700,
@@ -424,13 +424,13 @@ export default function TestResultView({ data, onExit }: TestResultViewProps) {
             style={{
               backgroundColor: "#FFFFFF",
               borderRadius: "12px",
-              border: "1px solid #D9E8F3",
+              border: "1px solid var(--mint-deep)",
               maxWidth: "460px",
               width: "100%",
               padding: "20px",
             }}
           >
-            <h4 style={{ margin: "0 0 8px", fontSize: "16px", color: "#142D4E", fontWeight: 700 }}>
+            <h4 style={{ margin: "0 0 8px", fontSize: "16px", color: "var(--forest)", fontWeight: 700 }}>
               Report a Problem with Question
             </h4>
             {reportSubmitted ? (
@@ -443,7 +443,7 @@ export default function TestResultView({ data, onExit }: TestResultViewProps) {
                     setReportSubmitted(false);
                     setReportText("");
                   }}
-                  style={{ padding: "6px 12px", borderRadius: "4px", backgroundColor: "#142D4E", color: "#FFFFFF", border: "none" }}
+                  style={{ padding: "6px 12px", borderRadius: "4px", backgroundColor: "var(--forest)", color: "#FFFFFF", border: "none" }}
                 >
                   Done
                 </button>
@@ -461,19 +461,19 @@ export default function TestResultView({ data, onExit }: TestResultViewProps) {
                   onChange={(e) => setReportText(e.target.value)}
                   placeholder="Describe ambiguity, broken data, or typo..."
                   required
-                  style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #D9E8F3", fontSize: "12px", marginBottom: "12px" }}
+                  style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid var(--mint-deep)", fontSize: "12px", marginBottom: "12px" }}
                 />
                 <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px" }}>
                   <button
                     type="button"
                     onClick={() => setReportQuestionId(null)}
-                    style={{ padding: "6px 12px", borderRadius: "4px", border: "1px solid #D9E8F3", background: "#FFFFFF", fontSize: "12px" }}
+                    style={{ padding: "6px 12px", borderRadius: "4px", border: "1px solid var(--mint-deep)", background: "#FFFFFF", fontSize: "12px" }}
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    style={{ padding: "6px 14px", borderRadius: "4px", backgroundColor: "#142D4E", color: "#FFFFFF", border: "none", fontSize: "12px", fontWeight: 600 }}
+                    style={{ padding: "6px 14px", borderRadius: "4px", backgroundColor: "var(--forest)", color: "#FFFFFF", border: "none", fontSize: "12px", fontWeight: 600 }}
                   >
                     Submit Report
                   </button>
@@ -492,9 +492,9 @@ export default function TestResultView({ data, onExit }: TestResultViewProps) {
           style={{
             padding: "10px 20px",
             borderRadius: "6px",
-            border: "1px solid #D9E8F3",
+            border: "1px solid var(--mint-deep)",
             backgroundColor: "#FFFFFF",
-            color: "#142D4E",
+            color: "var(--forest)",
             fontSize: "13px",
             fontWeight: 600,
             cursor: "pointer",
@@ -508,8 +508,8 @@ export default function TestResultView({ data, onExit }: TestResultViewProps) {
           style={{
             padding: "10px 22px",
             borderRadius: "6px",
-            backgroundColor: "#06C6E6",
-            color: "#142D4E",
+            backgroundColor: "var(--forest)",
+            color: "var(--forest)",
             fontSize: "13px",
             fontWeight: 700,
             textDecoration: "none",

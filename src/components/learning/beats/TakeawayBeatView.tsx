@@ -90,7 +90,7 @@ export default function TakeawayBeatView({
           className="primary-btn"
           onClick={onFinished}
           style={{
-            background: "#142D4E",
+            background: "var(--forest)",
             color: "#FFFFFF",
             padding: "10px 20px",
             borderRadius: "8px",

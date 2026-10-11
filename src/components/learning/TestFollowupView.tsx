@@ -28,7 +28,7 @@ export default function TestFollowupView({
       <div
         style={{
           backgroundColor: "#FFFFFF",
-          border: "1px solid #D9E8F3",
+          border: "1px solid var(--mint-deep)",
           borderRadius: "12px",
           padding: "24px",
           marginBottom: "20px",
@@ -40,8 +40,8 @@ export default function TestFollowupView({
             style={{
               fontSize: "11px",
               fontWeight: 700,
-              color: "#06C6E6",
-              backgroundColor: "#142D4E",
+              color: "var(--forest)",
+              backgroundColor: "var(--forest)",
               padding: "3px 8px",
               borderRadius: "4px",
               letterSpacing: "0.06em",
@@ -50,24 +50,24 @@ export default function TestFollowupView({
           >
             ADAPTIVE REASONING DEFENSE #{followup.index}
           </span>
-          <span style={{ fontSize: "12px", color: "#64748B" }}>
+          <span style={{ fontSize: "12px", color: "var(--muted)" }}>
             {questionTitle}
           </span>
         </div>
 
-        <h3 style={{ margin: "12px 0 8px", fontSize: "18px", color: "#142D4E", fontWeight: 700 }}>
+        <h3 style={{ margin: "12px 0 8px", fontSize: "18px", color: "var(--forest)", fontWeight: 700 }}>
           Follow-Up Question
         </h3>
 
         <div
           style={{
-            backgroundColor: "#EAF6FC",
-            borderLeft: "3px solid #06C6E6",
+            backgroundColor: "var(--lime-light)",
+            borderLeft: "3px solid var(--forest)",
             padding: "14px 18px",
             borderRadius: "0 8px 8px 0",
             marginBottom: "16px",
             fontSize: "15px",
-            color: "#142D4E",
+            color: "var(--forest)",
             fontWeight: 600,
             lineHeight: 1.5,
           }}
@@ -78,12 +78,12 @@ export default function TestFollowupView({
         <div
           style={{
             backgroundColor: "#FFFFFF",
-            border: "1px solid #D9E8F3",
+            border: "1px solid var(--mint-deep)",
             borderRadius: "6px",
             padding: "10px 14px",
             marginBottom: "18px",
             fontSize: "12px",
-            color: "#64748B",
+            color: "var(--muted)",
             lineHeight: 1.5,
           }}
         >
@@ -92,7 +92,7 @@ export default function TestFollowupView({
         </div>
 
         <form onSubmit={handleSubmit}>
-          <label htmlFor="followup-response-input" style={{ display: "block", fontSize: "13px", fontWeight: 700, color: "#142D4E", marginBottom: "6px" }}>
+          <label htmlFor="followup-response-input" style={{ display: "block", fontSize: "13px", fontWeight: 700, color: "var(--forest)", marginBottom: "6px" }}>
             Your Defense Explanation:
           </label>
           <textarea
@@ -106,9 +106,9 @@ export default function TestFollowupView({
               width: "100%",
               padding: "12px",
               borderRadius: "8px",
-              border: "1px solid #D9E8F3",
+              border: "1px solid var(--mint-deep)",
               fontSize: "13px",
-              color: "#334155",
+              color: "var(--ink-soft)",
               lineHeight: 1.5,
               marginBottom: "16px",
             }}
@@ -122,8 +122,8 @@ export default function TestFollowupView({
                 padding: "10px 24px",
                 borderRadius: "6px",
                 border: "none",
-                backgroundColor: busy || !response.trim() ? "#D9E8F3" : "#06C6E6",
-                color: "#142D4E",
+                backgroundColor: busy || !response.trim() ? "var(--mint-deep)" : "var(--forest)",
+                color: "var(--forest)",
                 fontSize: "13px",
                 fontWeight: 700,
                 cursor: busy || !response.trim() ? "not-allowed" : "pointer",

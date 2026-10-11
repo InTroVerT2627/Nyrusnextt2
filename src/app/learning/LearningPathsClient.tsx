@@ -110,6 +110,13 @@ export default function LearningPathsClient() {
         setProgress(remote ? data.progress : local);
         setActivePathSlug(data.paths[0]?.slug ?? "");
         setActiveModuleSlug(data.paths[0]?.modules[0]?.slug ?? "");
+        if (typeof window !== "undefined") {
+          const sp = new URLSearchParams(window.location.search);
+          if (sp.get("immersive") === "1" && data.paths[0]?.modules[0]) {
+            const fullMod = getFullModule(data.paths[0].slug, data.paths[0].title, data.paths[0].modules[0], 0);
+            setActiveImmersiveModule(fullMod);
+          }
+        }
       } catch (problem) {
         if (live) setError(problem instanceof Error ? problem.message : "Could not load the learning paths.");
       } finally {
@@ -417,8 +424,8 @@ export default function LearningPathsClient() {
                       className="learning-node"
                       style={{
                         margin: "4px 0 8px 12px",
-                        borderLeft: "2px solid #06C6E6",
-                        background: checkpointAvailable ? "rgba(6, 198, 230, 0.08)" : "transparent",
+                        borderLeft: "2px solid var(--forest)",
+                        background: checkpointAvailable ? "rgba(15, 61, 42, 0.08)" : "transparent",
                         opacity: checkpointAvailable ? 1 : 0.5,
                         cursor: checkpointAvailable ? "pointer" : "not-allowed",
                         textAlign: "left",
@@ -427,7 +434,7 @@ export default function LearningPathsClient() {
                       disabled={!checkpointAvailable}
                       onClick={() => setActiveCheckpoint(checkpointNum as 1 | 2 | 3 | 4)}
                     >
-                      <span className="learning-node-symbol" style={{ color: "#06C6E6" }}>✦</span>
+                      <span className="learning-node-symbol" style={{ color: "var(--forest)" }}>✦</span>
                       <span className="learning-node-copy">
                         <strong style={{ fontSize: "12px" }}>{checkpointNum === 4 ? "Capstone Reflection" : `Milestone Reflection ${checkpointNum}`}</strong>
                         <small>{checkpointAvailable ? "Ready to reflect" : "Pass module first"}</small>
@@ -443,22 +450,22 @@ export default function LearningPathsClient() {
               style={{
                 marginTop: "16px",
                 padding: "12px",
-                borderRadius: "8px",
-                background: finalTestUnlockStatus?.unlocked ? "rgba(6, 198, 230, 0.08)" : "rgba(20, 45, 78, 0.04)",
-                border: finalTestUnlockStatus?.unlocked ? "2px solid #06C6E6" : "1px solid #D9E8F3",
+                borderRadius: "12px",
+                background: finalTestUnlockStatus?.unlocked ? "var(--lime)" : "var(--paper)",
+                border: finalTestUnlockStatus?.unlocked ? "2px solid var(--forest)" : "1.5px solid var(--mint-deep)",
               }}
             >
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
-                <span style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.06em", color: "#142D4E", textTransform: "uppercase" }}>
+                <span style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.06em", color: "var(--ink)", textTransform: "uppercase" }}>
                   PATH CAPSTONE
                 </span>
                 <span
                   style={{
                     fontSize: "10px",
-                    padding: "2px 6px",
-                    borderRadius: "3px",
-                    backgroundColor: finalTestUnlockStatus?.unlocked ? "#059669" : "#64748B",
-                    color: "#FFFFFF",
+                    padding: "2px 8px",
+                    borderRadius: "9999px",
+                    backgroundColor: finalTestUnlockStatus?.unlocked ? "var(--success)" : "var(--muted)",
+                    color: "var(--white)",
                     fontWeight: 700,
                   }}
                 >
@@ -480,10 +487,10 @@ export default function LearningPathsClient() {
                   opacity: finalTestUnlockStatus?.unlocked ? 1 : 0.6,
                 }}
               >
-                <span className="learning-node-symbol" style={{ color: "#06C6E6" }}>🏆</span>
+                <span className="learning-node-symbol" style={{ color: "var(--forest)" }}>🏆</span>
                 <span className="learning-node-copy">
-                  <strong style={{ fontSize: "13px", color: "#142D4E" }}>Final Proof-of-Skill Test</strong>
-                  <small style={{ color: "#64748B" }}>
+                  <strong style={{ fontSize: "13px", color: "var(--ink)" }}>Final Proof-of-Skill Test</strong>
+                  <small style={{ color: "var(--muted)" }}>
                     {finalTestUnlockStatus?.unlocked
                       ? "Ready · 45 mins · 8 questions"
                       : finalTestUnlockStatus?.reason || "Complete 10 modules & 3 reflections"}
@@ -494,7 +501,7 @@ export default function LearningPathsClient() {
           </aside>
 
           {activeView === "work-sample" ? (
-            <section className="learning-module" style={{ padding: "24px" }}>
+            <section className="learning-module reading-surface" style={{ padding: "24px" }}>
               {activePath.slug === "data-analytics" && <SqlSandbox />}
               {activePath.slug === "business-analytics" && <SpreadsheetGrid />}
               {activePath.slug === "communication" && <CommunicationWorkbench />}
@@ -502,9 +509,9 @@ export default function LearningPathsClient() {
               {activePath.slug === "dsa" && <DsaWorkbench />}
             </section>
           ) : activeModule && (
-            <section className="learning-module">
+            <section className="learning-module reading-surface">
               {/* Draft Notice Banner */}
-              <div className="notice" style={{ marginBottom: "16px", borderLeft: "3px solid #eab308", display: "flex", alignItems: "center", gap: "10px" }}>
+              <div className="notice" style={{ marginBottom: "16px", borderLeft: "3px solid var(--warning)", display: "flex", alignItems: "center", gap: "10px" }}>
                 <span>⚠</span>
                 <p style={{ margin: 0, fontSize: "13px" }}>
                   <strong>Draft curriculum content — for demonstration purposes; requires human curriculum review.</strong> Do not invent statistics. Real skills are proven in the Authentic Work-Sample Sandbox.
@@ -513,9 +520,9 @@ export default function LearningPathsClient() {
 
               <div
                 style={{
-                  background: "linear-gradient(135deg, rgba(20, 45, 78, 0.04) 0%, rgba(6, 198, 230, 0.08) 100%)",
-                  border: "1px solid var(--border-color)",
-                  borderRadius: "8px",
+                  background: "var(--lime-light)",
+                  border: "1.5px solid var(--mint-deep)",
+                  borderRadius: "14px",
                   padding: "16px 20px",
                   marginBottom: "20px",
                   display: "flex",
@@ -527,14 +534,14 @@ export default function LearningPathsClient() {
               >
                 <div>
                   <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-                    <span style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "0.06em", color: "#142D4E", textTransform: "uppercase" }}>
+                    <span style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "0.06em", color: "var(--ink)", textTransform: "uppercase" }}>
                       IMMERSIVE STORY EXPERIENCE
                     </span>
-                    <span style={{ fontSize: "11px", padding: "2px 6px", borderRadius: "4px", background: "#EAF6FC", color: "#142D4E", fontWeight: "600" }}>
+                    <span style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "9999px", background: "var(--lime)", color: "var(--forest)", fontWeight: "700" }}>
                       7 Beats · Focus Engine
                     </span>
                   </div>
-                  <p style={{ margin: 0, fontSize: "13px", color: "var(--color-muted, #64748B)" }}>
+                  <p style={{ margin: 0, fontSize: "13px", color: "var(--muted)" }}>
                     Half-and-half layout with narrative scene, SVG character dialogue, calm pacing ring, try-it, and knowledge check.
                   </p>
                 </div>
@@ -542,14 +549,14 @@ export default function LearningPathsClient() {
                   type="button"
                   className="primary"
                   style={{
-                    background: "#142D4E",
-                    color: "#FFFFFF",
+                    background: "var(--forest)",
+                    color: "var(--on-forest)",
                     display: "inline-flex",
                     alignItems: "center",
                     gap: "8px",
-                    padding: "10px 18px",
-                    borderRadius: "6px",
-                    fontWeight: "600",
+                    padding: "10px 22px",
+                    borderRadius: "9999px",
+                    fontWeight: "700",
                     border: "none",
                     cursor: "pointer",
                   }}

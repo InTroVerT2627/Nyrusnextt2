@@ -114,19 +114,19 @@ export default function GlobalNotebookModal({
           display: "flex",
           flexDirection: "column",
           boxShadow: "0 10px 40px rgba(0, 0, 0, 0.15)",
-          border: "1px solid #D9E8F3",
+          border: "1px solid var(--mint-deep)",
         }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div style={{ padding: "20px 24px", borderBottom: "1px solid #D9E8F3", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div style={{ padding: "20px 24px", borderBottom: "1px solid var(--mint-deep)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <BookOpen size={20} color="#06C6E6" />
+            <BookOpen size={20} color="var(--forest)" />
             <div>
-              <h2 style={{ fontSize: "18px", margin: 0, color: "#142D4E", fontWeight: "700" }}>
+              <h2 style={{ fontSize: "18px", margin: 0, color: "var(--forest)", fontWeight: "700" }}>
                 My Learning Notebook
               </h2>
-              <small style={{ color: "#64748B" }}>
+              <small style={{ color: "var(--muted)" }}>
                 {notes.length} {notes.length === 1 ? "entry" : "entries"} across all learning paths
               </small>
             </div>
@@ -137,7 +137,7 @@ export default function GlobalNotebookModal({
                 type="button"
                 onClick={handleExportMarkdown}
                 style={{
-                  background: "#142D4E",
+                  background: "var(--forest)",
                   color: "#FFFFFF",
                   border: "none",
                   borderRadius: "6px",
@@ -157,7 +157,7 @@ export default function GlobalNotebookModal({
             <button
               type="button"
               onClick={onClose}
-              style={{ background: "transparent", border: "none", color: "#64748B", cursor: "pointer" }}
+              style={{ background: "transparent", border: "none", color: "var(--muted)", cursor: "pointer" }}
               aria-label="Close notebook"
             >
               <X size={18} />
@@ -166,9 +166,9 @@ export default function GlobalNotebookModal({
         </div>
 
         {/* Privacy Note */}
-        <div style={{ padding: "10px 24px", background: "#EAF6FC", borderBottom: "1px solid #D9E8F3", display: "flex", alignItems: "center", gap: "8px" }}>
-          <Lock size={14} color="#142D4E" />
-          <span style={{ fontSize: "12px", color: "#142D4E" }}>
+        <div style={{ padding: "10px 24px", background: "var(--lime-light)", borderBottom: "1px solid var(--mint-deep)", display: "flex", alignItems: "center", gap: "8px" }}>
+          <Lock size={14} color="var(--forest)" />
+          <span style={{ fontSize: "12px", color: "var(--forest)" }}>
             Private to you only · Never shared with recruiters, scored, or displayed on evidence profiles.
           </span>
         </div>
@@ -176,7 +176,7 @@ export default function GlobalNotebookModal({
         {/* Controls: Search and Path Filters */}
         <div style={{ padding: "14px 24px", borderBottom: "1px solid #E2E8F0", display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "center" }}>
           <div style={{ position: "relative", flex: 1, minWidth: "200px" }}>
-            <Search size={14} color="#64748B" style={{ position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)" }} />
+            <Search size={14} color="var(--muted)" style={{ position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)" }} />
             <input
               type="text"
               placeholder="Search notes or concepts…"
@@ -186,7 +186,7 @@ export default function GlobalNotebookModal({
                 width: "100%",
                 padding: "8px 10px 8px 30px",
                 borderRadius: "6px",
-                border: "1px solid #D9E8F3",
+                border: "1px solid var(--mint-deep)",
                 fontSize: "13px",
                 outline: "none",
                 boxSizing: "border-box",
@@ -200,9 +200,9 @@ export default function GlobalNotebookModal({
                 type="button"
                 onClick={() => setSelectedFilter(f)}
                 style={{
-                  background: selectedFilter === f ? "#142D4E" : "transparent",
-                  color: selectedFilter === f ? "#FFFFFF" : "#64748B",
-                  border: "1px solid #D9E8F3",
+                  background: selectedFilter === f ? "var(--forest)" : "transparent",
+                  color: selectedFilter === f ? "#FFFFFF" : "var(--muted)",
+                  border: "1px solid var(--mint-deep)",
                   borderRadius: "6px",
                   padding: "6px 10px",
                   cursor: "pointer",
@@ -218,7 +218,7 @@ export default function GlobalNotebookModal({
         {/* Notes List */}
         <div style={{ padding: "20px 24px", overflowY: "auto", flex: 1 }}>
           {filteredNotes.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "40px 0", color: "#64748B" }}>
+            <div style={{ textAlign: "center", padding: "40px 0", color: "var(--muted)" }}>
               <p style={{ margin: 0, fontSize: "14px" }}>
                 {notes.length === 0
                   ? "No notes taken yet. Open any learning module and click the Notes button to jot down personal insights."
@@ -230,7 +230,7 @@ export default function GlobalNotebookModal({
               <div
                 key={note.key}
                 style={{
-                  border: "1px solid #D9E8F3",
+                  border: "1px solid var(--mint-deep)",
                   borderRadius: "8px",
                   padding: "16px",
                   marginBottom: "14px",
@@ -239,15 +239,15 @@ export default function GlobalNotebookModal({
               >
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                    <span style={{ fontSize: "10px", fontWeight: "700", background: "#EAF6FC", color: "#142D4E", padding: "2px 6px", borderRadius: "4px", textTransform: "uppercase" }}>
+                    <span style={{ fontSize: "10px", fontWeight: "700", background: "var(--lime-light)", color: "var(--forest)", padding: "2px 6px", borderRadius: "4px", textTransform: "uppercase" }}>
                       {note.pathSlug}
                     </span>
-                    <strong style={{ fontSize: "13px", color: "#142D4E" }}>
+                    <strong style={{ fontSize: "13px", color: "var(--forest)" }}>
                       {note.moduleSlug.replace(/-/g, " ")}
                     </strong>
                   </div>
                 </div>
-                <p style={{ margin: 0, fontSize: "13px", color: "#334155", lineHeight: "1.5", whiteSpace: "pre-wrap" }}>
+                <p style={{ margin: 0, fontSize: "13px", color: "var(--ink-soft)", lineHeight: "1.5", whiteSpace: "pre-wrap" }}>
                   {note.content}
                 </p>
               </div>

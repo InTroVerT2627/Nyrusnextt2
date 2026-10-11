@@ -88,7 +88,6 @@ function LocalHome() {
     </aside>
     <section className="main-area" id="top">
       <header className="topbar"><div className="breadcrumb">Nyeras <span>/</span> <strong>{section}</strong></div><div className="top-actions"><span className="sandbox-pill"><i/> Local demo · synthetic data</span><button className="icon-button" aria-label="Notifications" onClick={() => setNotice("No new notifications.")}>♧</button></div></header>
-      <nav className="remote-mobile-nav" aria-label="Mobile navigation"><a href="/learning">⌁ Learning paths</a><button className={section==="Missions"?"active":""} onClick={()=>{setSection("Missions");closeMission();}}>◈ Missions</button><button className={section==="Skill tree"?"active":""} onClick={()=>{setSection("Skill tree");closeMission();}}>⌘ Skill tree</button></nav>
       <div className="content">
         {notice && <div className="notice" role="status"><span>{notice}</span><button aria-label="Dismiss" onClick={() => setNotice("")}>×</button></div>}
         {mission ? <MissionWorkspace mission={mission} code={code} setCode={setCode} report={report} setReport={setReport} aiUsed={aiUsed} setAiUsed={setAiUsed} questions={questions} answers={answers} setAnswers={setAnswers} draftAttempt={draftAttempt} submit={submit} finish={finishAttempt} close={closeMission} /> : <>
