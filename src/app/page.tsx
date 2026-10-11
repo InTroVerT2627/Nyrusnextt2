@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { getEvidenceState, missions, scoreFollowUp, selectQuestions, type Mission } from "@/lib/nextlearn";
 import RemoteHome from "@/app/RemoteHome";
+import RoleSwitcher, { type DemoRole } from "@/components/RoleSwitcher";
+import ThemeToggle from "@/components/ThemeToggle";
 
 type Section = "Missions" | "Skill tree" | "My evidence" | "Recruiter preview" | "Review queue" | "Audit log";
 type Attempt = { id: string; missionId: string; date: string; codePassed: boolean; followUpScore: number; confidence: string; report: string; code: string; answers: string[]; aiUsed: boolean; flagged: boolean; questionIds: string[]; challenge?: string };
@@ -20,6 +22,7 @@ export default function Home() {
 
 function LocalHome() {
   const [section, setSection] = useState<Section>("Missions");
+  const [activeRole, setActiveRole] = useState<DemoRole>("learner");
   const [saved, setSaved] = useState<Saved>(blank);
   const [ready, setReady] = useState(false);
   const [mission, setMission] = useState<Mission | null>(null);
@@ -76,18 +79,53 @@ function LocalHome() {
     setSaved((current) => ({ ...current, attempts: current.attempts.map((a) => a.id === selectedEvidence.id ? { ...a, challenge: challenge.trim(), confidence: "Low" } : a) }));
     setSelectedEvidence(null); setNotice("Challenge submitted. It is now in the human review queue.");
   };
-  const navItems: {name:Section; icon:string}[] = [{name:"Missions",icon:"◈"},{name:"Skill tree",icon:"⌘"},{name:"My evidence",icon:"▤"},{name:"Recruiter preview",icon:"◎"},{name:"Review queue",icon:"☷"},{name:"Audit log",icon:"◷"}];
-
   return <main className="shell">
     <aside className="rail" aria-label="Main navigation">
       <a className="brand" href="#top"><span className="brand-mark">N</span><span>nextlearn</span></a>
-      <div className="rail-label">WORKSPACE</div>
+
+      <div className="rail-label">LEARNER WORKSPACE</div>
       <a className="nav-link" href="/learning"><Icon>⌁</Icon>Learning paths</a>
-      {navItems.map((item) => <button key={item.name} className={`nav-link ${section===item.name?"active":""}`} onClick={() => { setSection(item.name); closeMission(); }}><Icon>{item.icon}</Icon>{item.name}</button>)}
-      <div className="rail-bottom"><div className="avatar">A</div><div><strong>Alex Morgan</strong><small>Synthetic learner</small></div><span className="more">···</span></div>
+      <button className={`nav-link ${section==="Missions"?"active":""}`} onClick={() => { setSection("Missions"); setActiveRole("learner"); closeMission(); }}><Icon>◈</Icon>Missions</button>
+      <button className={`nav-link ${section==="Skill tree"?"active":""}`} onClick={() => { setSection("Skill tree"); setActiveRole("learner"); closeMission(); }}><Icon>⌘</Icon>Skill tree</button>
+      <button className={`nav-link ${section==="My evidence"?"active":""}`} onClick={() => { setSection("My evidence"); setActiveRole("learner"); closeMission(); }}><Icon>▤</Icon>My evidence</button>
+
+      <div className="rail-label">RECRUITER WORKSPACE</div>
+      <button className={`nav-link ${section==="Recruiter preview"?"active":""}`} onClick={() => { setSection("Recruiter preview"); setActiveRole("recruiter"); closeMission(); }}><Icon>◎</Icon>Recruiter preview</button>
+
+      <div className="rail-label">REVIEWER & AUDIT</div>
+      <button className={`nav-link ${section==="Review queue"?"active":""}`} onClick={() => { setSection("Review queue"); setActiveRole("reviewer"); closeMission(); }}><Icon>☷</Icon>Review queue</button>
+      <a className="nav-link" href="/fairness"><Icon>⚗</Icon>Fairness lab</a>
+      <button className={`nav-link ${section==="Audit log"?"active":""}`} onClick={() => { setSection("Audit log"); setActiveRole("reviewer"); closeMission(); }}><Icon>◷</Icon>Audit log</button>
+
+      <div className="rail-bottom">
+        <div className="avatar">
+          {activeRole === "learner" ? "A" : activeRole === "recruiter" ? "P" : "S"}
+        </div>
+        <div>
+          <strong>{activeRole === "learner" ? "Alex Morgan" : activeRole === "recruiter" ? "Priya Patel" : "Dr. Sarah Chen"}</strong>
+          <small>{activeRole === "learner" ? "Synthetic learner" : activeRole === "recruiter" ? "NxtMove recruiter" : "Lead evaluator"}</small>
+        </div>
+        <a href="/login" className="more" title="Switch persona / login" style={{ textDecoration: "none" }}>⇄</a>
+      </div>
     </aside>
     <section className="main-area" id="top">
-      <header className="topbar"><div className="breadcrumb">Nyeras <span>/</span> <strong>{section}</strong></div><div className="top-actions"><span className="sandbox-pill"><i/> Local demo · synthetic data</span><button className="icon-button" aria-label="Notifications" onClick={() => setNotice("No new notifications.")}>♧</button></div></header>
+      <header className="topbar">
+        <div className="breadcrumb">ProofLoop <span>/</span> <strong>{section}</strong></div>
+        <div className="top-actions">
+          <RoleSwitcher
+            currentRole={activeRole}
+            onRoleChange={(role) => {
+              setActiveRole(role);
+              if (role === "learner") { setSection("Missions"); closeMission(); }
+              else if (role === "recruiter") { setSection("Recruiter preview"); closeMission(); }
+              else if (role === "reviewer") { setSection("Review queue"); closeMission(); }
+            }}
+          />
+          <span className="sandbox-pill"><i/> Local demo · synthetic data</span>
+          <ThemeToggle />
+          <button className="icon-button" aria-label="Notifications" onClick={() => setNotice("No new notifications.")}>♧</button>
+        </div>
+      </header>
       <div className="content">
         {notice && <div className="notice" role="status"><span>{notice}</span><button aria-label="Dismiss" onClick={() => setNotice("")}>×</button></div>}
         {mission ? <MissionWorkspace mission={mission} code={code} setCode={setCode} report={report} setReport={setReport} aiUsed={aiUsed} setAiUsed={setAiUsed} questions={questions} answers={answers} setAnswers={setAnswers} draftAttempt={draftAttempt} submit={submit} finish={finishAttempt} close={closeMission} /> : <>
